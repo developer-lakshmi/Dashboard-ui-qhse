@@ -45,25 +45,25 @@ export const sidebarLinks = [
       { label: "Project Reports", icon: FileText, path: "/projects/reports", iconColor: "text-indigo-500" }
     ]
   },
-  {
-    title: "Supporting Information",
-    links: [
-      { label: "Documentation", icon: File, path: "/support/documentation", iconColor: "text-gray-500" },
-      { label: "Procedures", icon: ClipboardList, path: "/support/procedures", iconColor: "text-blue-400" },
-      { label: "Training Materials", icon: GraduationCap, path: "/support/training", iconColor: "text-yellow-500" },
-      { label: "Standards & Guidelines", icon: BookOpen, path: "/support/standards", iconColor: "text-green-500" },
-      { label: "Templates", icon: FileText, path: "/support/templates", iconColor: "text-pink-500" },
-      { label: "Knowledge Base", icon: Lightbulb, path: "/support/knowledge", iconColor: "text-yellow-400" }
-    ]
-  },
-  {
-    title: "Reports & Analytics",
-    links: [
-      { label: "Executive Dashboard", icon: UserCheck, path: "/reports/executive", iconColor: "text-blue-500" },
-      { label: "Performance Metrics", icon: TrendingUp, path: "/reports/performance", iconColor: "text-green-500" },
-      { label: "Trend Analysis", icon: BarChart2, path: "/reports/trends", iconColor: "text-cyan-500" },
-      { label: "Custom Reports", icon: FileText, path: "/reports/custom", iconColor: "text-purple-500" },
-      { label: "Data Export", icon: PackagePlus, path: "/reports/export", iconColor: "text-pink-500" }
-    ]
-  }
+//   {
+//     title: "Supporting Information",
+//     links: [
+//       { label: "Documentation", icon: File, path: "/support/documentation", iconColor: "text-gray-500" },
+//       { label: "Procedures", icon: ClipboardList, path: "/support/procedures", iconColor: "text-blue-400" },
+//       { label: "Training Materials", icon: GraduationCap, path: "/support/training", iconColor: "text-yellow-500" },
+//       { label: "Standards & Guidelines", icon: BookOpen, path: "/support/standards", iconColor: "text-green-500" },
+//       { label: "Templates", icon: FileText, path: "/support/templates", iconColor: "text-pink-500" },
+//       { label: "Knowledge Base", icon: Lightbulb, path: "/support/knowledge", iconColor: "text-yellow-400" }
+//     ]
+//   },
+//   {
+//     title: "Reports & Analytics",
+//     links: [
+//       { label: "Executive Dashboard", icon: UserCheck, path: "/reports/executive", iconColor: "text-blue-500" },
+//       { label: "Performance Metrics", icon: TrendingUp, path: "/reports/performance", iconColor: "text-green-500" },
+//       { label: "Trend Analysis", icon: BarChart2, path: "/reports/trends", iconColor: "text-cyan-500" },
+//       { label: "Custom Reports", icon: FileText, path: "/reports/custom", iconColor: "text-purple-500" },
+//       { label: "Data Export", icon: PackagePlus, path: "/reports/export", iconColor: "text-pink-500" }
+//     ]
+//   }
 ];
