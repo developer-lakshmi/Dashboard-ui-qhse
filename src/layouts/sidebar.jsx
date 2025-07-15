@@ -4,12 +4,11 @@ import { NavLink } from "react-router-dom";
 import { navbarLinks } from "@/constants";
 import { sidebarLinks } from "@/constants/sidebarLinks";
 
-import logoLight from "@/assets/logo-light.png";
-import logoDark from "@/assets/logo-dark.svg";
 
 import { cn } from "@/utils/cn";
 
 import PropTypes from "prop-types";
+import Assets from "../assets/Assets";
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
     return (
@@ -23,12 +22,12 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
         >
             <div className="flex gap-x-3 p-3 items-center">
                 <img
-                    src={logoLight}
+                    src={Assets.logoLight}
                     alt="Logoipsum"
                     className="dark:hidden drop-shadow-md w-8 h-8 rounded-full"
                 />
                 <img
-                    src={logoDark}
+                    src={Assets.logoDark}
                     alt="Logoipsum"
                     className="hidden dark:block drop-shadow-md"
                 />
