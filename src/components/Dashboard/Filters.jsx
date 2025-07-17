@@ -2,6 +2,13 @@ import React from 'react';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { monthNames, projectsData } from '../../data';
+import {
+  Calendar as CalendarIcon,
+  Users as UsersIcon,
+  TrendingUp as TrendingUpIcon,
+  Filter as FilterIcon,
+  RefreshCw as RefreshIcon
+} from 'lucide-react';
 
 const Filters = ({
   selectedYear,
@@ -18,18 +25,23 @@ const Filters = ({
   getUniqueClients
 }) => {
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 dark:bg-gray-900 dark:border-gray-800">
       <CardContent className="p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <h3 className="text-lg font-semibold text-gray-900">🔍 Filters:</h3>
-          
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 gap-y-3 items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center mb-2 sm:mb-0">
+            <FilterIcon className="w-5 h-5 mr-2 text-blue-500" />
+            Filters
+          </h3>
+
           {/* Year Filter */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">Year:</label>
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <CalendarIcon className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Year:</label>
             <select
+              aria-label="Filter by year"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-3 py-1 border border-gray-300 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Years</option>
               {getUniqueYears().map(year => (
@@ -39,12 +51,14 @@ const Filters = ({
           </div>
 
           {/* Month Filter */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">Month:</label>
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <CalendarIcon className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Month:</label>
             <select
+              aria-label="Filter by month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-3 py-1 border border-gray-300 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Months</option>
               {monthNames.map((month, index) => (
@@ -54,12 +68,14 @@ const Filters = ({
           </div>
 
           {/* Client Filter */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">Client:</label>
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <UsersIcon className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Client:</label>
             <select
+              aria-label="Filter by client"
               value={selectedClient}
               onChange={(e) => setSelectedClient(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-3 py-1 border border-gray-300 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Clients</option>
               {getUniqueClients().map(client => (
@@ -69,12 +85,14 @@ const Filters = ({
           </div>
 
           {/* KPI Status Filter */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">KPI Status:</label>
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <TrendingUpIcon className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">KPI Status:</label>
             <select
+              aria-label="Filter by KPI status"
               value={selectedKPIStatus}
               onChange={(e) => setSelectedKPIStatus(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-3 py-1 border border-gray-300 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
               <option value="Green">🟢 Green</option>
@@ -86,35 +104,53 @@ const Filters = ({
           {/* Reset Button */}
           <button
             onClick={resetFilters}
-            className="px-4 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+            aria-label="Reset all filters"
+            className="flex items-center px-4 py-1 w-full sm:w-auto bg-blue-50 dark:bg-gray-800 text-blue-700 dark:text-blue-300 rounded-md text-sm hover:bg-blue-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            title="Reset all filters"
           >
-            🔄 Reset
+            <RefreshIcon className="w-4 h-4 mr-1" />
+            Reset
           </button>
 
           {/* Results Counter */}
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
-              📊 Showing {filteredProjects.length} of {projectsData.length} projects
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <span className="text-xs font-medium text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-gray-700">
+              📊 {filteredProjects.length} of {projectsData.length} projects
             </span>
           </div>
         </div>
 
         {/* Active Filters Display */}
         {(selectedYear !== "all" || selectedMonth !== "all" || selectedClient !== "all" || selectedKPIStatus !== "all") && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center">
+                <FilterIcon className="w-4 h-4 mr-1 text-blue-500" />
+                Active Filters:
+              </span>
               {selectedYear !== "all" && (
-                <Badge variant="blue">📅 Year: {selectedYear}</Badge>
+                <Badge variant="blue" className="flex items-center gap-1 dark:bg-gray-800 dark:text-blue-300">
+                  <CalendarIcon className="w-3 h-3 text-blue-400" />
+                  {selectedYear}
+                </Badge>
               )}
               {selectedMonth !== "all" && (
-                <Badge variant="blue">📅 Month: {monthNames[parseInt(selectedMonth) - 1]}</Badge>
+                <Badge variant="blue" className="flex items-center gap-1 dark:bg-gray-800 dark:text-blue-300">
+                  <CalendarIcon className="w-3 h-3 text-blue-400" />
+                  {monthNames[parseInt(selectedMonth) - 1]}
+                </Badge>
               )}
               {selectedClient !== "all" && (
-                <Badge variant="blue">🏢 Client: {selectedClient}</Badge>
+                <Badge variant="blue" className="flex items-center gap-1 dark:bg-gray-800 dark:text-blue-300">
+                  <UsersIcon className="w-3 h-3 text-blue-400" />
+                  {selectedClient}
+                </Badge>
               )}
               {selectedKPIStatus !== "all" && (
-                <Badge variant="blue">📊 KPI: {selectedKPIStatus}</Badge>
+                <Badge variant="blue" className="flex items-center gap-1 dark:bg-gray-800 dark:text-blue-300">
+                  <TrendingUpIcon className="w-3 h-3 text-blue-400" />
+                  {selectedKPIStatus}
+                </Badge>
               )}
             </div>
           </div>

@@ -1,6 +1,5 @@
 import React from 'react'
-import { projectStatusData } from "@/constants";
-
+import { projectsData } from '../../data'
 const ProjectStatus = () => {
   return (
     <div className="card">
@@ -24,19 +23,27 @@ const ProjectStatus = () => {
               </tr>
             </thead>
             <tbody className="table-body">
-              {projectStatusData.map((project) => (
-                <tr key={project.srNo} className="table-row hover:bg-slate-50 dark:hover:bg-slate-900">
-                  <td className="table-cell text-slate-700 dark:text-slate-200">{project.srNo}</td>
-                  <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectNo}</td>
-                  <td className="table-cell text-slate-700 dark:text-slate-200">{project.title}</td>
-                  <td className="table-cell text-slate-700 dark:text-slate-200">{project.client}</td>
-                  <td className="table-cell text-slate-700 dark:text-slate-200">{project.manager}</td>
-                  <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.billability}%</td>
-                  <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.carsOpen}</td>
-                  <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.obsOpen}</td>
-                  <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.kpiAchieved}%</td>
+              {projectsData && projectsData.length > 0 ? (
+                projectsData.map((project, idx) => (
+                  <tr key={project.srNo || idx} className="table-row hover:bg-slate-50 dark:hover:bg-slate-900">
+                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.srNo || idx + 1}</td>
+                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectNo}</td>
+                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectTitle}</td>
+                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.client}</td>
+                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectManager}</td>
+                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.qualityBillabilityPercent}%</td>
+                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.carsOpen}</td>
+                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.obsOpen}</td>
+                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.projectKPIsAchievedPercent}%</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={9} className="text-center py-4 text-slate-500 dark:text-slate-400">
+                    No projects found.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

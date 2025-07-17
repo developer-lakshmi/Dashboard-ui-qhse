@@ -187,6 +187,7 @@ export const projectsData = [
   }
 ];
 
+
 export const pieColors = ["#16a34a", "#facc15", "#ef4444", "#3b82f6"];
 
 export const monthNames = [

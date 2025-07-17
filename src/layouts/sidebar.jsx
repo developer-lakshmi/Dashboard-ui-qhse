@@ -5,10 +5,10 @@ import { navbarLinks } from "@/constants";
 import { sidebarLinks } from "@/constants/sidebarLinks";
 
 
-import { cn } from "@/utils/cn";
 
 import PropTypes from "prop-types";
 import Assets from "../assets/Assets";
+import { cn } from "../utils";
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
     return (

@@ -12,7 +12,7 @@ const metricOptions = [
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded shadow p-2 text-xs">
+      <div className="bg-white dark:bg-slate-800 rounded shadow p-2 text-xs border border-slate-200 dark:border-slate-700">
         <p className="font-semibold mb-1">{label}</p>
         {payload.map((entry, idx) => (
           <p key={idx} style={{ color: entry.color }}>
@@ -35,14 +35,18 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData }) => {
     <div className="card col-span-1 md:col-span-2 lg:col-span-4">
       <div className="card-header flex justify-between items-center">
         <p className="card-title">Overview</p>
-        <select
-          className="border rounded px-2 py-1 text-xs"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        >
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            id="overview-filter"
+            className="border rounded px-2 py-1 text-xs"
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            aria-label="Select overview filter"
+          >
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
       </div>
       <div className="card-body p-0">
         {chartData && chartData.length > 0 ? (
@@ -82,7 +86,7 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData }) => {
                 tickMargin={6}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend verticalAlign="top" height={36} />
+              <Legend verticalAlign="bottom" height={36} />
               {metricOptions.map(metric => (
                 <Area
                   key={metric.key}
@@ -102,7 +106,13 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData }) => {
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <div className="p-4 text-center text-gray-500">No data available</div>
+          <div className="p-4 text-center text-gray-500 flex flex-col items-center">
+            <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#94a3b8">
+              <circle cx="12" cy="12" r="10" strokeWidth="2" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01" />
+            </svg>
+            <span className="mt-2">No data available</span>
+          </div>
         )}
       </div>
     </div>

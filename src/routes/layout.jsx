@@ -6,8 +6,8 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { Sidebar } from "@/layouts/sidebar";
 import { Header } from "@/layouts/header";
 
-import { cn } from "@/utils/cn";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "../utils";
 
 const Layout = () => {
     const isDesktopDevice = useMediaQuery("(min-width: 768px)");
