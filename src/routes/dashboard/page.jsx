@@ -8,8 +8,7 @@ import { projectsData } from "@/data";
 import { Footer } from "@/layouts/footer";
 
 import { CreditCard, DollarSign, Package, PencilLine, Star, Trash, TrendingUp, Users } from "lucide-react";
-import logoLight from "@/assets/logo-light.png";
-import logoDark from "@/assets/logo-dark.svg";
+
 import Assets from "../../assets/Assets";
 import SummaryCard from "../../components/HomePage/SummaryCard";
 import QHSEOverviewChart from "../../components/HomePage/OverviewChart";
@@ -30,14 +29,19 @@ const DashboardPage = () => {
           <div className="mb-8">
         <div className="flex  items-center">
             <img
-                    src={Assets.qhseLogo}
-                    alt="Logoipsum"
-                    className="dark:hidden drop-shadow-md w-24 max-w-full h-auto rounded-full"
-                />
-                           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"> QHSE Dashboard </h1>
+          src={Assets.qhseLogo}
+          alt="Logoipsum"
+          className="dark:hidden drop-shadow-md w-24 max-w-full h-auto rounded-full"
+        />
+         <img
+          src={Assets.qhse_dark}
+          alt="Logoipsum"
+          className="hidden dark:block drop-shadow-md w-24 max-w-full h-auto rounded-full"
+        />
+                           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"> QHSE Dashboard </h1>
         </div>
 
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
                 Quality, Health, Safety & Environment Monitoring System
               </p>
             </div>

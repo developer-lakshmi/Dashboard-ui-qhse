@@ -169,7 +169,7 @@ const CriticalIssues = ({ filteredProjects }) => {
       {/* Summary Cards */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
             <AlertTriangle className="w-6 h-6 text-red-500" />
             Critical Issues Overview
           </h3>
@@ -177,23 +177,27 @@ const CriticalIssues = ({ filteredProjects }) => {
             {issuesData.map((issue, index) => (
               <div
                 key={index}
-                className={`${issue.bgColor} p-4 rounded-lg border ${issue.borderColor} hover:shadow-md transition-shadow flex flex-col h-full min-h-[180px]`}
+                className={`
+                  ${issue.bgColor} dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
+                  p-4 rounded-lg border ${issue.borderColor} dark:border-gray-700
+                  hover:shadow-md transition-shadow flex flex-col h-full min-h-[180px]
+                `}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className={`font-semibold ${issue.textColor} text-base`}>{issue.title}</h4>
+                  <h4 className={`font-semibold ${issue.textColor} dark:text-gray-100 text-base`}>{issue.title}</h4>
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span>{issue.icon}</span>
-                      <p className={`text-3xl font-bold ${issue.countColor}`}>{issue.count}</p>
+                      <p className={`text-3xl font-bold ${issue.countColor} dark:text-white`}>{issue.count}</p>
                     </div>
-                    <p className={`text-sm ${issue.textColor}`}>{issue.description}</p>
+                    <p className={`text-sm ${issue.textColor} dark:text-gray-300`}>{issue.description}</p>
                   </div>
                   {issue.count > 0 && (
                     <div className="mt-3">
                       <button
-                        className="text-xs bg-white px-2 py-1 rounded border border-gray-200 hover:bg-gray-50 transition-colors font-medium text-gray-700"
+                        className="text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-gray-700 dark:text-gray-200"
                         onClick={() => handleViewDetails(issueTypeMap[issue.title])}
                       >
                         View Details →
@@ -211,14 +215,14 @@ const CriticalIssues = ({ filteredProjects }) => {
       {criticalIssues.length > 0 && (
         <Card ref={detailsRef}>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                 <AlertTriangle className="w-6 h-6 text-red-500" />
                 Detailed Critical Issues
               </h3>
               {selectedType && (
                 <button
-                  className="text-xs px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 font-medium"
+                  className="text-xs px-3 py-1 rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-medium transition-colors"
                   onClick={() => setSelectedType(null)}
                 >
                   Show All
@@ -227,37 +231,35 @@ const CriticalIssues = ({ filteredProjects }) => {
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {filteredDetails.length === 0 && (
-                <div className="text-gray-500 text-sm text-center py-8">
+                <div className="text-gray-500 dark:text-gray-400 text-sm text-center py-8">
                   No issues found for this category.
                 </div>
               )}
               {filteredDetails.map((issue, index) => (
                 <div
                   key={index}
-                  className={`p-4 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow flex`}
+                  className="p-4 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow flex flex-col sm:flex-row justify-between items-start"
                 >
-                  <div className="flex items-start justify-between w-full">
-                    <div className="flex items-start space-x-3">
-                      <span>{iconMap[issue.type]}</span>
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h4 className="font-semibold text-sm">{issue.title}</h4>
-                          <Badge variant={
-                            issue.severity === 'Critical' ? 'red' :
-                            issue.severity === 'High' ? 'orange' : 'yellow'
-                          }>
-                            {issue.severity}
-                          </Badge>
-                        </div>
-                        <p className="text-sm font-medium">{issue.project}</p>
-                        <p className="text-xs opacity-75">Project No: {issue.projectNo}</p>
-                        <p className="text-xs mt-1">{issue.details}</p>
+                  <div className="flex items-start space-x-3 flex-1 min-w-0">
+                    <span>{iconMap[issue.type]}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center space-x-2 mb-1 flex-wrap">
+                        <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-100 break-words">{issue.title}</h4>
+                        <Badge variant={
+                          issue.severity === 'Critical' ? 'red' :
+                          issue.severity === 'High' ? 'orange' : 'yellow'
+                        }>
+                          {issue.severity}
+                        </Badge>
                       </div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200 break-words">{issue.project}</p>
+                      <p className="text-xs opacity-75 text-gray-500 dark:text-gray-400 break-words">Project No: {issue.projectNo}</p>
+                      <p className="text-xs mt-1 text-gray-600 dark:text-gray-300 break-words">{issue.details}</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold">{issue.count}</div>
-                      <div className="text-xs opacity-75">{issue.type}</div>
-                    </div>
+                  </div>
+                  <div className="text-right mt-3 sm:mt-0 sm:ml-4 flex-shrink-0">
+                    <div className="text-lg font-bold text-gray-800 dark:text-gray-100">{issue.count}</div>
+                    <div className="text-xs opacity-75 text-gray-500 dark:text-gray-400">{issue.type}</div>
                   </div>
                 </div>
               ))}
