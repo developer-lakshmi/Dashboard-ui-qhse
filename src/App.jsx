@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import Layout from "@/routes/layout";
 import DashboardPage from "@/routes/dashboard/page";
 import SummaryView from "./components/Dashboard/SummaryView";
+import DetailedView from "./components/Dashboard/DetailedView";
 // Create a placeholder ./components/Dashboard/SummaryViewew
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
                     <Route path="/" element={<Layout />}>
                         <Route index element={<DashboardPage />} />
                         <Route path="dashboard/summary" element={<SummaryView />} />
+                           <Route path="dashboard/detailed" element={<DetailedView />} />
                         <Route path="analytics" element={<h1 className="title">Analytics</h1>} />
                         <Route path="reports" element={<h1 className="title">Reports</h1>} />
                         <Route path="customers" element={<h1 className="title">Customers</h1>} />
