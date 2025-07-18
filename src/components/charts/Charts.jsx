@@ -144,68 +144,85 @@ const Charts = ({
         </span>
       ),
       component: (
-        <div className=''>
-          <div className="flex justify-center">
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart
-                layout="vertical"
-                data={manhoursData}
-                height={Math.max(400, manhoursData.length * 30)}
-                margin={{ top: 16, right: 24, left: 120, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={180} // Increased width for full project names
-                  tick={({ x, y, payload }) => (
-                    <g transform={`translate(${x},${y})`}>
-                      <text
-                        x={0}
-                        y={0}
-                        dy={16}
-                        textAnchor="end"
-                        fill="#64748b"
-                        fontSize={12}
-                        fontWeight={500}
-                        style={{ pointerEvents: "none" }}
-                      >
-                        {payload.value}
-                      </text>
-                    </g>
-                  )}
-                  tickLine={true}
-                  axisLine={true}
-                  interval={0} // Show all labels
-                  label={{
-                    value: "Project",
-                    angle: -90,
-                    position: "insideLeft",
-                    offset: 0,
-                    fill: "#64748b",
-                    fontSize: 13
-                  }}
-                />
-                <XAxis
-                  type="number"
-                  tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }}
-                  tickLine={true}
-                  axisLine={true}
-                  label={{
-                    value: "Manhours",
-                    position: "insideBottom",
-                    offset: -20,
-                    fill: "#64748b",
-                    fontSize: 13
-                  }}
-                />
-                <Tooltip content={<ManhoursTooltip />} />
-                <Bar dataKey="Planned" fill="#3b82f6" name="Planned" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="Used" fill="#ef4444" name="Used" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        <div className="w-full flex flex-col items-center">
+          {/* Responsive horizontal scroll for mobile */}
+          <div className="w-full max-w-full flex justify-center overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 dark:scrollbar-thumb-blue-900 scrollbar-track-transparent">
+            <div className="min-w-[400px] sm:min-w-[320px] w-full">
+              <ResponsiveContainer width="100%" minWidth={320} minHeight={220} height={320}>
+                <BarChart
+                  layout="vertical"
+                  data={manhoursData}
+                  height={Math.max(400, manhoursData.length * 30)}
+                  margin={{ top: 16, right: 24, left: 120, bottom: 40 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    width={120}
+                    tick={({ x, y, payload }) => (
+                      <g transform={`translate(${x},${y})`}>
+                        {/* Show truncated on small screens, full on md+ */}
+                        <text
+                          x={0}
+                          y={0}
+                          dy={16}
+                          textAnchor="end"
+                          fill="#64748b"
+                          fontSize={12}
+                          fontWeight={500}
+                          className="block md:hidden"
+                          style={{ pointerEvents: "none" }}
+                        >
+                          {payload.value.length > 14 ? payload.value.slice(0, 13) + "…" : payload.value}
+                        </text>
+                        <text
+                          x={0}
+                          y={0}
+                          dy={16}
+                          textAnchor="end"
+                          fill="#64748b"
+                          fontSize={12}
+                          fontWeight={500}
+                          className="hidden md:block"
+                          style={{ pointerEvents: "none" }}
+                        >
+                          {payload.value}
+                        </text>
+                      </g>
+                    )}
+                    tickLine={true}
+                    axisLine={true}
+                    interval={0}
+                    label={{
+                      value: "Project",
+                      angle: -90,
+                      position: "insideLeft",
+                      offset: 0,
+                      fill: "#64748b",
+                      fontSize: 13
+                    }}
+                  />
+                  <XAxis
+                    type="number"
+                    tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }}
+                    tickLine={true}
+                    axisLine={true}
+                    label={{
+                      value: "Manhours",
+                      position: "insideBottom",
+                      offset: -20,
+                      fill: "#64748b",
+                      fontSize: 13
+                    }}
+                  />
+                  <Tooltip content={<ManhoursTooltip />} />
+                  <Bar dataKey="Planned" fill="#3b82f6" name="Planned" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Used" fill="#ef4444" name="Used" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          {/* Custom legend, only once and centered */}
           <div className="flex justify-center gap-6 mt-2 mb-1">
             <span className="flex items-center text-xs text-gray-500 dark:text-gray-400">
               <span className="inline-block w-3 h-3 rounded-full mr-1" style={{ background: "#3b82f6" }} />
@@ -443,7 +460,23 @@ const Charts = ({
                 dataKey="name"
                 type="category"
                 width={120}
-                tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }}
+                tick={({ x, y, payload }) => (
+                  <g transform={`translate(${x},${y})`}>
+                    <title>{payload.value}</title>
+                    <text
+                      x={0}
+                      y={0}
+                      dy={16}
+                      textAnchor="end"
+                      fill="#64748b"
+                      fontSize={12}
+                      fontWeight={500}
+                      style={{ pointerEvents: "none" }}
+                    >
+                      {payload.value.length > 14 ? payload.value.slice(0, 13) + "…" : payload.value}
+                    </text>
+                  </g>
+                )}
                 tickLine={true}
                 axisLine={true}
                 label={{
