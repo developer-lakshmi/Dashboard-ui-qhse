@@ -455,9 +455,10 @@ const Charts = ({
                 <BarChart
                   layout="vertical"
                   data={carsObsData}
+                  height={Math.max(400, carsObsData.length * 36)}
                   margin={{ top: 16, right: 24, left: 120, bottom: 40 }}
-                  barCategoryGap="10%"
-                  barSize={18}
+                  barCategoryGap="20%" // Match Manhours chart
+                  barSize={18}         // Match Manhours chart
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <YAxis
