@@ -7,33 +7,28 @@ import { AlertTriangle, Star, Info, User, Calendar, ClipboardList, BadgeCheck, B
 // Field labels and priorities
 const fieldLabels = {
   srNo: "Sr No",
-  projectNo: "Project No",
-  projectTitle: "Project Title",
-  client: "Client",
+  projectNo: "RAD PROJECT NO",
+  projectTitle: "Project Name",
+  client: "CLIENT",
   projectManager: "Project Manager",
+  projectQualityEng: "Project Quality Engineer",
   projectStartingDate: "Project Starting Date",
   projectClosingDate: "Project Closing Date",
-  projectExtension: "Project Extension",
-  manhoursUsed: "Manhour Used",
-  manhoursBalance: "Manhour Balance",
-  qualityBillabilityPercent: "Quality Billability (%)",
-  projectQualityPlanStatusRev: "Project Quality Plan Status - Rev",
-  projectQualityPlanStatusIssueDate: "Project Quality Plan Status - Issue Date",
-  projectAudit1: "Project Audit-1",
-  projectAudit2: "Project Audit-2",
-  projectAudit3: "Project Audit-3",
-  projectAudit4: "Project Audit-4",
-  clientAudit1: "Client Audit-1",
-  clientAudit2: "Client Audit-2",
-  delayInAuditsNoDays: "Delay in Audits - No of Days",
+  projectExtension: "Project Extention",
+  manHourForQuality: "Manhours for Quality",
+  manhoursUsed: "Manhours Used",
+  manhoursBalance: "Manhours Balance",
+  projectQualityPlanStatusRev: "Project Quality Plan status",
+  projectAudit1: "Project Audit -1",
+  projectAudit2: "Project Audit -2",
+  projectAudit3: "Project Audit -3",
+  clientAudit1: "Client Audit -1",
+  clientAudit2: "Client Audit -2",
   carsOpen: "CARs Open",
-  carsDelayedClosingNoDays: "CARs Delayed Closing No of Days",
   carsClosed: "CARs Closed",
-  obsOpen: "No of Obs Open",
-  obsDelayedClosingNoDays: "Obs Delayed Closing No of Days",
+  obsOpen: "Obs Open",
   obsClosed: "Obs Closed",
-  projectKPIsAchievedPercent: "Project KPIs Achieved %",
-  projectKPIStatus: "KPI Status",
+  projectKPIStatus: "Project KPI Status",
   remarks: "Remarks"
 };
 
@@ -51,7 +46,34 @@ const colorMap = {
 };
 
 // Compose all headers for "Show Everything"
-const allHeaders = fieldPriorities.standardInformation.map((key) => ({
+const allKeys = [
+  "srNo",
+  "projectNo",
+  "projectTitle",
+  "client",
+  "projectManager",
+  "projectQualityEng",
+  "projectStartingDate",
+  "projectClosingDate",
+  "projectExtension",
+  "manHourForQuality",
+  "manhoursUsed",
+  "manhoursBalance",
+  "projectQualityPlanStatusRev",
+  "projectAudit1",
+  "projectAudit2",
+  "projectAudit3",
+  "clientAudit1",
+  "clientAudit2",
+  "carsOpen",
+  "carsClosed",
+  "obsOpen",
+  "obsClosed",
+  "projectKPIStatus",
+  "remarks"
+];
+
+const allHeaders = allKeys.map((key) => ({
   key,
   label: fieldLabels[key] || key,
   priority: priorityMap[key] || "standard",
@@ -71,6 +93,7 @@ const DetailedView = () => {
   const [viewMode, setViewMode] = useState("all");
 
   const getFilteredHeaders = () => {
+    if (viewMode === "everything") return allHeaders;
     switch (viewMode) {
       case "alerts":
         return allHeaders.filter((h) => h.priority === "alert");
@@ -78,8 +101,6 @@ const DetailedView = () => {
         return allHeaders.filter((h) => h.priority === "focus");
       case "standard":
         return allHeaders.filter((h) => h.priority === "standard");
-      case "everything":
-        return allHeaders;
       default:
         return headers;
     }

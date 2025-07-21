@@ -148,11 +148,11 @@ const Charts = ({
           {/* Responsive horizontal scroll for mobile */}
           <div className="w-full max-w-full flex justify-center overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 dark:scrollbar-thumb-blue-900 scrollbar-track-transparent">
             <div className="min-w-[400px] sm:min-w-[320px] w-full">
-              <ResponsiveContainer width="100%" minWidth={320} minHeight={220} height={320}>
+              <ResponsiveContainer width="100%" minWidth={320} minHeight={220} height={Math.max(400, manhoursData.length * 36)}>
                 <BarChart
                   layout="vertical"
                   data={manhoursData}
-                  height={Math.max(400, manhoursData.length * 30)}
+                  height={Math.max(400, manhoursData.length * 36)}
                   margin={{ top: 16, right: 24, left: 120, bottom: 40 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
