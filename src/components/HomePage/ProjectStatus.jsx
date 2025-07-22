@@ -1,55 +1,116 @@
-import React from 'react'
-import { projectsData } from '../../data'
+import React from 'react';
+import { projectsData } from '../../data';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Chip
+} from '@mui/material';
+
+const getChipColor = (value, type) => {
+  if (type === "billability") {
+    if (value >= 80) return "success";
+    if (value >= 50) return "warning";
+    return "error";
+  }
+  if (type === "cars") {
+    return value > 0 ? "error" : "success";
+  }
+  if (type === "obs") {
+    return value > 0 ? "warning" : "success";
+  }
+  if (type === "kpi") {
+    if (value >= 90) return "success";
+    if (value >= 70) return "warning";
+    return "error";
+  }
+  return "default";
+};
+
 const ProjectStatus = () => {
   return (
-    <div className="card">
-      <div className="card-header">
-        <p className="card-title">Project Status Overview</p>
-      </div>
-      <div className="card-body p-0">
-        <div className="w-full overflow-x-auto">
-          <table className="min-w-[700px] w-full table-auto text-xs md:text-sm">
-            <thead className="table-header bg-slate-100 dark:bg-slate-800">
-              <tr className="table-row">
-                <th className="table-head whitespace-nowrap text-slate-700 dark:text-slate-200">#</th>
-                <th className="table-head whitespace-nowrap text-slate-700 dark:text-slate-200">Project No</th>
-                <th className="table-head whitespace-nowrap text-slate-700 dark:text-slate-200">Title</th>
-                <th className="table-head whitespace-nowrap text-slate-700 dark:text-slate-200">Client</th>
-                <th className="table-head whitespace-nowrap text-slate-700 dark:text-slate-200">Manager</th>
-                <th className="table-head whitespace-nowrap text-orange-700 dark:text-orange-400">Billability (%)</th>
-                <th className="table-head whitespace-nowrap text-orange-700 dark:text-orange-400">CARs Open</th>
-                <th className="table-head whitespace-nowrap text-orange-700 dark:text-orange-400">Obs Open</th>
-                <th className="table-head whitespace-nowrap text-orange-700 dark:text-orange-400">KPIs Achieved (%)</th>
-              </tr>
-            </thead>
-            <tbody className="table-body">
-              {projectsData && projectsData.length > 0 ? (
-                projectsData.map((project, idx) => (
-                  <tr key={project.srNo || idx} className="table-row hover:bg-slate-50 dark:hover:bg-slate-900">
-                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.srNo || idx + 1}</td>
-                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectNo}</td>
-                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectTitle}</td>
-                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.client}</td>
-                    <td className="table-cell text-slate-700 dark:text-slate-200">{project.projectManager}</td>
-                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.qualityBillabilityPercent}%</td>
-                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.carsOpen}</td>
-                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.obsOpen}</td>
-                    <td className="table-cell text-orange-600 dark:text-orange-400 font-bold">{project.projectKPIsAchievedPercent}%</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={9} className="text-center py-4 text-slate-500 dark:text-slate-400">
-                    No projects found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
-}
+    <Box component={Paper} elevation={4} sx={{ borderRadius: 3, p: 3, mb: 4, boxShadow: 4 }}>
+      <Typography variant="h6" component="div" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+        Project Status Overview
+      </Typography>
+      <TableContainer sx={{ borderRadius: 2, maxHeight: 500 }}>
+        <Table size="small" stickyHeader aria-label="project status table">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'grey.100' }}>
+              <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>#</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Project No</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Title</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Client</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Manager</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>Billability (%)</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>CARs Open</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>Obs Open</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>KPIs Achieved (%)</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {projectsData && projectsData.length > 0 ? (
+              projectsData.map((project, idx) => (
+                <TableRow
+                  key={project.srNo || idx}
+                  hover
+                  sx={{
+                    backgroundColor: idx % 2 === 0 ? 'grey.50' : 'white',
+                    '&:hover': { backgroundColor: 'primary.lighter' }
+                  }}
+                >
+                  <TableCell>{project.srNo || idx + 1}</TableCell>
+                  <TableCell>{project.projectNo}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={600} color="text.primary">
+                      {project.projectTitle}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{project.client}</TableCell>
+                  <TableCell>{project.projectManager}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={`${project.qualityBillabilityPercent}%`}
+                      color={getChipColor(project.qualityBillabilityPercent, "billability")}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={project.carsOpen}
+                      color={getChipColor(project.carsOpen, "cars")}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={project.obsOpen}
+                      color={getChipColor(project.obsOpen, "obs")}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={`${project.projectKPIsAchievedPercent}%`}
+                      color={getChipColor(project.projectKPIsAchievedPercent, "kpi")}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 4, color: 'grey.500' }}>
+                  No projects found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+};
 
-export default ProjectStatus
+export default ProjectStatus;

@@ -20,31 +20,40 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 collapsed ? "max-md:-left-full" : "max-md:left-0",
             )}
         >
-            <div className="flex gap-x-3 p-3 items-center">
-                <img
-                    src={Assets.logoLight}
-                    alt="Logoipsum"
-                    className="dark:hidden drop-shadow-md w-8 h-8 rounded-full"
-                />
-                <img
-                    src={Assets.logoDark}
-                    alt="Logoipsum"
-                    className="hidden dark:block drop-shadow-md"
-                />
-            {!collapsed && <p className="text-lg font-bold text-[#0d0d37e4] transition-colors dark:text-blue-900 tracking-wide">Rejlers QHSE</p>}
-            </div>
+            <NavLink to="/" className="block" reloadDocument>
+                <div className="flex gap-x-3 p-3 items-center cursor-pointer">
+                    <img
+                        src={Assets.logoLight}
+                        alt="Logoipsum"
+                        className="dark:hidden drop-shadow-md w-8 h-8 rounded-full"
+                    />
+                    <img
+                        src={Assets.logo_dark}
+                        alt="Logoipsum"
+                        className="hidden dark:block drop-shadow-md w-8 h-8 rounded-full"
+                    />
+                    {!collapsed && (
+                        <p className="text-lg font-bold text-[#0d0d37e4] transition-colors dark:text-slate-200 tracking-wide">
+                            Rejlers QHSE
+                        </p>
+                    )}
+                </div>
+            </NavLink>
             <div className="flex w-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden p-3 [scrollbar-width:_thin]">
                 {sidebarLinks.map((navbarLink, idx) => (
                     <nav
                         key={navbarLink.title}
                         className={cn("sidebar-group", collapsed && "md:items-center")}
                     >
-                        <p className={cn(
-                            "sidebar-group-title mb-2 font-semibold text-slate-700 dark:text-slate-200 tracking-wider uppercase text-xs",
-                            collapsed && "md:w-[45px]"
-                        )}>
-                            {navbarLink.title}
-                        </p>
+                        {!collapsed && (
+                            <p
+                                className={cn(
+                                    "sidebar-group-title mb-2 font-semibold text-slate-700 dark:text-slate-200 tracking-wider uppercase text-xs"
+                                )}
+                            >
+                                {navbarLink.title}
+                            </p>
+                        )}
                         <div className="space-y-1">
                         {navbarLink.links.map((link) => (
                             <NavLink

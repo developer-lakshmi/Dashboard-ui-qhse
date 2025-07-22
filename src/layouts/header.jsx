@@ -46,7 +46,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         className="hidden dark:block"
                     />
                 </button>
-                <button className="btn-ghost size-10">
+                {/* <button className="btn-ghost size-10">
                     <Bell size={20} />
                 </button>
                 <button className="size-10 overflow-hidden rounded-full">
@@ -55,7 +55,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         alt="profile image"
                         className="size-full object-cover"
                     />
-                </button>
+                </button> */}
             </div>
         </header>
     );

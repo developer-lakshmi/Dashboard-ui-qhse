@@ -10,7 +10,7 @@ export const sidebarLinks = [
     links: [
       { label: "Summary View", icon: TrendingUp, path: "/dashboard/summary", iconColor: "text-blue-500" },
       { label: "Detailed View", icon: ClipboardList, path: "/dashboard/detailed", iconColor: "text-indigo-500" },
-      { label: "Analytics", icon: BarChart2, path: "/dashboard/analytics", iconColor: "text-cyan-500" }
+      // { label: "Analytics", icon: BarChart2, path: "/dashboard/analytics", iconColor: "text-cyan-500" }
     ]
   },
   {
