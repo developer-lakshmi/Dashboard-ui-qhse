@@ -35,16 +35,16 @@ export const sidebarLinks = [
       { label: "Compliance", icon: FileText, path: "/qhse/compliance", iconColor: "text-purple-400" }
     ]
   },
-  {
-    title: "Project Management",
-    links: [
-      { label: "Project Overview", icon: BarChart2, path: "/projects/overview", iconColor: "text-blue-500" },
-      { label: "Critical Projects", icon: AlertTriangle, path: "/projects/critical", iconColor: "text-red-600" },
-      { label: "Project Timeline", icon: CalendarDays, path: "/projects/timeline", iconColor: "text-cyan-600" },
-      { label: "Resource Management", icon: Users, path: "/projects/resources", iconColor: "text-green-500" },
-      { label: "Project Reports", icon: FileText, path: "/projects/reports", iconColor: "text-indigo-500" }
-    ]
-  },
+  // {
+  //   title: "Project Management",
+  //   links: [
+  //     { label: "Project Overview", icon: BarChart2, path: "/projects/overview", iconColor: "text-blue-500" },
+  //     { label: "Critical Projects", icon: AlertTriangle, path: "/projects/critical", iconColor: "text-red-600" },
+  //     { label: "Project Timeline", icon: CalendarDays, path: "/projects/timeline", iconColor: "text-cyan-600" },
+  //     { label: "Resource Management", icon: Users, path: "/projects/resources", iconColor: "text-green-500" },
+  //     { label: "Project Reports", icon: FileText, path: "/projects/reports", iconColor: "text-indigo-500" }
+  //   ]
+  // },
 //   {
 //     title: "Supporting Information",
 //     links: [

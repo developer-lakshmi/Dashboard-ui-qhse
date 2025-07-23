@@ -44,8 +44,28 @@ const getTrendPercent = (current, previous) => {
   return "0%";
 };
 
+// Helper: Get count of projects with a condition
+const countProjects = (data, fn) => data.filter(fn).length;
+
+const overdueAudits = countProjects(projectsData, p => Number(p.delayInAuditsNoDays) > 0);
+const openCARs = countProjects(projectsData, p => Number(p.carsOpen) > 0);
+const openObs = countProjects(projectsData, p => Number(p.obsOpen) > 0);
+const delayedCARs = countProjects(projectsData, p => Number(p.carsDelayedClosingNoDays) > 0);
+const delayedObs = countProjects(projectsData, p => Number(p.obsDelayedClosingNoDays) > 0);
+const lowBillability = countProjects(projectsData, p => Number(p.qualityBillabilityPercent) < 90);
+const lowCompletion = countProjects(projectsData, p => Number(p.projectCompletionPercent) < 50);
+
+const getBadge = (title, value) => {
+  if (value === 0) return <span className="ml-2 rounded bg-green-200 px-2 py-0.5 text-xs text-green-800">OK</span>;
+  if (title.includes("Low") || title.includes("Overdue") || title.includes("Delayed")) {
+    if (value > 5) return <span className="ml-2 rounded bg-red-200 px-2 py-0.5 text-xs text-red-800">Critical</span>;
+    if (value > 0) return <span className="ml-2 rounded bg-yellow-200 px-2 py-0.5 text-xs text-yellow-800">Warning</span>;
+  }
+  return null;
+};
+
 const SummaryCard = () => {
-  // Current and previous values
+  // Current and previous values for important fields
   const carsOpenNow = getTotal(projectsData, "carsOpen");
   const carsOpenPrev = getTotal(previousProjectsData, "carsOpen");
 
@@ -55,65 +75,103 @@ const SummaryCard = () => {
   const delayNow = getTotal(projectsData, "delayInAuditsNoDays");
   const delayPrev = getTotal(previousProjectsData, "delayInAuditsNoDays");
 
-  const kpiNow = getAverage(projectsData, "projectKPIsAchievedPercent");
-  const kpiPrev = getAverage(previousProjectsData, "projectKPIsAchievedPercent");
+  const billabilityNow = getAverage(projectsData, "qualityBillabilityPercent");
+  const billabilityPrev = getAverage(previousProjectsData, "qualityBillabilityPercent");
+
+  const planRevNow = projectsData[0]?.projectQualityPlanStatusRev || "-";
+  const planRevPrev = previousProjectsData[0]?.projectQualityPlanStatusRev || "-";
+
+  const planIssueDateNow = projectsData[0]?.projectQualityPlanStatusIssueDate || "-";
+  const planIssueDatePrev = previousProjectsData[0]?.projectQualityPlanStatusIssueDate || "-";
+
+  const carsDelayNow = getTotal(projectsData, "carsDelayedClosingNoDays");
+  const carsDelayPrev = getTotal(previousProjectsData, "carsDelayedClosingNoDays");
+
+  const obsDelayNow = getTotal(projectsData, "obsDelayedClosingNoDays");
+  const obsDelayPrev = getTotal(previousProjectsData, "obsDelayedClosingNoDays");
+
+  const completionNow = getAverage(projectsData, "projectCompletionPercent");
+  const completionPrev = getAverage(previousProjectsData, "projectCompletionPercent");
 
   const importantSummary = [
     {
-      title: "CARs Open",
-      value: carsOpenNow,
+      title: "Projects with Overdue Audits",
+      value: overdueAudits,
       icon: AlertTriangle,
-      color: "text-orange-600 bg-orange-100/60 dark:bg-orange-900/30 dark:text-orange-400",
-      trend: getTrend(carsOpenNow, carsOpenPrev),
-      trendColor: "text-orange-600 border-orange-600 dark:text-orange-400 dark:border-orange-400"
+      color: "text-red-600 bg-red-100/60 dark:bg-red-900/30 dark:text-red-400",
+      description: "Projects with delayed audits"
     },
     {
-      title: "Obs Open",
-      value: obsOpenNow,
+      title: "Projects with Open CARs",
+      value: openCARs,
       icon: FileText,
       color: "text-orange-600 bg-orange-100/60 dark:bg-orange-900/30 dark:text-orange-400",
-      trend: getTrend(obsOpenNow, obsOpenPrev),
-      trendColor: "text-orange-600 border-orange-600 dark:text-orange-400 dark:border-orange-400"
+      description: "Projects with unresolved CARs"
     },
     {
-      title: "Delay in Audits (days)",
-      value: delayNow,
-      icon: TrendingUp,
-      color: "text-orange-600 bg-orange-100/60 dark:bg-orange-900/30 dark:text-orange-400",
-      trend: getTrend(delayNow, delayPrev),
-      trendColor: "text-orange-600 border-orange-600 dark:text-orange-400 dark:border-orange-400"
+      title: "Projects with Open Observations",
+      value: openObs,
+      icon: FileText,
+      color: "text-yellow-600 bg-yellow-100/60 dark:bg-yellow-900/30 dark:text-yellow-400",
+      description: "Projects with open observations"
     },
     {
-      title: "Project KPIs Achieved (%)",
-      value: `${kpiNow}%`,
+      title: "Projects with Delayed CAR Closure",
+      value: delayedCARs,
+      icon: AlertTriangle,
+      color: "text-red-600 bg-red-100/60 dark:bg-red-900/30 dark:text-red-400",
+      description: "Projects with overdue CAR closure"
+    },
+    {
+      title: "Projects with Delayed OBS Closure",
+      value: delayedObs,
+      icon: FileText,
+      color: "text-red-600 bg-red-100/60 dark:bg-red-900/30 dark:text-red-400",
+      description: "Projects with overdue OBS closure"
+    },
+    {
+      title: "Projects with Low Billability (<90%)",
+      value: lowBillability,
       icon: Users,
-      color: "text-orange-600 bg-orange-100/60 dark:bg-orange-900/30 dark:text-orange-400",
-      trend: getTrendPercent(kpiNow, kpiPrev),
-      trendColor: "text-orange-600 border-orange-600 dark:text-orange-400 dark:border-orange-400"
+      color: "text-blue-600 bg-blue-100/60 dark:bg-blue-900/30 dark:text-blue-400",
+      description: "Projects with billability below 90%"
+    },
+    {
+      title: "Projects with Low Completion (<50%)",
+      value: lowCompletion,
+      icon: TrendingUp,
+      color: "text-green-600 bg-green-100/60 dark:bg-green-900/30 dark:text-green-400",
+      description: "Projects less than 50% complete"
     }
   ];
+
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {importantSummary.map((item) => (
-        <Card key={item.title}>
+      
+        <Card
+  key={item.title}
+ 
+  className="hover:scale-[1.03] transition-transform shadow-md min-w-[320px] max-w-[400px] mx-auto cursor-pointer"
+>
           <CardHeader>
             <div className={`w-fit rounded-lg p-2 transition-colors ${item.color}`}>
               <item.icon size={26} />
             </div>
-            <p className="card-title">{item.title}</p>
+            <div className="flex items-center justify-between w-full">
+              <p className="card-title font-semibold">{item.title}</p>
+              {getBadge(item.title, item.value)}
+            </div>
           </CardHeader>
           <CardBody className="bg-slate-100 transition-colors dark:bg-slate-950">
-            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">{item.value}</p>
-            <span className={`flex w-fit items-center gap-x-2 rounded-full border px-2 py-1 font-medium ${item.trendColor}`}>
-              <TrendingUp size={18} />
-              {item.trend}
-            </span>
+            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50 animate-pulse">{item.value}</p>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{item.description}</span>
           </CardBody>
         </Card>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default SummaryCard
+export default SummaryCard;
 
