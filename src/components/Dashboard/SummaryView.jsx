@@ -98,10 +98,17 @@ const SummaryView = () => {
         ) / totalProjects
       : 0;
 
+  const getKPIStatus = (percentStr) => {
+    const percent = parsePercent(percentStr);
+    if (percent >= 90) return "Green";
+    if (percent >= 70) return "Yellow";
+    return "Red";
+  };
+
   const kpiStatusData = [
-    { name: "Green", value: filteredProjects.filter(p => p.projectKPIStatus === "Green").length },
-    { name: "Yellow", value: filteredProjects.filter(p => p.projectKPIStatus === "Yellow").length },
-    { name: "Red", value: filteredProjects.filter(p => p.projectKPIStatus === "Red").length },
+    { name: "Green", value: filteredProjects.filter(p => getKPIStatus(p.projectKPIsAchievedPercent) === "Green").length },
+    { name: "Yellow", value: filteredProjects.filter(p => getKPIStatus(p.projectKPIsAchievedPercent) === "Yellow").length },
+    { name: "Red", value: filteredProjects.filter(p => getKPIStatus(p.projectKPIsAchievedPercent) === "Red").length },
   ];
 
   const manhoursData = filteredProjects.map(project => ({
