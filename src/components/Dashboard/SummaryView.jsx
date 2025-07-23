@@ -162,17 +162,14 @@ const SummaryView = () => {
     const startDate = new Date(project.projectStartingDate);
     const endDate = new Date(project.projectClosingDate);
     const today = new Date();
-    const totalDuration = endDate - startDate;
-    const elapsed = today - startDate;
-    const progress =
-      totalDuration > 0
-        ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
-        : 0;
+    const percentComplete = parsePercent(project.projectCompletionPercent);
+    const isCompleted = percentComplete >= 100;
     return {
       name: project.projectTitle,
-      progress,
+      progress: percentComplete, // Use actual completion percent
       status: project.projectKPIStatus,
-      daysRemaining: Math.ceil((endDate - today) / (1000 * 60 * 60 * 24))
+      daysRemaining: Math.ceil((endDate - today) / (1000 * 60 * 60 * 24)),
+      isCompleted
     };
   });
 

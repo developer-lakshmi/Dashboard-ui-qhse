@@ -568,7 +568,12 @@ const Charts = ({
                   </Badge>
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                  {project.daysRemaining > 0 ? (
+                  {project.isCompleted ? (
+                    <>
+                      <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
+                      <span className="font-semibold text-green-600 dark:text-green-400">Completed</span>
+                    </>
+                  ) : project.daysRemaining > 0 ? (
                     <>
                       <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
                       {project.daysRemaining} days remaining
