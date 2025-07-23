@@ -54,7 +54,12 @@ const ProjectTimeline = ({ timelineData }) => (
               </Badge>
             </div>
             <div className="text-xs flex items-center gap-x-1 mt-1">
-              {project.daysRemaining > 0 ? (
+              {project.status === "Completed" || project.progress === 100 ? (
+                <>
+                  <CheckCircle2 className="text-green-500" size={14} />
+                  <span className="text-green-600 font-semibold">Completed</span>
+                </>
+              ) : project.daysRemaining > 0 ? (
                 <>
                   <Clock className="text-blue-400 dark:text-blue-300" size={14} />
                   <span className="text-blue-700">

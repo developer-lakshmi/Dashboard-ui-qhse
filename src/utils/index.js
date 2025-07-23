@@ -32,25 +32,29 @@ export function getMonthlyOverviewData(projects) {
 
 export function getProjectTimelineData(projects) {
   const today = new Date();
-  return projects.map(p => {
-    const start = new Date(p.projectStartingDate);
-    const end = new Date(p.projectClosingDate);
-    const total = (end - start) / (1000 * 60 * 60 * 24); // total days
-    const elapsed = (today - start) / (1000 * 60 * 60 * 24); // days passed
-    const progress = Math.max(0, Math.min(100, (elapsed / total) * 100));
-    const daysRemaining = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
-    let status = "On Track";
-    if (daysRemaining < 0) status = "Completed";
-    else if (progress < 80 && daysRemaining < total * 0.2) status = "Delayed";
-    // You can refine status logic as needed
-
-    return {
-      name: p.projectTitle,
-      progress,
-      daysRemaining,
-      status,
-    };
-  });
+  return projects
+    .filter(p => p.projectStartingDate && p.projectClosingDate) // skip if missing dates
+    .map(p => {
+      const start = new Date(p.projectStartingDate);
+      const end = new Date(p.projectClosingDate);
+      if (isNaN(start) || isNaN(end)) {
+        return null; // skip invalid dates
+      }
+      const total = (end - start) / (1000 * 60 * 60 * 24); // total days
+      const elapsed = (today - start) / (1000 * 60 * 60 * 24); // days passed
+      const progress = Math.max(0, Math.min(100, (elapsed / total) * 100));
+      const daysRemaining = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+      let status = "On Track";
+      if (daysRemaining < 0) status = "Completed";
+      else if (progress < 80 && daysRemaining < total * 0.2) status = "Delayed";
+      return {
+        name: p.projectTitle,
+        progress: isFinite(progress) ? progress : 0,
+        daysRemaining: isFinite(daysRemaining) ? daysRemaining : 0,
+        status,
+      };
+    })
+    .filter(Boolean); // remove nulls
 }
 
 export function getYearlyOverviewData(projects) {
