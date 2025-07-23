@@ -14,9 +14,11 @@ import SummaryCard from "../../components/HomePage/SummaryCard";
 import QHSEOverviewChart from "../../components/HomePage/OverviewChart";
 import ProjectTimeline from "../../components/HomePage/ProjectTimeline";
 import ProjectStatus from "../../components/HomePage/ProjectStatus";
-import { getMonthlyOverviewData, getProjectTimelineData } from "../../utils";
+import { getMonthlyOverviewData, getProjectTimelineData, getYearlyOverviewData } from "../../utils";
 
 const monthlyData = getMonthlyOverviewData(projectsData);
+const yearlyData = getYearlyOverviewData(projectsData);
+
 
 // Generate timeline data dynamically
 const timelineData = getProjectTimelineData(projectsData);
@@ -50,7 +52,7 @@ const DashboardPage = () => {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
               
-                <QHSEOverviewChart monthlyData={monthlyData} yearlyData={[]} />
+                <QHSEOverviewChart monthlyData={monthlyData} yearlyData={yearlyData} />
               
                 <ProjectTimeline timelineData={timelineData} />
             </div>

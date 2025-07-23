@@ -53,4 +53,36 @@ export function getProjectTimelineData(projects) {
   });
 }
 
+export function getYearlyOverviewData(projects) {
+  const yearly = {};
+  projects.forEach(p => {
+    const date = new Date(p.projectStartingDate);
+    const yearKey = `${date.getFullYear()}`; // e.g., "2025"
+    if (!yearly[yearKey]) {
+      yearly[yearKey] = { 
+        name: yearKey, 
+        date: new Date(date.getFullYear(), 0), 
+        carsOpen: 0, 
+        obsOpen: 0, 
+        kpiAchieved: 0, 
+        billability: 0, 
+        count: 0 
+      };
+    }
+    yearly[yearKey].carsOpen += Number(p.carsOpen) || 0;
+    yearly[yearKey].obsOpen += Number(p.obsOpen) || 0;
+    yearly[yearKey].kpiAchieved += Number(p.projectKPIsAchievedPercent) || 0;
+    yearly[yearKey].billability += Number(p.qualityBillabilityPercent) || 0;
+    yearly[yearKey].count += 1;
+  });
+  // Convert to array, average, and sort by date
+  return Object.values(yearly)
+    .map(y => ({
+      ...y,
+      kpiAchieved: y.count ? Math.round((y.kpiAchieved / y.count) * 100) / 100 : 0,
+      billability: y.count ? Math.round((y.billability / y.count) * 100) / 100 : 0,
+    }))
+    .sort((a, b) => a.date - b.date); // Sort by year ascending
+}
+
 

@@ -16,7 +16,9 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="font-semibold mb-1">{label}</p>
         {payload.map((entry, idx) => (
           <p key={idx} style={{ color: entry.color }}>
-            {entry.name}: <span className="font-bold">{entry.value}</span>
+            {entry.name}: <span className="font-bold">
+              {typeof entry.value === "number" ? entry.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : entry.value}
+            </span>
           </p>
         ))}
       </div>
@@ -84,6 +86,7 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData }) => {
                 strokeWidth={0}
                 stroke={theme === "light" ? "#475569" : "#94a3b8"}
                 tickMargin={6}
+                domain={['auto', 'auto']} // This is default, but you can customize if needed
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend verticalAlign="bottom" height={36} />
