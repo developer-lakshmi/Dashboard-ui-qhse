@@ -33,8 +33,8 @@ const ProjectStatus = () => {
       <TableContainer sx={{ borderRadius: 2, maxHeight: 500 }}>
         <Table size="small" stickyHeader aria-label="project status table">
           <TableHead>
-            <TableRow sx={{ backgroundColor: 'grey.100' }}>
-              <TableCell sx={{ fontWeight: 700, color: 'primary.main' }}>#</TableCell>
+            <TableRow sx={{ backgroundColor: '#f5f5fa',textTransform: 'uppercase', }}>
+              <TableCell sx={{ fontWeight: 700 }}>Sr.No</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Project No</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Title</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Client</TableCell>
@@ -43,6 +43,10 @@ const ProjectStatus = () => {
               <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>CARs Open</TableCell>
               <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>Obs Open</TableCell>
               <TableCell sx={{ fontWeight: 700, color: 'orange.main' }}>KPIs Achieved (%)</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'red.main' }}>Audit Delay (days)</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'red.main' }}>CARs Delayed Closing (days)</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'red.main' }}>OBS Delayed Closing (days)</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'green.main' }}>Completion (%)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -67,7 +71,7 @@ const ProjectStatus = () => {
                   <TableCell>{project.projectManager}</TableCell>
                   <TableCell>
                     <Chip
-                      label={`${project.qualityBillabilityPercent}%`}
+                      label={`${project.qualityBillabilityPercent}`}
                       color={getChipColor(project.qualityBillabilityPercent, "billability")}
                       size="small"
                       sx={{ fontWeight: 700 }}
@@ -91,8 +95,49 @@ const ProjectStatus = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={`${project.projectKPIsAchievedPercent}%`}
+                      label={`${project.projectKPIsAchievedPercent}`}
                       color={getChipColor(project.projectKPIsAchievedPercent, "kpi")}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={project.delayInAuditsNoDays}
+                      color={project.delayInAuditsNoDays > 0 ? "error" : "success"}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={project.carsDelayedClosingNoDays}
+                      color={project.carsDelayedClosingNoDays > 0 ? "error" : "success"}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={project.obsDelayedClosingNoDays}
+                      color={project.obsDelayedClosingNoDays > 0 ? "error" : "success"}
+                      size="small"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={
+                        project.projectCompletionPercent !== undefined
+                          ? `${project.projectCompletionPercent}`
+                          : "N/A"
+                      }
+                      color={getChipColor(
+                        typeof project.projectCompletionPercent === "string"
+                          ? Number(project.projectCompletionPercent.replace("%", ""))
+                          : Number(project.projectCompletionPercent),
+                        "kpi"
+                      )}
                       size="small"
                       sx={{ fontWeight: 700 }}
                     />
