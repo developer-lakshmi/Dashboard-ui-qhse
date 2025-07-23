@@ -261,72 +261,60 @@ const Charts = ({
             </span>
             <span className="flex items-center text-xs text-gray-600 dark:text-gray-300">
               <span className="inline-block w-3 h-3 rounded-full mr-1" style={{ background: "#facc15" }} />
-              In Progress
-            </span>
-            <span className="flex items-center text-xs text-gray-600 dark:text-gray-300">
-              <span className="inline-block w-3 h-3 rounded-full mr-1" style={{ background: "#ef4444" }} />
-              Pending
+              Upcoming
             </span>
             <span className="flex items-center text-xs text-gray-600 dark:text-gray-300">
               <span className="inline-block w-3 h-3 rounded-full mr-1" style={{ background: "#64748b" }} />
-              Not Started
+              Not Applicable
             </span>
           </div>
-          {/* Responsive horizontal scroll for mobile */}
-          <div className="w-full max-w-full flex justify-center overflow-x-auto scrollbar-thin scrollbar-thumb-yellow-200 dark:scrollbar-thumb-yellow-900 scrollbar-track-transparent">
-            <div className="min-w-[400px] sm:min-w-[320px] w-full">
-              <ResponsiveContainer width="100%" minWidth={320} minHeight={220} height={320}>
-                <BarChart
-                  data={auditStatusData}
-                  margin={{ top: 16, right: 24, left: 24, bottom: 40 }}
-                  barCategoryGap="20%"
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fill: "#64748b", fontSize: 13, fontWeight: 500 }}
-                    axisLine={true}
-                    tickLine={false}
-                    label={{
-                      value: "Audit",
-                      position: "insideBottom",
-                      offset: -10,
-                      fill: "#64748b",
-                      fontSize: 14
-                    }}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fill: "#64748b", fontSize: 13 }}
-                    axisLine={true}
-                    tickLine={false}
-                    label={{
-                      value: "Number of Projects",
-                      angle: -90,
-                      position: "insideLeft",
-                      offset: 30,
-                      fill: "#64748b",
-                      fontSize: 14,
-                      dy: 120 // Adjust this value as needed for your chart height
-                    }}
-                  />
-                  <Tooltip content={<AuditStatusTooltip />} />
-                  <Bar dataKey="Completed" fill="#16a34a" name="Completed" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="Completed" position="top" fill="#16a34a" fontSize={12} />
-                  </Bar>
-                  <Bar dataKey="InProgress" fill="#facc15" name="In Progress" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="InProgress" position="top" fill="#facc15" fontSize={12} />
-                  </Bar>
-                  <Bar dataKey="Pending" fill="#ef4444" name="Pending" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="Pending" position="top" fill="#ef4444" fontSize={12} />
-                  </Bar>
-                  <Bar dataKey="NotStarted" fill="#64748b" name="Not Started" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="NotStarted" position="top" fill="#64748b" fontSize={12} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <ResponsiveContainer width="100%" minWidth={320} minHeight={220} height={320}>
+            <BarChart
+              data={auditStatusData}
+              margin={{ top: 16, right: 24, left: 24, bottom: 40 }}
+              barCategoryGap="20%"
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                tick={{ fill: "#64748b", fontSize: 13, fontWeight: 500 }}
+                axisLine={true}
+                tickLine={false}
+                label={{
+                  value: "Audit",
+                  position: "insideBottom",
+                  offset: -10,
+                  fill: "#64748b",
+                  fontSize: 14
+                }}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: "#64748b", fontSize: 13 }}
+                axisLine={true}
+                tickLine={false}
+                label={{
+                  value: "Number of Projects",
+                  angle: -90,
+                  position: "insideLeft",
+                  offset: 30,
+                  fill: "#64748b",
+                  fontSize: 14,
+                  dy: 120
+                }}
+              />
+              <Tooltip content={<AuditStatusTooltip />} />
+              <Bar dataKey="Completed" fill="#16a34a" name="Completed">
+                <LabelList dataKey="Completed" position="top" fill="#16a34a" fontSize={12} />
+              </Bar>
+              <Bar dataKey="Upcoming" fill="#facc15" name="Upcoming">
+                <LabelList dataKey="Upcoming" position="top" fill="#facc15" fontSize={12} />
+              </Bar>
+              <Bar dataKey="NotApplicable" fill="#64748b" name="Not Applicable">
+                <LabelList dataKey="NotApplicable" position="top" fill="#64748b" fontSize={12} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
           <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center w-full">
             Status of audits across all filtered projects.
           </div>

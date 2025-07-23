@@ -7,6 +7,9 @@ import { Card, CardContent } from '../ui/Card'
 import { projectsData } from '../../data/index';
 import { SearchX, BarChart2 } from 'lucide-react'; // Add this import at the top
 
+const parsePercent = val =>
+  typeof val === "string" ? Number(val.replace("%", "")) : Number(val);
+
 const SummaryView = () => {
   // Add state for filters
   const [selectedYear, setSelectedYear] = useState("")
@@ -67,9 +70,33 @@ const SummaryView = () => {
 
   const totalProjects = filteredProjects.length;
   const extendedProjects = filteredProjects.filter(p => p.projectExtension !== "No").length;
-  const totalOpenCARs = filteredProjects.reduce((sum, p) => sum + (p.CARs ? p.CARs.filter(c => c.status === "Open").length : 0), 0);
-  const totalOpenObs = filteredProjects.reduce((sum, p) => sum + (p.Observations ? p.Observations.filter(o => o.status === "Open").length : 0), 0);
-  const avgProgress = totalProjects > 0 ? (filteredProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / totalProjects) : 0;
+
+  // Robust open CARs/Obs calculation (support both array and numeric fields)
+  const totalOpenCARs = filteredProjects.reduce(
+    (sum, p) =>
+      sum +
+      (Array.isArray(p.CARs)
+        ? p.CARs.filter(c => c.status === "Open").length
+        : Number(p.carsOpen) || 0),
+    0
+  );
+  const totalOpenObs = filteredProjects.reduce(
+    (sum, p) =>
+      sum +
+      (Array.isArray(p.Observations)
+        ? p.Observations.filter(o => o.status === "Open").length
+        : Number(p.obsOpen) || 0),
+    0
+  );
+
+  // Average progress using percent field
+  const avgProgress =
+    totalProjects > 0
+      ? filteredProjects.reduce(
+          (sum, p) => sum + parsePercent(p.projectCompletionPercent),
+          0
+        ) / totalProjects
+      : 0;
 
   const kpiStatusData = [
     { name: "Green", value: filteredProjects.filter(p => p.projectKPIStatus === "Green").length },
@@ -78,32 +105,50 @@ const SummaryView = () => {
   ];
 
   const manhoursData = filteredProjects.map(project => ({
-    code: project.projectNo, // or any unique code
+    code: project.projectNo,
     name: project.projectTitle,
-    Planned: project.manhoursUsed + project.manhoursBalance,
-    Used: project.manhoursUsed,
-    Balance: project.manhoursBalance
+    Planned: Number(project.manhoursUsed) + Number(project.manhoursBalance),
+    Used: Number(project.manhoursUsed),
+    Balance: Number(project.manhoursBalance)
   }));
 
   // Find all audit fields dynamically (e.g. projectAudit1, projectAudit2, ...)
+  const today = new Date();
   const auditFields = Object.keys(filteredProjects[0] || {}).filter(key =>
     key.toLowerCase().startsWith("projectaudit")
   );
 
-  const auditStatusData = auditFields.map((field, idx) => ({
-    name: `Audit ${idx + 1}`,
-    Completed: filteredProjects.filter(p => p[field] === "Completed").length,
-    InProgress: filteredProjects.filter(p => p[field] === "In Progress").length,
-    Pending: filteredProjects.filter(p => p[field] === "Pending").length,
-    NotStarted: filteredProjects.filter(p => p[field] === "Not Started").length,
-  }));
+  const auditStatusData = auditFields.map((field, idx) => {
+    let completed = 0, upcoming = 0, notApplicable = 0;
+    filteredProjects.forEach(p => {
+      const val = p[field];
+      if (!val || val === "not applicable") {
+        notApplicable++;
+      } else {
+        const date = new Date(val);
+        if (isNaN(date)) {
+          notApplicable++;
+        } else if (date < today) {
+          completed++;
+        } else {
+          upcoming++;
+        }
+      }
+    });
+    return {
+      name: `Audit ${idx + 1}`,
+      Completed: completed,
+      Upcoming: upcoming,
+      NotApplicable: notApplicable
+    };
+  });
 
   const carsObsData = filteredProjects.map(project => ({
     name: project.projectTitle,
-    CARsOpen: project.carsOpen,
-    CARsClosed: project.carsClosed,
-    ObsOpen: project.obsOpen,
-    ObsClosed: project.obsClosed,
+    CARsOpen: Number(project.carsOpen),
+    CARsClosed: Number(project.carsClosed),
+    ObsOpen: Number(project.obsOpen),
+    ObsClosed: Number(project.obsClosed),
   }));
 
   const timelineData = filteredProjects.map(project => {
@@ -112,7 +157,10 @@ const SummaryView = () => {
     const today = new Date();
     const totalDuration = endDate - startDate;
     const elapsed = today - startDate;
-    const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+    const progress =
+      totalDuration > 0
+        ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
+        : 0;
     return {
       name: project.projectTitle,
       progress,
