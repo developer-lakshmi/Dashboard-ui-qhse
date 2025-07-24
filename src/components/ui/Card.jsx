@@ -1,7 +1,7 @@
 import React from "react";
 
-export const Card = ({ children, className = "" }) => (
-  <div className={`card ${className}`}>{children}</div>
+export const Card = ({ children, className = "", ...props }) => (
+  <div className={`card ${className}`} {...props}>{children}</div>
 );
 
 export const CardHeader = ({ children, className = "" }) => (

@@ -1,7 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { AlertTriangle, FileText, TrendingUp, Users } from "lucide-react";
 import { projectsData } from "@/data/index";
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import Paper from '@mui/material/Paper';
 
 // --- MOCK: Replace this with real previous period data when available ---
 const previousProjectsData = [
@@ -62,6 +67,16 @@ const getBadge = (title, value) => {
     if (value > 0) return <span className="ml-2 rounded bg-yellow-200 px-2 py-0.5 text-xs text-yellow-800">Warning</span>;
   }
   return null;
+};
+
+const filterProjects = {
+  "Projects with Overdue Audits": p => Number(p.delayInAuditsNoDays) > 0,
+  "Projects with Open CARs": p => Number(p.carsOpen) > 0,
+  "Projects with Open Observations": p => Number(p.obsOpen) > 0,
+  "Projects with Delayed CAR Closure": p => Number(p.carsDelayedClosingNoDays) > 0,
+  "Projects with Delayed OBS Closure": p => Number(p.obsDelayedClosingNoDays) > 0,
+  "Projects with Low Billability (<90%)": p => Number(p.qualityBillabilityPercent) < 90,
+  "Projects with Low Completion (<50%)": p => Number(p.projectCompletionPercent) < 50,
 };
 
 const SummaryCard = () => {
@@ -145,31 +160,126 @@ const SummaryCard = () => {
     }
   ];
 
+  const [open, setOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalProjects, setModalProjects] = useState([]);
+
+  const handleOpen = (item) => {
+    setModalTitle(item.title);
+    setModalProjects(projectsData.filter(filterProjects[item.title]));
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {importantSummary.map((item) => (
-      
-        <Card
-  key={item.title}
- 
-  className="hover:scale-[1.03] transition-transform shadow-md min-w-[320px] max-w-[400px] mx-auto cursor-pointer"
->
-          <CardHeader>
-            <div className={`w-fit rounded-lg p-2 transition-colors ${item.color}`}>
-              <item.icon size={26} />
-            </div>
-            <div className="flex items-center justify-between w-full">
-              <p className="card-title font-semibold">{item.title}</p>
-              {getBadge(item.title, item.value)}
-            </div>
-          </CardHeader>
-          <CardBody className="bg-slate-100 transition-colors dark:bg-slate-950">
-            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50 animate-pulse">{item.value}</p>
-            <span className="text-xs text-slate-500 dark:text-slate-400">{item.description}</span>
-          </CardBody>
-        </Card>
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        {importantSummary.map((item) => (
+          <Card
+            key={item.title}
+            className="hover:scale-[1.03] transition-transform shadow-lg min-w-[320px] max-w-[400px] mx-auto cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800"
+            onClick={() => handleOpen(item)}
+          >
+            <CardHeader>
+              <div className={`w-fit rounded-lg p-2 transition-colors ${item.color}`}>
+                <item.icon size={26} />
+              </div>
+              <div className="flex items-center justify-between w-full">
+                <p className="card-title font-semibold">{item.title}</p>
+                {getBadge(item.title, item.value)}
+              </div>
+            </CardHeader>
+            <CardBody className="bg-slate-100 dark:bg-slate-950 rounded-b-xl">
+              <p className="text-3xl font-bold text-slate-900 dark:text-slate-50 animate-pulse">{item.value}</p>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{item.description}</span>
+            </CardBody>
+          </Card>
+        ))}
+      </div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="project-details-modal"
+        sx={{ zIndex: 1300 }}
+      >
+        <Box
+          sx={{
+            position: 'fixed',
+            top: { xs: '60px', md: '80px' }, // below navbar
+            left: '50%',
+            transform: 'translate(-50%, 0)',
+            bgcolor: 'transparent',
+            width: { xs: '95vw', md: 700 },
+            maxHeight: 'calc(100vh - 100px)',
+            overflowY: 'auto',
+            outline: 'none',
+          }}
+        >
+          <Paper elevation={6} sx={{ borderRadius: 4, p: 3, position: 'relative' }}>
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={{ position: 'absolute', right: 12, top: 12, color: 'grey.600' }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <h2 id="project-details-modal" className="font-bold text-xl mb-4 text-blue-700">{modalTitle}</h2>
+            {modalProjects.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No projects found.</p>
+            ) : (
+              <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                <table className="min-w-full text-sm border rounded-lg shadow">
+                  <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900 z-10">
+                    <tr>
+                      <th className="border px-2 py-2">Project No</th>
+                      <th className="border px-2 py-2">Title</th>
+                      <th className="border px-2 py-2">Manager</th>
+                      <th className="border px-2 py-2">Client</th>
+                      <th className="border px-2 py-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modalProjects.map((p) => (
+                      <tr key={p.projectNo} className="hover:bg-blue-50 dark:hover:bg-blue-950 transition">
+                        <td className="border px-2 py-1 font-semibold">{p.projectNo}</td>
+                        <td className="border px-2 py-1">{p.projectTitle}</td>
+                        <td className="border px-2 py-1">{p.projectManager}</td>
+                        <td className="border px-2 py-1">{p.client}</td>
+                        <td className="border px-2 py-1">
+                          <span className={
+                            modalTitle.includes("CAR") || modalTitle.includes("OBS") || modalTitle.includes("Overdue")
+                              ? (Number(
+                                  modalTitle === "Projects with Open CARs" ? p.carsOpen :
+                                  modalTitle === "Projects with Open Observations" ? p.obsOpen :
+                                  modalTitle === "Projects with Delayed CAR Closure" ? p.carsDelayedClosingNoDays :
+                                  modalTitle === "Projects with Delayed OBS Closure" ? p.obsDelayedClosingNoDays :
+                                  modalTitle === "Projects with Overdue Audits" ? p.delayInAuditsNoDays : 0
+                                ) > 5
+                                ? "bg-red-200 text-red-800 px-2 py-1 rounded"
+                                : "bg-yellow-100 text-yellow-800 px-2 py-1 rounded"
+                              )
+                              : "bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          }>
+                            {modalTitle === "Projects with Open CARs" ? p.carsOpen :
+                              modalTitle === "Projects with Open Observations" ? p.obsOpen :
+                              modalTitle === "Projects with Delayed CAR Closure" ? p.carsDelayedClosingNoDays :
+                              modalTitle === "Projects with Delayed OBS Closure" ? p.obsDelayedClosingNoDays :
+                              modalTitle === "Projects with Low Billability (<90%)" ? p.qualityBillabilityPercent :
+                              modalTitle === "Projects with Low Completion (<50%)" ? p.projectCompletionPercent :
+                              modalTitle === "Projects with Overdue Audits" ? p.delayInAuditsNoDays : ""}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Paper>
+        </Box>
+      </Modal>
+    </>
   );
 };
 
