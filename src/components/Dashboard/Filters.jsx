@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { monthNames, projectsData } from '../../data';
 import {
   Calendar as CalendarIcon,
   Users as UsersIcon,
@@ -9,6 +8,12 @@ import {
   Filter as FilterIcon,
   RefreshCw as RefreshIcon
 } from 'lucide-react';
+
+// Month names array (moved from data file since it's static)
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 const Filters = ({
   selectedYear,
@@ -22,7 +27,8 @@ const Filters = ({
   resetFilters,
   filteredProjects,
   getUniqueYears,
-  getUniqueClients
+  getUniqueClients,
+  totalProjects // Add this prop to get total count from Google Sheets
 }) => {
   return (
     <Card className="mb-6 dark:bg-gray-900 dark:border-gray-800">
@@ -112,10 +118,10 @@ const Filters = ({
             Reset
           </button>
 
-          {/* Results Counter */}
+          {/* Results Counter - Now uses Google Sheets data */}
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <span className="text-xs font-medium text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-gray-700">
-              📊 {filteredProjects.length} of {projectsData.length} projects
+              📊 {filteredProjects.length} of {totalProjects || 0} projects
             </span>
           </div>
         </div>

@@ -1,26 +1,11 @@
 import React, { useState } from 'react'
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { AlertTriangle, FileText, TrendingUp, Users } from "lucide-react";
-import { projectsData } from "@/data/index";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
-
-// --- MOCK: Replace this with real previous period data when available ---
-const previousProjectsData = [
-  // Copy of projectsData with slightly different values for demo
-  // In real use, fetch previous period's data from API or storage
-  ...projectsData.map(p => ({
-    ...p,
-    carsOpen: Math.max(0, (p.carsOpen || 0) - 2),
-    obsOpen: Math.max(0, (p.obsOpen || 0) - 1),
-    delayInAuditsNoDays: Math.max(0, (p.delayInAuditsNoDays || 0) - 5),
-    projectKPIsAchievedPercent: (p.projectKPIsAchievedPercent || 0) - 3,
-  }))
-];
-// ---------------------------------------------------------------
 
 // Helper functions
 const getTotal = (data, key) =>
@@ -42,6 +27,7 @@ const getTrend = (current, previous) => {
   if (diff < 0) return `${diff}`;
   return "0";
 };
+
 const getTrendPercent = (current, previous) => {
   const diff = Math.round((current - previous) * 100) / 100;
   if (diff > 0) return `+${diff}%`;
@@ -51,14 +37,6 @@ const getTrendPercent = (current, previous) => {
 
 // Helper: Get count of projects with a condition
 const countProjects = (data, fn) => data.filter(fn).length;
-
-const overdueAudits = countProjects(projectsData, p => Number(p.delayInAuditsNoDays) > 0);
-const openCARs = countProjects(projectsData, p => Number(p.carsOpen) > 0);
-const openObs = countProjects(projectsData, p => Number(p.obsOpen) > 0);
-const delayedCARs = countProjects(projectsData, p => Number(p.carsDelayedClosingNoDays) > 0);
-const delayedObs = countProjects(projectsData, p => Number(p.obsDelayedClosingNoDays) > 0);
-const lowBillability = countProjects(projectsData, p => Number(p.qualityBillabilityPercent) < 90);
-const lowCompletion = countProjects(projectsData, p => Number(p.projectCompletionPercent) < 50);
 
 const getBadge = (title, value) => {
   if (value === 0) return <span className="ml-2 rounded bg-green-200 px-2 py-0.5 text-xs text-green-800">OK</span>;
@@ -75,38 +53,38 @@ const filterProjects = {
   "Projects with Open Observations": p => Number(p.obsOpen) > 0,
   "Projects with Delayed CAR Closure": p => Number(p.carsDelayedClosingNoDays) > 0,
   "Projects with Delayed OBS Closure": p => Number(p.obsDelayedClosingNoDays) > 0,
-  "Projects with Low Billability (<90%)": p => Number(p.qualityBillabilityPercent) < 90,
-  "Projects with Low Completion (<50%)": p => Number(p.projectCompletionPercent) < 50,
+  "Projects with Low Billability (<90%)": p => Number(p.qualityBillabilityPercent?.toString().replace('%', '')) < 90,
+  "Projects with Low Completion (<50%)": p => Number(p.projectCompletionPercent?.toString().replace('%', '')) < 50,
 };
 
-const SummaryCard = () => {
-  // Current and previous values for important fields
-  const carsOpenNow = getTotal(projectsData, "carsOpen");
-  const carsOpenPrev = getTotal(previousProjectsData, "carsOpen");
+const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop with default empty array
+  // Mock previous data (in production, fetch from previous period)
+  const previousProjectsData = projectsData.map(p => ({
+    ...p,
+    carsOpen: Math.max(0, (p.carsOpen || 0) - 2),
+    obsOpen: Math.max(0, (p.obsOpen || 0) - 1),
+    delayInAuditsNoDays: Math.max(0, (p.delayInAuditsNoDays || 0) - 5),
+    projectKPIsAchievedPercent: (p.projectKPIsAchievedPercent || 0) - 3,
+  }));
 
-  const obsOpenNow = getTotal(projectsData, "obsOpen");
-  const obsOpenPrev = getTotal(previousProjectsData, "obsOpen");
-
-  const delayNow = getTotal(projectsData, "delayInAuditsNoDays");
-  const delayPrev = getTotal(previousProjectsData, "delayInAuditsNoDays");
-
-  const billabilityNow = getAverage(projectsData, "qualityBillabilityPercent");
-  const billabilityPrev = getAverage(previousProjectsData, "qualityBillabilityPercent");
-
-  const planRevNow = projectsData[0]?.projectQualityPlanStatusRev || "-";
-  const planRevPrev = previousProjectsData[0]?.projectQualityPlanStatusRev || "-";
-
-  const planIssueDateNow = projectsData[0]?.projectQualityPlanStatusIssueDate || "-";
-  const planIssueDatePrev = previousProjectsData[0]?.projectQualityPlanStatusIssueDate || "-";
-
-  const carsDelayNow = getTotal(projectsData, "carsDelayedClosingNoDays");
-  const carsDelayPrev = getTotal(previousProjectsData, "carsDelayedClosingNoDays");
-
-  const obsDelayNow = getTotal(projectsData, "obsDelayedClosingNoDays");
-  const obsDelayPrev = getTotal(previousProjectsData, "obsDelayedClosingNoDays");
-
-  const completionNow = getAverage(projectsData, "projectCompletionPercent");
-  const completionPrev = getAverage(previousProjectsData, "projectCompletionPercent");
+  // Calculate counts using the passed projectsData
+  const overdueAudits = countProjects(projectsData, p => Number(p.delayInAuditsNoDays) > 0);
+  const openCARs = countProjects(projectsData, p => Number(p.carsOpen) > 0);
+  const openObs = countProjects(projectsData, p => Number(p.obsOpen) > 0);
+  const delayedCARs = countProjects(projectsData, p => Number(p.carsDelayedClosingNoDays) > 0);
+  const delayedObs = countProjects(projectsData, p => Number(p.obsDelayedClosingNoDays) > 0);
+  const lowBillability = countProjects(projectsData, p => {
+    const billability = typeof p.qualityBillabilityPercent === 'string' 
+      ? Number(p.qualityBillabilityPercent.replace('%', ''))
+      : Number(p.qualityBillabilityPercent);
+    return billability < 90;
+  });
+  const lowCompletion = countProjects(projectsData, p => {
+    const completion = typeof p.projectCompletionPercent === 'string'
+      ? Number(p.projectCompletionPercent.replace('%', ''))
+      : Number(p.projectCompletionPercent);
+    return completion < 50;
+  });
 
   const importantSummary = [
     {
@@ -172,6 +150,17 @@ const SummaryCard = () => {
 
   const handleClose = () => setOpen(false);
 
+  // Show message if no data available
+  if (!projectsData || projectsData.length === 0) {
+    return (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="col-span-full text-center py-8">
+          <p className="text-gray-500 dark:text-gray-400">No project data available for summary cards.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
@@ -197,6 +186,8 @@ const SummaryCard = () => {
           </Card>
         ))}
       </div>
+
+      {/* Modal for project details */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -206,7 +197,7 @@ const SummaryCard = () => {
         <Box
           sx={{
             position: 'fixed',
-            top: { xs: '60px', md: '80px' }, // below navbar
+            top: { xs: '60px', md: '80px' },
             left: '50%',
             transform: 'translate(-50%, 0)',
             bgcolor: 'transparent',
@@ -226,7 +217,7 @@ const SummaryCard = () => {
             </IconButton>
             <h2 id="project-details-modal" className="font-bold text-xl mb-4 text-blue-700">{modalTitle}</h2>
             {modalProjects.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No projects found.</p>
+              <p className="text-center text-gray-500 py-8">No projects found for this criteria.</p>
             ) : (
               <div style={{ maxHeight: 400, overflowY: 'auto' }}>
                 <table className="min-w-full text-sm border rounded-lg shadow">
