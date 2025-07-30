@@ -192,6 +192,9 @@ export const CarsObsChart = ({ data = [] }) => {
           <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400" />
           CARs & Observations Status
         </h3>
+        <span className="text-xs bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1 rounded-full border border-red-200 dark:border-red-800">
+          {processedData.length} project{processedData.length !== 1 ? 's' : ''} active
+        </span>
       </div>
 
       {/* Chart Container with Horizontal Scroll - Same UI as ManhoursChart */}

@@ -87,7 +87,7 @@ const splitTextIntoLines = (text, maxLength = 30) => {
 };
 
 export const ManhoursChart = ({ data = [] }) => {
-  // Data processing
+  // Data processing with filtering for projects with actual manhour data
   const processedData = React.useMemo(() => {
     if (!Array.isArray(data)) return [];
     
@@ -106,7 +106,8 @@ export const ManhoursChart = ({ data = [] }) => {
         originalName: item.name,
         Planned: Number(item.Planned) || 0,
         Used: Number(item.Used) || 0
-      }));
+      }))
+      .filter(item => item.Planned > 0 || item.Used > 0); // Only show projects with actual manhour data
   }, [data]);
 
   const hasData = processedData.length > 0;
@@ -130,8 +131,8 @@ export const ManhoursChart = ({ data = [] }) => {
         <div className="flex-1 flex items-center justify-center min-h-[400px]">
           <div className="text-center text-gray-500 dark:text-gray-400">
             <BarChart2 className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p className="text-base font-medium mb-2">No project data available</p>
-            <p className="text-sm">Projects will appear when they have valid names in Google Sheets</p>
+            <p className="text-base font-medium mb-2">No manhour data available</p>
+            <p className="text-sm">Projects will appear when they have manhour values in Google Sheets</p>
           </div>
         </div>
 
@@ -148,7 +149,7 @@ export const ManhoursChart = ({ data = [] }) => {
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            📊 Resource data synced from Google Sheets
+            📊 Manhour data synced from Google Sheets
           </p>
         </div>
       </div>
@@ -159,11 +160,14 @@ export const ManhoursChart = ({ data = [] }) => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <BarChart2 className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-          Manhours: Planned vs Used
-        </h3>
-     
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <BarChart2 className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            Manhours: Planned vs Used
+          </h3>
+          <span className="text-xs bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+            {processedData.length} project{processedData.length !== 1 ? 's' : ''} tracked
+          </span>
+      
       </div>
 
       {/* Chart Container with Horizontal Scroll */}
@@ -178,7 +182,7 @@ export const ManhoursChart = ({ data = [] }) => {
               <BarChart
                 layout="vertical"
                 data={processedData}
-                margin={{ top: 20, right: 80, left: 320, bottom: 40 }} // Increased left margin for longer names
+                margin={{ top: 20, right: 80, left: 320, bottom: 40 }}
                 barCategoryGap="15%"
                 barGap={6}
               >
@@ -193,9 +197,9 @@ export const ManhoursChart = ({ data = [] }) => {
                 <YAxis
                   dataKey="name"
                   type="category"
-                  width={320} // Increased width for project names
+                  width={320}
                   tick={({ x, y, payload }) => {
-                    const [line1, line2] = splitTextIntoLines(payload.value, 35); // Increased character limit
+                    const [line1, line2] = splitTextIntoLines(payload.value, 35);
                     
                     return (
                       <g transform={`translate(${x},${y})`}>
@@ -285,8 +289,6 @@ export const ManhoursChart = ({ data = [] }) => {
             </ResponsiveContainer>
           </div>
         </div>
-        
-       
       </div>
 
       {/* Legend and Summary */}
@@ -333,7 +335,7 @@ export const ManhoursChart = ({ data = [] }) => {
         {/* Data Source Info */}
         <div className="text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            📊 Resource data synced from Google Sheets • {processedData.length} projects shown
+            📊 Manhour data synced from Google Sheets • {processedData.length} projects shown
           </p>
         </div>
       </div>
