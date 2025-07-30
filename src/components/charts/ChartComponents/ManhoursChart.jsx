@@ -4,31 +4,40 @@ import {
 } from "recharts";
 import { BarChart2 } from 'lucide-react';
 
-// Enhanced Manhours Tooltip Component
+// Enhanced Manhours Tooltip Component with controlled width and smaller project name
 const ManhoursTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const projectName = payload[0]?.payload?.name || "Project";
+    
+    // Function to truncate project name for tooltip
+    const truncateProjectName = (name, maxLength = 25) => {
+      if (!name || name.length <= maxLength) return name;
+      return name.slice(0, maxLength) + "...";
+    };
+
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 min-w-[200px]">
-        <div className="font-semibold mb-3 text-blue-700 dark:text-blue-300 text-sm border-b border-gray-200 dark:border-gray-600 pb-2">
-          {projectName}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 min-w-[180px] max-w-[250px]">
+        <div className="font-medium mb-2 text-blue-700 dark:text-blue-300 text-xs border-b border-gray-200 dark:border-gray-600 pb-1.5">
+          {truncateProjectName(projectName)}
         </div>
-        {payload.map((entry, idx) => (
-          <div key={idx} className="flex justify-between items-center mb-2 last:mb-0">
-            <span className="flex items-center gap-2">
-              <span 
-                className="inline-block w-3 h-3 rounded-full" 
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="font-medium text-gray-700 dark:text-gray-300">
-                {entry.name}
+        <div className="space-y-1.5">
+          {payload.map((entry, idx) => (
+            <div key={idx} className="flex justify-between items-center">
+              <span className="flex items-center gap-1.5">
+                <span 
+                  className="inline-block w-2.5 h-2.5 rounded-full" 
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="font-medium text-gray-700 dark:text-gray-300 text-xs">
+                  {entry.name}
+                </span>
               </span>
-            </span>
-            <span className="font-bold ml-3 text-gray-900 dark:text-gray-100">
-              {Number(entry.value || 0).toLocaleString()} hrs
-            </span>
-          </div>
-        ))}
+              <span className="font-bold ml-2 text-gray-900 dark:text-gray-100 text-xs">
+                {Number(entry.value || 0).toLocaleString()} hrs
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -157,58 +166,42 @@ export const ManhoursChart = ({ data = [] }) => {
      
       </div>
 
-      {/* Description */}
-      <div className="text-sm text-gray-600 dark:text-gray-400 mb-6 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-        Resource allocation overview showing planned versus actual manhours consumed per project
-      </div>
-
-      {/* Chart Container */}
+      {/* Chart Container with Horizontal Scroll */}
       <div className="flex-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-        <div className="w-full h-full">
-          <ResponsiveContainer 
-            width="100%" 
-            height={Math.max(400, processedData.length * 50)}
-          >
-            <BarChart
-              layout="vertical"
-              data={processedData}
-              margin={{ top: 20, right: 60, left: 250, bottom: 40 }}
-              barCategoryGap="15%"
-              barGap={6}
+        <div className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-blue-200 dark:scrollbar-thumb-blue-900 scrollbar-track-transparent">
+          <div className="min-w-[900px] w-full">
+            <ResponsiveContainer 
+              width="100%" 
+              minWidth={900}
+              height={Math.max(400, processedData.length * 50)}
             >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke="#e5e7eb" 
-                strokeOpacity={0.7}
-                horizontal={true}
-                vertical={true}
-              />
-              
-              <YAxis
-                dataKey="name"
-                type="category"
-                width={250}
-                tick={({ x, y, payload }) => {
-                  const [line1, line2] = splitTextIntoLines(payload.value, 28);
-                  
-                  return (
-                    <g transform={`translate(${x},${y})`}>
-                      <text
-                        x={-10}
-                        y={line2 ? -6 : 0}
-                        dy={4}
-                        textAnchor="end"
-                        fill="#374151"
-                        fontSize={12}
-                        fontWeight={500}
-                        className="fill-gray-700 dark:fill-gray-300"
-                      >
-                        {line1}
-                      </text>
-                      {line2 && (
+              <BarChart
+                layout="vertical"
+                data={processedData}
+                margin={{ top: 20, right: 80, left: 320, bottom: 40 }} // Increased left margin for longer names
+                barCategoryGap="15%"
+                barGap={6}
+              >
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="#e5e7eb" 
+                  strokeOpacity={0.7}
+                  horizontal={true}
+                  vertical={true}
+                />
+                
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={320} // Increased width for project names
+                  tick={({ x, y, payload }) => {
+                    const [line1, line2] = splitTextIntoLines(payload.value, 35); // Increased character limit
+                    
+                    return (
+                      <g transform={`translate(${x},${y})`}>
                         <text
-                          x={-10}
-                          y={6}
+                          x={-15}
+                          y={line2 ? -6 : 0}
                           dy={4}
                           textAnchor="end"
                           fill="#374151"
@@ -216,68 +209,84 @@ export const ManhoursChart = ({ data = [] }) => {
                           fontWeight={500}
                           className="fill-gray-700 dark:fill-gray-300"
                         >
-                          {line2}
+                          {line1}
                         </text>
-                      )}
-                    </g>
-                  );
-                }}
-                tickLine={false}
-                axisLine={false}
-                interval={0}
-                label={{
-                  value: "Projects",
-                  angle: -90,
-                  position: "insideLeft",
-                  offset: -20,
-                  style: { 
-                    textAnchor: 'middle',
-                    fill: "#6b7280",
-                    fontSize: "13px",
-                    fontWeight: "600"
-                  }
-                }}
-              />
-              
-              <XAxis
-                type="number"
-                tick={{ fill: "#6b7280", fontSize: 11 }}
-                tickLine={false}
-                axisLine={{ stroke: "#d1d5db", strokeWidth: 1 }}
-                tickFormatter={(value) => value.toLocaleString()}
-                label={{
-                  value: "Manhours",
-                  position: "insideBottom",
-                  offset: -5,
-                  style: { 
-                    textAnchor: 'middle',
-                    fill: "#6b7280",
-                    fontSize: "13px",
-                    fontWeight: "600"
-                  }
-                }}
-              />
-              
-              <Tooltip content={<ManhoursTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }} />
-              
-              <Bar 
-                dataKey="Planned" 
-                fill="#3b82f6" 
-                name="Planned"
-                radius={[0, 4, 4, 0]}
-                maxBarSize={30}
-              />
-              
-              <Bar 
-                dataKey="Used" 
-                fill="#ef4444" 
-                name="Used"
-                radius={[0, 4, 4, 0]}
-                maxBarSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+                        {line2 && (
+                          <text
+                            x={-15}
+                            y={6}
+                            dy={4}
+                            textAnchor="end"
+                            fill="#374151"
+                            fontSize={12}
+                            fontWeight={500}
+                            className="fill-gray-700 dark:fill-gray-300"
+                          >
+                            {line2}
+                          </text>
+                        )}
+                      </g>
+                    );
+                  }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                  label={{
+                    value: "Projects",
+                    angle: -90,
+                    position: "insideLeft",
+                    offset: -25,
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: "#6b7280",
+                      fontSize: "13px",
+                      fontWeight: "600"
+                    }
+                  }}
+                />
+                
+                <XAxis
+                  type="number"
+                  tick={{ fill: "#6b7280", fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={{ stroke: "#d1d5db", strokeWidth: 1 }}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  label={{
+                    value: "Manhours",
+                    position: "insideBottom",
+                    offset: -5,
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: "#6b7280",
+                      fontSize: "13px",
+                      fontWeight: "600"
+                    }
+                  }}
+                />
+                
+                <Tooltip content={<ManhoursTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }} />
+                
+                <Bar 
+                  dataKey="Planned" 
+                  fill="#3b82f6" 
+                  name="Planned"
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={30}
+                />
+                
+                <Bar 
+                  dataKey="Used" 
+                  fill="#ef4444" 
+                  name="Used"
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+        
+       
       </div>
 
       {/* Legend and Summary */}
