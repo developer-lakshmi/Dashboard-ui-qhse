@@ -31,7 +31,7 @@ export const generateKPIStatusData = (filteredProjects) => {
 export const generateManhoursData = (filteredProjects) => {
   return filteredProjects.map(project => ({
     code: project.projectNo || 'N/A',
-    name: project.projectTitle || 'Untitled Project',
+    name: project.projectTitle,
     Planned: (Number(project.manhoursUsed) || 0) + (Number(project.manhoursBalance) || 0),
     Used: Number(project.manhoursUsed) || 0,
     Balance: Number(project.manhoursBalance) || 0
@@ -79,7 +79,7 @@ export const generateAuditStatusData = (filteredProjects) => {
 // Generate CARs & Observations data for charts
 export const generateCarsObsData = (filteredProjects) => {
   return filteredProjects.map(project => ({
-    name: project.projectTitle || 'Untitled Project',
+    name: project.projectTitle,
     CARsOpen: Number(project.carsOpen) || 0,
     CARsClosed: Number(project.carsClosed) || 0,
     ObsOpen: Number(project.obsOpen) || 0,
@@ -87,25 +87,37 @@ export const generateCarsObsData = (filteredProjects) => {
   }));
 };
 
-// Generate timeline data for charts
+// Enhanced timeline data generation with extensions
 export const generateTimelineData = (filteredProjects) => {
   return filteredProjects.map(project => {
     const startDate = parseDate(project.projectStartingDate);
     const endDate = parseDate(project.projectClosingDate);
     const today = new Date();
     const percentComplete = parsePercent(project.projectCompletionPercent);
+    const hasExtension = project.projectExtension && project.projectExtension !== "" && project.projectExtension !== "N/A";
     
     let daysRemaining = 0;
     if (endDate) {
       daysRemaining = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
     }
     
+    // Enhanced status logic with extensions
+    let enhancedStatus = getKPIStatus(project.projectKPIsAchievedPercent);
+    if (percentComplete >= 100) {
+      enhancedStatus = "Completed";
+    } else if (hasExtension) {
+      enhancedStatus = "Extended";
+    }
+    
     return {
-      name: project.projectTitle || 'Untitled Project',
+      name: project.projectTitle,
       progress: percentComplete,
-      status: getKPIStatus(project.projectKPIsAchievedPercent),
+      projectCompletionPercent: percentComplete,
+      status: enhancedStatus,
       daysRemaining: daysRemaining,
-      isCompleted: percentComplete >= 100
+      isCompleted: percentComplete >= 100,
+      projectExtension: project.projectExtension,
+      hasExtension: hasExtension
     };
   });
 };
