@@ -2,11 +2,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { ThemeProvider } from "@/contexts/theme-context";
 
-import Layout from "@/routes/layout";
-import DashboardPage from "@/routes/dashboard/page";
-import SummaryView from "./components/Dashboard/SummaryView";
-import DetailedView from "./components/Dashboard/DetailedView";
+import SummaryView from "./components/SummayView/SummaryView";
 import ComingSoon from "./components/Common/ComingSoon";
+import Layout from "./layouts/layout";
+import DashboardPage from "./components/Dashboard/page";
+import DetailedView from "./components/DetailedView/DetailedView";
 
 function App() {
     return (

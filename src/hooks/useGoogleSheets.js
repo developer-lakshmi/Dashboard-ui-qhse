@@ -51,6 +51,22 @@ const toCamelCase = (str) => {
     .replace(/[^\w]/g, '');
 };
 
+// Add this helper function after line 44 (after toCamelCase function)
+const parseEuropeanDate = (dateString) => {
+  if (!dateString || dateString === '' || dateString === 'N/A') {
+    return dateString;
+  }
+  
+  // Handle European format DD.MM.YYYY or DD.MM.YY
+  if (/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(dateString)) {
+    const [day, month, year] = dateString.split('.');
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Convert to ISO format
+  }
+  
+  return dateString; // Return as-is for other formats
+};
+
 export function useGoogleSheets(pollInterval = 60000) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,6 +117,11 @@ export function useGoogleSheets(pollInterval = 60000) {
           } else if (fieldName.includes('Percent') || fieldName.includes('percent')) {
             // Keep percentage fields as strings (e.g., "100%")
             item[fieldName] = value.toString();
+          } else if (['projectStartingDate', 'projectClosingDate', 'projectExtension', 
+                      'projectQualityPlanStatusIssueDate', 'projectAudit1', 'projectAudit2', 
+                      'projectAudit3', 'projectAudit4', 'clientAudit1', 'clientAudit2'].includes(fieldName)) {
+            // Parse European dates to ISO format
+            item[fieldName] = parseEuropeanDate(value);
           } else {
             // Keep as string
             item[fieldName] = value.toString();
