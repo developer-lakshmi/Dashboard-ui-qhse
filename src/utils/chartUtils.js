@@ -230,3 +230,126 @@ export const getYearlyOverviewData = (projects) => {
     }))
     .sort((a, b) => a.date - b.date); // Sort by year ascending
 };
+
+// SIMPLIFIED: Generate management-focused timeline data for ProjectTimeline component
+export const generateManagementTimelineData = (filteredProjects) => {
+  return filteredProjects
+    .filter(project => {
+      // Filter out projects without proper identification
+      const hasValidId = project.srNo && project.srNo !== "" && project.srNo !== "N/A";
+      const hasValidProjectNo = project.projectNo && project.projectNo !== "" && project.projectNo !== "N/A";
+      const hasValidName = project.projectTitle && project.projectTitle !== "" && project.projectTitle !== "N/A";
+      
+      // Only include projects that have at least ID/ProjectNo AND name
+      return (hasValidId || hasValidProjectNo) && hasValidName;
+    })
+    .map(project => {
+      // Basic project data
+      const startDate = parseDate(project.projectStartingDate);
+      const originalEndDate = parseDate(project.projectClosingDate);
+      const today = new Date();
+      const percentComplete = parsePercent(project.projectCompletionPercent);
+      const kpiStatus = parsePercentage(project.projectKPIsAchievedPercent);
+      
+      // Handle project extension - use extended date if available
+      const hasExtension = project.projectExtension && project.projectExtension !== "" && project.projectExtension !== "N/A";
+      let effectiveEndDate = originalEndDate;
+      
+      if (hasExtension) {
+        const extensionDate = parseDate(project.projectExtension);
+        if (extensionDate && extensionDate > originalEndDate) {
+          effectiveEndDate = extensionDate;
+        }
+      }
+      
+      // Quality issues
+      const carsOpen = Number(project.carsOpen) || 0;
+      const obsOpen = Number(project.obsOpen) || 0;
+      const auditDelay = Number(project.delayInAuditsNoDays) || 0;
+      
+      // Calculate days remaining using effective end date (with extension if applicable)
+      let daysRemaining = 0;
+      if (startDate && effectiveEndDate) {
+        daysRemaining = Math.ceil((effectiveEndDate - today) / (1000 * 60 * 60 * 24));
+      }
+      
+      // Simple urgency scoring
+      let urgencyScore = 0;
+      if (auditDelay > 0) urgencyScore += auditDelay > 10 ? 4 : 2;  // Audit delays
+      if (carsOpen > 0) urgencyScore += carsOpen > 5 ? 4 : 2;       // Quality issues
+      if (obsOpen > 0) urgencyScore += obsOpen > 3 ? 2 : 1;        // Minor issues
+      
+      // Timeline urgency - consider extension status
+      if (daysRemaining < 0) {
+        // If overdue even with extension, higher urgency
+        urgencyScore += hasExtension ? 5 : 4;  // More urgent if extended but still overdue
+      } else if (daysRemaining === 0) {
+        urgencyScore += 3;  // Due today
+      } else if (daysRemaining <= 7) {
+        urgencyScore += 2;  // Due this week
+      }
+      
+      // Add urgency for projects with extensions (management attention needed)
+      if (hasExtension) urgencyScore += 1;
+      
+      // Simple status assignment
+      let status = "On Track";
+      let priority = 1;
+      
+      if (percentComplete >= 100) {
+        status = "Completed";
+        priority = 0;
+      } else if (urgencyScore >= 7 || (daysRemaining < 0 && hasExtension)) {
+        status = "Critical";  // Extended but still overdue = Critical
+        priority = 4;
+      } else if (urgencyScore >= 6) {
+        status = "Critical";
+        priority = 4;
+      } else if (urgencyScore >= 3 || hasExtension) {
+        status = hasExtension ? "Extended" : "Delayed";
+        priority = 3;
+      } else if (urgencyScore > 0 || daysRemaining < 30) {
+        status = "At Risk";
+        priority = 2;
+      }
+      
+      // Enhanced risk factors list with extension info
+      const riskFactors = [
+        auditDelay > 0 && `${auditDelay} days audit delay`,
+        carsOpen > 0 && `${carsOpen} open CARs`,
+        obsOpen > 0 && `${obsOpen} open observations`,
+        daysRemaining === 0 && (hasExtension ? `Due TODAY (Extended)` : `Due TODAY`),
+        daysRemaining < 0 && hasExtension && `OVERDUE by ${Math.abs(daysRemaining)} days (Even with extension)`,
+        daysRemaining < 0 && !hasExtension && `OVERDUE by ${Math.abs(daysRemaining)} days`,
+        hasExtension && daysRemaining > 0 && `Extended until ${effectiveEndDate.toLocaleDateString()}`,
+        hasExtension && `Original deadline was ${originalEndDate?.toLocaleDateString()}`
+      ].filter(Boolean);
+      
+      return {
+        id: project.srNo || project.projectNo || `proj-${Date.now()}-${Math.random()}`,
+        projectNo: project.projectNo,
+        name: project.projectTitle,
+        client: project.client && project.client !== "" && project.client !== "N/A" ? project.client : null,
+        manager: project.projectManager && project.projectManager !== "" && project.projectManager !== "N/A" ? project.projectManager : null,
+        progress: percentComplete,
+        daysRemaining: daysRemaining,
+        status: status,
+        priority: priority,
+        urgencyScore: urgencyScore,
+        kpiStatus: kpiStatus,
+        carsOpen: carsOpen,
+        obsOpen: obsOpen,
+        auditDelay: auditDelay,
+        riskFactors: riskFactors,
+        needsAttention: priority >= 2,  // Only show projects that need attention
+        // Extension-related fields
+        hasExtension: hasExtension,
+        originalEndDate: originalEndDate,
+        effectiveEndDate: effectiveEndDate,
+        extensionDate: hasExtension ? project.projectExtension : null
+      };
+    })
+    .filter(project => project.needsAttention)  // Only projects needing attention
+    .sort((a, b) => b.priority - a.priority)    // Most urgent first
+    .slice(0, 10); // Top 10 projects only
+};

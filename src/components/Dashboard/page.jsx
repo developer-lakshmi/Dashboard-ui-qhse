@@ -15,12 +15,11 @@ import QHSEOverviewChart from "./OverviewChart"
 import ProjectTimeline from "./ProjectTimeline"
 import ProjectStatus from "./ProjectStatus"
 
-// Import utilities
 import { 
   getMonthlyOverviewData, 
-  getProjectTimelineData, 
   getYearlyOverviewData 
 } from "../../utils"
+import { generateManagementTimelineData } from "../../utils/chartUtils" // NEW: Management-focused timeline data
 import { PageLayout } from '../../layouts/PageLayout'
 import { useGoogleSheets } from '../../hooks/useGoogleSheets'
 
@@ -29,7 +28,6 @@ const DashboardPage = () => {
   const { theme } = useTheme()
   const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets()
 
-  // Data processing
   const chartData = React.useMemo(() => {
     if (!projectsData || projectsData.length === 0) {
       return { monthlyData: [], yearlyData: [], timelineData: [] }
@@ -38,9 +36,14 @@ const DashboardPage = () => {
     return {
       monthlyData: getMonthlyOverviewData(projectsData),
       yearlyData: getYearlyOverviewData(projectsData),
-      timelineData: getProjectTimelineData(projectsData)
+      timelineData: generateManagementTimelineData(projectsData) // UPDATED: Use management-focused function
     }
   }, [projectsData])
+
+  // Debug logging to see what we're getting
+  React.useEffect(() => {
+    console.log("Dashboard - Generated timeline data:", chartData.timelineData);
+  }, [chartData.timelineData]);
 
   // Loading state
   if (loading) {
