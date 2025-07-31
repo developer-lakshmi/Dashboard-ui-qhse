@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/use-theme"
 import { Footer } from "@/layouts/footer"
 
 // Import reusable components
-import { MainHeader } from "../Common/MainHeader"
+import { DashboardHeader } from "../Common/MainHeader"
 import { LoadingState } from "../common/LoadingState"
 import { ErrorState } from "../common/ErrorState"
 import { EmptyDataState } from "../common/EmptyDataState"
@@ -46,7 +46,7 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <PageLayout>
-        <MainHeader />
+        <DashboardHeader />
         <LoadingState message="Loading Google Sheets data..." />
       </PageLayout>
     )
@@ -56,7 +56,7 @@ const DashboardPage = () => {
   if (error) {
     return (
       <PageLayout>
-        <MainHeader />
+        <DashboardHeader />
         <ErrorState error={error} onRetry={refetch} />
       </PageLayout>
     )
@@ -66,7 +66,7 @@ const DashboardPage = () => {
   if (!projectsData || projectsData.length === 0) {
     return (
       <PageLayout>
-        <MainHeader />
+        <DashboardHeader />
         <EmptyDataState />
       </PageLayout>
     )
@@ -75,7 +75,7 @@ const DashboardPage = () => {
   // Main dashboard
   return (
     <PageLayout>
-      <MainHeader lastUpdated={lastUpdated} />
+      <DashboardHeader lastUpdated={lastUpdated} />
       
       <DashboardContent 
         projectsData={projectsData}

@@ -1,7 +1,7 @@
 import React from 'react'
 import Assets from "../../assets/Assets"
 
-export const DashboardHeader = ({ 
+export const MainHeader = ({ 
   title = "QHSE Dashboard",
   subtitle = "Quality, Health, Safety & Environment Monitoring System",
   lastUpdated = null 
