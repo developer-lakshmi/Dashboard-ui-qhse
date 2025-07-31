@@ -29,9 +29,6 @@ import {
 } from '../../utils'
 
 const SummaryView = () => {
-  // ============================================================================
-  // HOOKS & STATE
-  // ============================================================================
   const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets();
 
   const [selectedYear, setSelectedYear] = useState("all")
@@ -39,9 +36,6 @@ const SummaryView = () => {
   const [selectedClient, setSelectedClient] = useState("all")
   const [selectedKPIStatus, setSelectedKPIStatus] = useState("all")
 
-  // ============================================================================
-  // DATA PROCESSING
-  // ============================================================================
   
   // Filter projects using utility function
   const filteredProjects = projectsData ? projectsData.filter(
@@ -69,9 +63,6 @@ const SummaryView = () => {
     qualityPlanStatus: generateQualityPlanStatusData(filteredProjects)
   };
 
-  // ============================================================================
-  // RENDER STATES (Following DashboardPage pattern)
-  // ============================================================================
 
   // Loading state
   if (loading) {
@@ -112,9 +103,6 @@ const SummaryView = () => {
     )
   }
 
-  // ============================================================================
-  // MAIN RENDER (Following DashboardPage pattern)
-  // ============================================================================
   
   return (
     <PageLayout>
@@ -147,9 +135,6 @@ const SummaryView = () => {
   )
 }
 
-// ============================================================================
-// INTERNAL COMPONENTS (Following DashboardPage pattern)
-// ============================================================================
 
 const SummaryContent = ({ 
   projectsData,
