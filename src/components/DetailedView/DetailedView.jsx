@@ -1,17 +1,23 @@
 import React, { useState, useMemo } from "react";
-import { projectsData, fieldPriorities } from "../../data";
+import { fieldPriorities } from "../../data"; // Keep this for field priorities configuration
+import { useGoogleSheets } from '../../hooks/useGoogleSheets'; // Add this import
 import {
   Paper, Typography, Box, Chip, Button, Stack
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { AlertTriangle, Star, Info, User, Calendar, ClipboardList, BadgeCheck, TrendingUp } from "lucide-react";
 
-// Field labels and priorities
+// Import common components for consistent loading/error states
+import { LoadingState } from "../common/LoadingState";
+import { ErrorState } from "../common/ErrorState";
+import { EmptyDataState } from "../common/EmptyDataState";
+
+// Field labels using the correct Google Sheets field names
 const fieldLabels = {
   srNo: "Sr No",
-  projectNo: "RAD PROJECT NO",
-  projectTitle: "Project Name",
-  client: "CLIENT",
+  projectNo: "Project No", 
+  projectTitle: "Project Title",
+  client: "Client",
   projectManager: "Project Manager",
   projectQualityEng: "Project Quality Engineer",
   projectStartingDate: "Project Starting Date",
@@ -20,25 +26,85 @@ const fieldLabels = {
   manHourForQuality: "Manhours for Quality",
   manhoursUsed: "Manhours Used",
   manhoursBalance: "Manhours Balance",
-  projectQualityPlanStatusRev: "Project Quality Plan Status",
+  qualityBillabilityPercent: "Quality Billability %",
+  projectQualityPlanStatusRev: "Project Quality Plan Status - Rev",
+  projectQualityPlanStatusIssueDate: "Project Quality Plan Status - Issue Date",
   projectAudit1: "Project Audit -1",
   projectAudit2: "Project Audit -2",
   projectAudit3: "Project Audit -3",
+  projectAudit4: "Project Audit -4",
   clientAudit1: "Client Audit -1",
   clientAudit2: "Client Audit -2",
+  delayInAuditsNoDays: "Delay in Audits - No. of Days",
   carsOpen: "CARs Open",
+  carsDelayedClosingNoDays: "CARs Delayed Closing No. Days",
   carsClosed: "CARs Closed",
-  obsOpen: "Obs Open",
+  obsOpen: "No. of Obs Open",
+  obsDelayedClosingNoDays: "Obs Delayed Closing No. of Days",
   obsClosed: "Obs Closed",
-  projectKPIStatus: "Project KPI Status",
+  projectKPIsAchievedPercent: "Project KPIs Achieved %",
+  projectCompletionPercent: "Project Completion %",
   remarks: "Remarks"
 };
 
+// Create priority map from your existing configuration
 const priorityMap = {};
-fieldPriorities.highPriority.forEach(key => priorityMap[key] = "alert");
-fieldPriorities.focusInformation.forEach(key => priorityMap[key] = "focus");
-fieldPriorities.standardInformation.forEach(key => {
-  if (!priorityMap[key]) priorityMap[key] = "standard";
+if (fieldPriorities?.highPriority) {
+  fieldPriorities.highPriority.forEach(key => priorityMap[key] = "alert");
+}
+if (fieldPriorities?.focusInformation) {
+  fieldPriorities.focusInformation.forEach(key => priorityMap[key] = "focus");
+}
+if (fieldPriorities?.standardInformation) {
+  fieldPriorities.standardInformation.forEach(key => {
+    if (!priorityMap[key]) priorityMap[key] = "standard";
+  });
+}
+
+// Set default priorities for Google Sheets fields
+const defaultPriorities = {
+  // Alert fields (high priority)
+  qualityBillabilityPercent: "alert",
+  delayInAuditsNoDays: "alert",
+  carsOpen: "alert",
+  carsDelayedClosingNoDays: "alert",
+  obsOpen: "alert",
+  obsDelayedClosingNoDays: "alert",
+  projectKPIsAchievedPercent: "alert",
+  
+  // Focus fields
+  projectAudit1: "focus",
+  projectAudit2: "focus",
+  projectAudit3: "focus",
+  projectAudit4: "focus",
+  clientAudit1: "focus",
+  clientAudit2: "focus",
+  carsClosed: "focus",
+  obsClosed: "focus",
+  projectQualityPlanStatusRev: "focus",
+  
+  // Standard fields (everything else)
+  srNo: "standard",
+  projectNo: "standard",
+  projectTitle: "standard",
+  client: "standard",
+  projectManager: "standard",
+  projectQualityEng: "standard",
+  projectStartingDate: "standard",
+  projectClosingDate: "standard",
+  projectExtension: "standard",
+  manHourForQuality: "standard",
+  manhoursUsed: "standard",
+  manhoursBalance: "standard",
+  projectCompletionPercent: "standard",
+  remarks: "standard"
+};
+
+// Merge with defaults
+Object.keys(defaultPriorities).forEach(key => {
+  if (!priorityMap[key]) {
+    priorityMap[key] = defaultPriorities[key];
+  }
 });
 
 const colorMap = {
@@ -47,33 +113,8 @@ const colorMap = {
   standard: "default"
 };
 
-// Compose all headers for "Show Everything"
-const allKeys = [
-  "srNo",
-  "projectNo",
-  "projectTitle",
-  "client",
-  "projectManager",
-  "projectQualityEng",
-  "projectStartingDate",
-  "projectClosingDate",
-  "projectExtension",
-  "manHourForQuality",
-  "manhoursUsed",
-  "manhoursBalance",
-  "projectQualityPlanStatusRev",
-  "projectAudit1",
-  "projectAudit2",
-  "projectAudit3",
-  "clientAudit1",
-  "clientAudit2",
-  "carsOpen",
-  "carsClosed",
-  "obsOpen",
-  "obsClosed",
-  "projectKPIStatus",
-  "remarks"
-];
+// Get all available field keys from Google Sheets mapping
+const allKeys = Object.keys(fieldLabels);
 
 const allHeaders = allKeys.map((key) => ({
   key,
@@ -82,12 +123,16 @@ const allHeaders = allKeys.map((key) => ({
   color: colorMap[priorityMap[key] || "standard"]
 }));
 
-// Default headers for other views (short view)
-const headers = [
+// Default headers for basic view
+const basicHeaders = [
   { key: "srNo", label: "Sr No", priority: "standard", color: colorMap.standard },
   { key: "projectNo", label: "Project No", priority: "standard", color: colorMap.standard },
+  { key: "projectTitle", label: "Project Title", priority: "standard", color: colorMap.standard },
+  { key: "client", label: "Client", priority: "standard", color: colorMap.standard },
   { key: "qualityBillabilityPercent", label: "Quality Billability %", priority: "alert", color: colorMap.alert },
-  { key: "projectAudit1", label: "Project Audit 1", priority: "focus", color: colorMap.focus },
+  { key: "projectKPIsAchievedPercent", label: "Project KPIs Achieved %", priority: "alert", color: colorMap.alert },
+  { key: "carsOpen", label: "CARs Open", priority: "alert", color: colorMap.alert },
+  { key: "obsOpen", label: "Obs Open", priority: "alert", color: colorMap.alert },
   { key: "remarks", label: "Remarks", priority: "standard", color: colorMap.standard }
 ];
 
@@ -95,48 +140,53 @@ const getCellChip = (header, value) => {
   if (header.priority === "alert") {
     return (
       <Chip
-        icon={<AlertTriangle size={16} />}
+        icon={<AlertTriangle size={14} />}
         label="Alert"
         color="warning"
         size="small"
-        sx={{ ml: 1, fontWeight: 600 }}
+        sx={{ ml: 0.5, fontWeight: 600, fontSize: '0.7rem' }}
       />
     );
   }
   if (header.priority === "focus") {
     return (
       <Chip
-        icon={<Info size={16} />}
+        icon={<Info size={14} />}
         label="Focus"
         color="info"
         size="small"
-        sx={{ ml: 1, fontWeight: 600 }}
+        sx={{ ml: 0.5, fontWeight: 600, fontSize: '0.7rem' }}
       />
     );
   }
-  if (header.key === "projectKPIStatus") {
-    let color =
-      value === "Green"
-        ? "success"
-        : value === "Yellow"
-        ? "warning"
-        : value === "Red"
-        ? "error"
-        : "default";
+  
+  // Handle KPI status colors based on percentage values
+  if (header.key === "projectKPIsAchievedPercent" || header.key === "qualityBillabilityPercent") {
+    const numericValue = parseFloat(value?.toString().replace('%', '')) || 0;
+    let color = "default";
+    if (numericValue >= 90) color = "success";
+    else if (numericValue >= 70) color = "info";
+    else if (numericValue >= 50) color = "warning";
+    else color = "error";
+    
     return (
-      <Chip
-        label={value}
-        color={color}
-        size="small"
-        sx={{ ml: 1, fontWeight: 600 }}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+        <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{value}</span>
+        <Chip
+          label={`${Math.round(numericValue)}%`}
+          color={color}
+          size="small"
+          sx={{ fontWeight: 600, fontSize: '0.7rem', minWidth: 'auto' }}
+        />
+      </Box>
     );
   }
+  
   return null;
 };
 
 const iconForHeader = (header) => {
-  // Alert (orange)
+  // Alert (orange) - critical fields that need attention
   if (
     [
       "qualityBillabilityPercent",
@@ -150,9 +200,9 @@ const iconForHeader = (header) => {
       "projectKPIsAchievedPercent"
     ].includes(header.key)
   ) {
-    return <AlertTriangle size={16} />;
+    return <AlertTriangle size={14} />;
   }
-  // Focus (blue)
+  // Focus (blue) - important tracking fields
   if (
     [
       "projectAudit1",
@@ -165,46 +215,52 @@ const iconForHeader = (header) => {
       "obsClosed"
     ].includes(header.key)
   ) {
-    return <Info size={16} />;
+    return <Info size={14} />;
   }
-  // Standard (gray)
+  // Standard (gray) - basic information
   switch (header.key) {
     case "projectNo":
-      return <ClipboardList size={16} />;
+      return <ClipboardList size={14} />;
     case "projectTitle":
-      return <Star size={16} />;
+      return <Star size={14} />;
     case "client":
     case "projectManager":
     case "projectQualityEng":
-      return <User size={16} />;
+      return <User size={14} />;
     case "projectStartingDate":
     case "projectClosingDate":
-      return <Calendar size={16} />;
-    case "projectKPIStatus":
-      return <BadgeCheck size={16} />;
+    case "projectExtension":
+      return <Calendar size={14} />;
+    case "projectCompletionPercent":
+      return <TrendingUp size={14} />;
     default:
       return null;
   }
 };
 
-function ensureProjectColumns(headers) {
-  const mustHave = ["projectNo", "projectTitle"];
-  const always = allHeaders.filter(h => mustHave.includes(h.key));
-  // Filter out duplicates
-  const keys = new Set(always.map(h => h.key));
-  headers.forEach(h => {
-    if (!keys.has(h.key)) always.push(h);
-  });
-  return always;
-}
-
 const DetailedView = () => {
+  const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets();
   const [viewMode, setViewMode] = useState("all");
 
-  const getFilteredHeaders = () => {
-    if (viewMode === "everything") return allHeaders;
+  // Debug: Log first project to verify field structure (only when data exists)
+  if (projectsData && projectsData.length > 0) {
+    console.log('🔍 DetailedView - First project structure:', {
+      srNo: projectsData[0].srNo,
+      projectNo: projectsData[0].projectNo,
+      projectTitle: projectsData[0].projectTitle,
+      client: projectsData[0].client,
+      qualityBillabilityPercent: projectsData[0].qualityBillabilityPercent,
+      carsOpen: projectsData[0].carsOpen,
+      obsOpen: projectsData[0].obsOpen,
+      projectKPIsAchievedPercent: projectsData[0].projectKPIsAchievedPercent
+    });
+  }
+
+  // Helper function to get filtered headers
+  const getFilteredHeaders = (currentViewMode) => {
+    if (currentViewMode === "everything") return allHeaders;
     let filtered;
-    switch (viewMode) {
+    switch (currentViewMode) {
       case "alerts":
         filtered = allHeaders.filter((h) => h.priority === "alert");
         break;
@@ -213,152 +269,316 @@ const DetailedView = () => {
         break;
       case "standard":
         filtered = allHeaders.filter((h) => h.priority === "standard");
-        // Exclude certain fields in "standard" view
+        // Exclude some complex fields in "standard" view for simplicity
         const excludeKeys = [
-          "projectQualityPlanStatusRev", "projectAudit1", "projectAudit2", "projectAudit3",
-          "clientAudit1", "clientAudit2", "carsOpen", "obsOpen", "projectKPIStatus"
+          "projectQualityPlanStatusRev", "projectQualityPlanStatusIssueDate",
+          "delayInAuditsNoDays", "carsDelayedClosingNoDays", "obsDelayedClosingNoDays"
         ];
         filtered = filtered.filter(f => !excludeKeys.includes(f.key));
         break;
       default:
-        filtered = headers;
+        filtered = basicHeaders;
     }
-   // Always include Project No and Project Name (Project Title)
-const mustHaveKeys = ["srNo", "projectNo", "projectTitle"];
-const rest = filtered.filter(f => !mustHaveKeys.includes(f.key));
-const ordered = mustHaveKeys
-  .map(key => allHeaders.find(f => f.key === key))
-  .filter(Boolean)
-  .concat(rest);
-return ordered;
+    
+    // Always include essential project identification fields
+    const mustHaveKeys = ["srNo", "projectNo", "projectTitle"];
+    const rest = filtered.filter(f => !mustHaveKeys.includes(f.key));
+    const ordered = mustHaveKeys
+      .map(key => allHeaders.find(f => f.key === key))
+      .filter(Boolean)
+      .concat(rest);
+    return ordered;
   };
 
-  const filteredHeaders = getFilteredHeaders();
+  // MOVE ALL HOOKS HERE - BEFORE ANY CONDITIONAL RETURNS
+  const filteredHeaders = useMemo(() => getFilteredHeaders(viewMode), [viewMode]);
 
-  // DataGrid columns
+  // Smart column width calculation
+  const getColumnWidth = (header) => {
+    const baseWidth = header.label.length * 10;
+    switch (header.key) {
+      case "srNo":
+        return 80;
+      case "projectNo":
+        return 140;
+      case "projectTitle":
+        return Math.max(250, baseWidth);
+      case "client":
+        return Math.max(150, baseWidth);
+      case "projectManager":
+      case "projectQualityEng":
+        return Math.max(180, baseWidth);
+      case "remarks":
+        return 300;
+      case "qualityBillabilityPercent":
+      case "projectKPIsAchievedPercent":
+        return 180;
+      case "carsOpen":
+      case "obsOpen":
+      case "carsClosed":
+      case "obsClosed":
+        return 120;
+      case "delayInAuditsNoDays":
+      case "carsDelayedClosingNoDays":
+      case "obsDelayedClosingNoDays":
+        return 160;
+      default:
+        return Math.max(120, Math.min(200, baseWidth));
+    }
+  };
+
+  // DataGrid columns with enhanced rendering
   const columns = useMemo(
     () =>
       filteredHeaders.map((header) => ({
         field: header.key,
         headerName: header.label,
-        minWidth: header.label.length * 10 + 40,
+        width: getColumnWidth(header),
         headerAlign: "center",
-        align: header.align || "center",
+        align: ["remarks", "projectTitle"].includes(header.key) ? "left" : "center",
         sortable: true,
+        resizable: true,
         renderHeader: () => (
-          <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: 0.5,
+            width: '100%',
+            textAlign: 'center'
+          }}>
             {iconForHeader(header)}
-            <span>{header.label}</span>
-          </Stack>
+            <Typography variant="caption" sx={{ 
+              fontSize: '0.75rem', 
+              fontWeight: 700,
+              lineHeight: 1.2,
+              textAlign: 'center'
+            }}>
+              {header.label}
+            </Typography>
+          </Box>
         ),
-        renderCell: (params) =>
-          header.priority === "alert" || header.priority === "focus" ? (
-            <Chip
-              label={params.value}
-              color={header.color}
-              size="small"
-              icon={iconForHeader(header)}
-              sx={{ fontWeight: 600 }}
-            />
-          ) : header.key === "projectKPIStatus" ? (
-            getCellChip(header, params.value)
-          ) : (
-            <span style={{ color: "#64748b" }}>{params.value}</span>
-          ),
+        renderCell: (params) => {
+          const value = params.value;
+          
+          if (header.key === "projectKPIsAchievedPercent" || header.key === "qualityBillabilityPercent") {
+            return getCellChip(header, value);
+          } else if (header.priority === "alert" || header.priority === "focus") {
+            return (
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: 0.5, 
+                width: '100%',
+                flexWrap: 'wrap'
+              }}>
+                <Typography variant="body2" sx={{ 
+                  color: header.priority === "alert" ? "#d97706" : "#2563eb",
+                  fontWeight: 500,
+                  fontSize: '0.8rem',
+                  textAlign: 'center'
+                }}>
+                  {value}
+                </Typography>
+                <Chip
+                  color={header.color}
+                  size="small"
+                  icon={iconForHeader(header)}
+                  sx={{ 
+                    fontWeight: 600, 
+                    fontSize: '0.65rem',
+                    height: '20px',
+                    '& .MuiChip-label': { px: 0.5 }
+                  }}
+                />
+              </Box>
+            );
+          } else {
+            return (
+              <Typography variant="body2" sx={{ 
+                color: "#64748b",
+                fontSize: '0.8rem',
+                wordBreak: header.key === "remarks" ? 'break-word' : 'normal',
+                textAlign: ["remarks", "projectTitle"].includes(header.key) ? 'left' : 'center',
+                width: '100%'
+              }}>
+                {value || '-'}
+              </Typography>
+            );
+          }
+        },
       })),
     [filteredHeaders]
   );
 
   // DataGrid expects each row to have an id
-  const rows = useMemo(() =>
-    projectsData.map((row, idx) => ({
+  const rows = useMemo(() => {
+    if (!projectsData) return [];
+    return projectsData.map((row, idx) => ({
       id: row.srNo || idx + 1,
       ...row,
-    }))
-  , [projectsData]);
+    }));
+  }, [projectsData]);
+
+  // NOW HANDLE CONDITIONAL RETURNS AFTER ALL HOOKS
+  
+  // Loading state
+  if (loading) {
+    return (
+      <Box sx={{ p: 2, height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState message="Loading detailed project data from Google Sheets..." />
+      </Box>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Box sx={{ p: 2, height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <ErrorState error={error} onRetry={refetch} />
+      </Box>
+    );
+  }
+
+  // Empty state
+  if (!projectsData || projectsData.length === 0) {
+    return (
+      <Box sx={{ p: 2, height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EmptyDataState />
+      </Box>
+    );
+  }
 
   return (
-    <Box
-      component={Paper}
-      elevation={4}
-      sx={{
-        borderRadius: 3,
-        p: 3,
-        mb: 0,
-        boxShadow: 4,
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0,
-      }}
-    >
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: "primary.main" }}>
-        Detailed Project Info
-      </Typography>
+    <Box sx={{ 
+      height: '100%', 
+      width: '100%', 
+      p: 2,
+      overflow: 'hidden'
+    }}>
+      <Paper 
+        elevation={2} 
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 2,
+          overflow: 'hidden'
+        }}
+      >
+        {/* Header Section */}
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: "primary.main" }}>
+            📊 Detailed Project Information
+          </Typography>
 
-      {/* Priority Legend */}
-      <Box sx={{ mb: 2, p: 2, bgcolor: "grey.50", borderRadius: 2 }}>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Chip icon={<AlertTriangle size={16} />} label="High Priority (Alert)" color="warning" size="small" />
-          <Chip icon={<Info size={16} />} label="Focus Field" color="info" size="small" />
-                    <Chip label="Standard Info" color="default" size="small" />
+          {/* Data source info */}
+          <Box sx={{ 
+            mb: 2, 
+            p: 1, 
+            bgcolor: "success.50", 
+            borderRadius: 1, 
+            border: 1, 
+            borderColor: "success.200" 
+          }}>
+            {/* <Typography variant="caption" sx={{ color: "success.800" }}>
+              Live data from Google Sheets • {projectsData.length} projects • Last updated: {lastUpdated?.toLocaleTimeString() || 'Unknown'}
+            </Typography> */}
+          </Box>
 
-          <Chip icon={<BadgeCheck size={16} />} label="KPI Status: Good" color="success" size="small" />
-          <Chip label="KPI Status: Warning" color="warning" size="small" variant="outlined" />
-          <Chip label="KPI Status: Critical" color="error" size="small" variant="outlined" />
-        </Stack>
-      </Box>
+          {/* View Mode Buttons */}
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {["all", "alerts", "focus", "standard", "everything"].map((mode) => (
+              <Button
+                key={mode}
+                variant={viewMode === mode ? "contained" : "outlined"}
+                color={viewMode === mode ? "primary" : "inherit"}
+                size="small"
+                onClick={() => setViewMode(mode)}
+                sx={{ 
+                  mb: 0.5,
+                  fontSize: '0.75rem',
+                  px: 1.5,
+                  py: 0.5
+                }}
+              >
+                {mode === "all" && "🔍 Key Fields"}
+                {mode === "alerts" && "🚨 Alerts"}
+                {mode === "focus" && "📌 Focus"}
+                {mode === "standard" && "📋 Standard"}
+                {mode === "everything" && "🗂️ All"}
+              </Button>
+            ))}
+          </Stack>
 
-      {/* View Mode Buttons */}
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        {["all", "alerts", "focus", "standard", "everything"].map((mode) => (
-          <Button
-            key={mode}
-            variant={viewMode === mode ? "contained" : "outlined"}
-            color={viewMode === mode ? "primary" : "inherit"}
-            size="small"
-            onClick={() => setViewMode(mode)}
-          >
-            {mode === "all" && "All Fields"}
-            {mode === "alerts" && "🚨 Alerts"}
-            {mode === "focus" && "🔍 Focus"}
-            {mode === "standard" && "📋 Standard"}
-            {mode === "everything" && "🗂️ Show Everything"}
-          </Button>
-        ))}
-      </Stack>
+          {/* Current view info */}
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            Showing {filteredHeaders.length} columns • {
+              viewMode === "everything" ? "All available fields" : 
+              viewMode === "alerts" ? "High priority fields only" :
+              viewMode === "focus" ? "Focus tracking fields" :
+              viewMode === "standard" ? "Basic information fields" : "Key project fields"
+            }
+          </Typography>
+        </Box>
 
-      {/* DataGrid Table */}
-      <Box sx={{ flex: 1, minHeight: 0 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pagination={false}
-          hideFooter
-          disableRowSelectionOnClick
-          sortingOrder={['asc', 'desc']}
-          disableColumnMenu={false}
-          autoHeight={false}
-          sx={{
-            background: "#fff",
-            borderRadius: 2,
-            border: "1px solid #e0e0e0",
-            "& .MuiDataGrid-columnHeaders": { cursor: "grab", fontWeight: 700 },
-            "& .MuiDataGrid-cell": { py: 0.5, px: 1, whiteSpace: "normal", wordBreak: "break-word" },
-            "& .MuiDataGrid-columnHeaderTitle": { whiteSpace: "normal", lineHeight: 1.2, wordBreak: "break-word" },
-          }}
-        />
-      </Box>
-
-      {/* <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {projectsData.length} projects
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Data as of {new Date().toLocaleDateString()}
-        </Typography>
-      </Stack> */}
+        {/* DataGrid Container */}
+        <Box sx={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pagination={true}
+            pageSizeOptions={[10, 25, 50, 100]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 25 } },
+            }}
+            disableRowSelectionOnClick
+            sortingOrder={['asc', 'desc']}
+            disableColumnMenu={false}
+            columnHeaderHeight={60}
+            rowHeight={50}
+            sx={{
+              height: '100%',
+              width: '100%',
+              border: 'none',
+              '& .MuiDataGrid-main': {
+                overflow: 'hidden'
+              },
+              '& .MuiDataGrid-columnHeaders': { 
+                backgroundColor: "#f8fafc",
+                borderBottom: "2px solid #e2e8f0",
+                '& .MuiDataGrid-columnHeader': {
+                  padding: '8px 4px',
+                }
+              },
+              '& .MuiDataGrid-cell': { 
+                padding: '4px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderBottom: '1px solid #f1f5f9'
+              },
+              '& .MuiDataGrid-row': {
+                '&:hover': {
+                  backgroundColor: "#f8fafc"
+                },
+                '&:nth-of-type(even)': {
+                  backgroundColor: '#fafbfb'
+                }
+              },
+              '& .MuiDataGrid-columnSeparator': {
+                visibility: 'visible',
+                color: '#e2e8f0'
+              },
+              '& .MuiDataGrid-footerContainer': {
+                borderTop: '2px solid #e2e8f0',
+                backgroundColor: '#f8fafc'
+              }
+            }}
+          />
+        </Box>
+      </Paper>
     </Box>
   );
 };

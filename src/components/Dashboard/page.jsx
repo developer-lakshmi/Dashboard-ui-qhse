@@ -113,7 +113,7 @@ const DashboardContent = ({ projectsData, chartData, loading, onRefresh }) => (
 
 // Internal component (simple, dashboard-specific)
 const ChartsGrid = ({ monthlyData, yearlyData, timelineData }) => (
-  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
+  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-7">
     <QHSEOverviewChart 
       monthlyData={monthlyData} 
       yearlyData={yearlyData} 

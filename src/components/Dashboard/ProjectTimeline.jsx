@@ -260,7 +260,7 @@ const ProjectTimeline = ({ timelineData }) => {
   ) || [];
 
   return (
-    <div className="card col-span-1 md:col-span-2 lg:col-span-3">
+    <div className="card col-span-1 lg:col-span-1 xl:col-span-3">
       <div className="card-header flex items-center justify-between">
         <div className="flex items-center gap-x-2">
           <AlertTriangle className="text-red-500" size={22} />

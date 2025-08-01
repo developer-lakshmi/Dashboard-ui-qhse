@@ -34,7 +34,7 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData }) => {
   const chartData = filter === "monthly" ? monthlyData : yearlyData;
 
   return (
-    <div className="card col-span-1 md:col-span-2 lg:col-span-4">
+    <div className="card col-span-1 lg:col-span-1 xl:col-span-4">
       <div className="card-header flex justify-between items-center">
         <p className="card-title">Overview</p>
         <div className="flex items-center gap-2">
