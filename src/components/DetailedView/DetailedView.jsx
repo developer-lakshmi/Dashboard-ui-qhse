@@ -473,19 +473,7 @@ const DetailedView = () => {
             📊 Detailed Project Information
           </Typography>
 
-          {/* Data source info */}
-          <Box sx={{ 
-            mb: 2, 
-            p: 1, 
-            bgcolor: "success.50", 
-            borderRadius: 1, 
-            border: 1, 
-            borderColor: "success.200" 
-          }}>
-            {/* <Typography variant="caption" sx={{ color: "success.800" }}>
-              Live data from Google Sheets • {projectsData.length} projects • Last updated: {lastUpdated?.toLocaleTimeString() || 'Unknown'}
-            </Typography> */}
-          </Box>
+        
 
           {/* View Mode Buttons */}
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

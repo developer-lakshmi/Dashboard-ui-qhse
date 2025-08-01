@@ -7,6 +7,34 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 
+// ✅ ADDED: Simple date parsing function (same as chartUtils)
+const parseDate = (dateStr) => {
+  if (!dateStr || dateStr === 'N/A' || dateStr === '') return null;
+  return new Date(dateStr);
+};
+
+// ✅ ADDED: Simple overdue calculation function (same as chartUtils)
+const calculateDaysOverdue = (project) => {
+  const today = new Date();
+  const originalClosingDate = parseDate(project.projectClosingDate);
+  const extensionDate = parseDate(project.projectExtension);
+  
+  // Step 1: Which date should we use?
+  let deadlineDate = originalClosingDate; // Default: use original closing date
+  
+  if (extensionDate) {
+    deadlineDate = extensionDate; // If extension exists, use extension date instead
+  }
+  
+  // Step 2: Calculate days difference
+  if (!deadlineDate) return 0; // No date = no overdue
+  
+  const timeDiff = today.getTime() - deadlineDate.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+  
+  return daysDiff; // Positive = overdue, Negative = time remaining
+};
+
 // Helper functions
 const getTotal = (data, key) =>
   data.reduce((sum, p) => sum + (Number(p[key]) || 0), 0);
@@ -48,15 +76,21 @@ const getBadge = (title, value) => {
   return null;
 };
 
-// Updated filter functions for all cards including new ones
+// ✅ SIMPLIFIED: Updated filter functions using the same logic as chartUtils
 const filterProjects = {
   "Projects with Overdue Audits": p => Number(p.delayInAuditsNoDays) > 0,
   "CAR Management Issues": p => Number(p.carsOpen) > 0 || Number(p.carsDelayedClosingNoDays) > 0,
   "Observation Management Issues": p => Number(p.obsOpen) > 0 || Number(p.obsDelayedClosingNoDays) > 0,
-  "Projects with Low Billability (<90%)": p => Number(p.qualityBillabilityPercent?.toString().replace('%', '')) < 90,
-  "Projects with Low Completion (<50%)": p => Number(p.projectCompletionPercent?.toString().replace('%', '')) < 50,
-  "Projects with Rejection Rate": p => Number(p.rejectionOfDeliverablesPercent?.toString().replace('%', '')) > 0, // ✅ CHANGED: Removed (>0%)
-  "Projects with Poor Quality Costs": p => Number(p.costOfPoorQualityAED) > 0, // ✅ CHANGED: Removed (>0 AED)
+  "Projects with Over Billability": p => Number(p.qualityBillabilityPercent?.toString().replace('%', '')) > 100,
+  "Project Closure Overdue": p => { // ✅ SIMPLIFIED: Use the same calculation as chartUtils
+    const completion = Number(p.projectCompletionPercent?.toString().replace('%', '')) || 0;
+    const daysOverdue = calculateDaysOverdue(p);
+    
+    // Project is overdue if days overdue is positive and completion is less than 100%
+    return daysOverdue > 0 && completion < 100;
+  },
+  "Projects with Rejection Rate": p => Number(p.rejectionOfDeliverablesPercent?.toString().replace('%', '')) > 0,
+  "Projects with Poor Quality Costs": p => Number(p.costOfPoorQualityAED) > 0,
 };
 
 const SummaryCard = ({ projectsData = [] }) => {
@@ -82,32 +116,38 @@ const SummaryCard = ({ projectsData = [] }) => {
     Number(p.obsOpen) > 0 || Number(p.obsDelayedClosingNoDays) > 0
   );
   
-  const lowBillability = countProjects(projectsData, p => {
+  // Projects with over billability (>100%)
+  const overBillability = countProjects(projectsData, p => {
     const billability = typeof p.qualityBillabilityPercent === 'string' 
       ? Number(p.qualityBillabilityPercent.replace('%', ''))
       : Number(p.qualityBillabilityPercent);
-    return billability < 90;
+    return billability > 100;
   });
   
-  const lowCompletion = countProjects(projectsData, p => {
+  // ✅ SIMPLIFIED: Projects with closure overdue using the same calculation as chartUtils
+  const overdueClosures = countProjects(projectsData, p => {
     const completion = typeof p.projectCompletionPercent === 'string'
       ? Number(p.projectCompletionPercent.replace('%', ''))
       : Number(p.projectCompletionPercent);
-    return completion < 50;
+    
+    const daysOverdue = calculateDaysOverdue(p);
+    
+    // Project is overdue if days overdue is positive and completion is less than 100%
+    return daysOverdue > 0 && completion < 100;
   });
 
-  // ✅ UPDATED: Show ALL projects with any rejection rate (>0%)
+  // Show ALL projects with any rejection rate (>0%)
   const highRejection = countProjects(projectsData, p => {
     const rejection = typeof p.rejectionOfDeliverablesPercent === 'string'
       ? Number(p.rejectionOfDeliverablesPercent.replace('%', ''))
       : Number(p.rejectionOfDeliverablesPercent);
-    return rejection > 0; // ✅ CHANGED: 5 → 0 (show ALL with rejection)
+    return rejection > 0;
   });
 
-  // ✅ NEW: Projects with significant poor quality costs (>1000 AED)
+  // Show ALL projects with any poor quality costs (>0 AED)
   const highQualityCosts = countProjects(projectsData, p => {
     const cost = Number(p.costOfPoorQualityAED) || 0;
-    return cost > 0; // ✅ CHANGED: 1000 → 0 (show ALL with costs)
+    return cost > 0;
   });
 
   const importantSummary = [
@@ -133,33 +173,32 @@ const SummaryCard = ({ projectsData = [] }) => {
       description: "Projects with open observations or delayed closures"
     },
     {
-      title: "Projects with Low Billability (<90%)",
-      value: lowBillability,
+      title: "Projects with Over Billability",
+      value: overBillability,
       icon: Users,
       color: "text-blue-600 bg-blue-100/60 dark:bg-blue-900/30 dark:text-blue-400",
-      description: "Projects with billability below 90%"
+      description: "Projects with billability exceeding 100%"
     },
     {
-      title: "Projects with Low Completion (<50%)",
-      value: lowCompletion,
+      title: "Project Closure Overdue",
+      value: overdueClosures,
       icon: TrendingUp,
       color: "text-green-600 bg-green-100/60 dark:bg-green-900/30 dark:text-green-400",
-      description: "Projects less than 50% complete"
+      description: "Projects overdue for closure and not completed"
     },
-    // ✅ UPDATED CARDS: Removed range indicators
     {
-      title: "Projects with Rejection Rate", // ✅ CHANGED: Removed (>0%)
+      title: "Projects with Rejection Rate",
       value: highRejection,
       icon: XCircle,
       color: "text-purple-600 bg-purple-100/60 dark:bg-purple-900/30 dark:text-purple-400",
-      description: "Projects with deliverable rejection issues" // ✅ CHANGED: Simplified description
+      description: "Projects with deliverable rejection issues"
     },
     {
-      title: "Projects with Poor Quality Costs", // ✅ CHANGED: Removed (>0 AED)
+      title: "Projects with Poor Quality Costs",
       value: highQualityCosts,
       icon: DollarSign,
       color: "text-pink-600 bg-pink-100/60 dark:bg-pink-900/30 dark:text-pink-400",
-      description: "Projects with poor quality cost impacts" // ✅ CHANGED: Simplified description
+      description: "Projects with poor quality cost impacts"
     }
   ];
 
@@ -184,20 +223,20 @@ const SummaryCard = ({ projectsData = [] }) => {
         return "Open CARs / Delayed Days";
       case "Observation Management Issues":
         return "Open Observations / Delayed Days";
-      case "Projects with Low Billability (<90%)":
+      case "Projects with Over Billability":
         return "Quality Billability";
-      case "Projects with Low Completion (<50%)":
-        return "Project Completion";
-      case "Projects with Rejection Rate": // ✅ CHANGED: Removed (>0%)
+      case "Project Closure Overdue":
+        return "Days Overdue"; // ✅ SIMPLIFIED: Just show days overdue
+      case "Projects with Rejection Rate":
         return "Rejection of Deliverables";
-      case "Projects with Poor Quality Costs": // ✅ CHANGED: Removed (>0 AED)
+      case "Projects with Poor Quality Costs":
         return "Cost of Poor Quality (AED)";
       default:
         return "Issue Details";
     }
   };
 
-  // Helper function to get detailed status information for modal
+  // ✅ SIMPLIFIED: Helper function using the same calculation as chartUtils
   const getDetailedStatus = (project, modalTitle) => {
     switch (modalTitle) {
       case "Projects with Overdue Audits":
@@ -248,27 +287,40 @@ const SummaryCard = ({ projectsData = [] }) => {
           };
         }
       
-      case "Projects with Low Billability (<90%)":
+      case "Projects with Over Billability":
+        const billabilityPercent = Number(project.qualityBillabilityPercent?.toString().replace('%', '')) || 0;
         return {
           value: project.qualityBillabilityPercent || "0%",
-          severity: Number(project.qualityBillabilityPercent?.toString().replace('%', '')) < 70 ? "critical" : "warning"
+          severity: billabilityPercent > 150 ? "critical" : billabilityPercent > 120 ? "warning" : "info"
         };
       
-      case "Projects with Low Completion (<50%)":
+      // ✅ SIMPLIFIED: Project closure overdue using the same calculation as chartUtils
+      case "Project Closure Overdue":
+        const completion = Number(project.projectCompletionPercent?.toString().replace('%', '')) || 0;
+        const daysOverdue = calculateDaysOverdue(project);
+        const hasExtension = project.projectExtension && project.projectExtension !== 'N/A' && project.projectExtension !== '';
+        
+        // Simple display: just show days overdue and completion
+        let displayValue;
+        if (hasExtension) {
+          displayValue = `${daysOverdue} days overdue • ${completion}% • Extended`;
+        } else {
+          displayValue = `${daysOverdue} days overdue • ${completion}%`;
+        }
+        
         return {
-          value: project.projectCompletionPercent || "0%",
-          severity: Number(project.projectCompletionPercent?.toString().replace('%', '')) < 25 ? "critical" : "warning"
+          value: displayValue,
+          severity: daysOverdue > 60 ? "critical" : daysOverdue > 30 ? "warning" : "info"
         };
       
-      // ✅ UPDATED: Clean case names without ranges
-      case "Projects with Rejection Rate": // ✅ CHANGED: Removed (>0%)
+      case "Projects with Rejection Rate":
         const rejectionRate = Number(project.rejectionOfDeliverablesPercent?.toString().replace('%', '')) || 0;
         return {
           value: project.rejectionOfDeliverablesPercent || "0%",
           severity: rejectionRate > 3 ? "critical" : rejectionRate > 1 ? "warning" : "info"
         };
       
-      case "Projects with Poor Quality Costs": // ✅ CHANGED: Removed (>0 AED)
+      case "Projects with Poor Quality Costs":
         const qualityCost = Number(project.costOfPoorQualityAED) || 0;
         return {
           value: `${qualityCost.toLocaleString()} AED`,
