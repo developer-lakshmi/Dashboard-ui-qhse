@@ -16,28 +16,30 @@ const FIELD_MAPPING = {
   'Project Starting Date': 'projectStartingDate',
   'Project Closing Date': 'projectClosingDate',
   'Project Extension': 'projectExtension',
-  'Project Quality Engineer': 'projectQualityEng',                    // Fixed: was "Project Quality Eng"
+  'Project Quality Engineer': 'projectQualityEng',
   'Manhours for Quality': 'manHourForQuality',
   'Manhours Used': 'manhoursUsed',
   'Manhours Balance': 'manhoursBalance',
-  'Quality Billability %': 'qualityBillabilityPercent',              // Fixed: was "Quality Billability Percent"
-  'Project Quality Plan status - Rev': 'projectQualityPlanStatusRev', // Fixed: was "Project Quality Plan Status Rev"
-  'Project Quality Plan status - Issued Date': 'projectQualityPlanStatusIssueDate', // Fixed: was "Project Quality Plan Status Issue Date"
-  'Project Audit -1': 'projectAudit1',                               // Fixed: was "Project Audit 1"
-  'Project Audit -2': 'projectAudit2',                               // Fixed: was "Project Audit 2"
-  'Project Audit -3': 'projectAudit3',                               // Fixed: was "Project Audit 3"
-  'Project Audit -4': 'projectAudit4',                               // Fixed: was "Project Audit 4"
-  'Client Audit -1': 'clientAudit1',                                 // Fixed: was "Client Audit 1"
-  'Client Audit -2': 'clientAudit2',                                 // Fixed: was "Client Audit 2"
-  'Delay in Audits - No. of Days': 'delayInAuditsNoDays',           // Fixed: was "Delay in Audits No Days"
+  'Quality Billability %': 'qualityBillabilityPercent',
+  'Project Quality Plan status - Rev': 'projectQualityPlanStatusRev',
+  'Project Quality Plan status - Issued Date': 'projectQualityPlanStatusIssueDate',
+  'Project Audit -1': 'projectAudit1',
+  'Project Audit -2': 'projectAudit2',
+  'Project Audit -3': 'projectAudit3',
+  'Project Audit -4': 'projectAudit4',
+  'Client Audit -1': 'clientAudit1',
+  'Client Audit -2': 'clientAudit2',
+  'Delay in Audits - No. of Days': 'delayInAuditsNoDays',
   'CARs Open': 'carsOpen',
-  'CARs Delayed closing No. days': 'carsDelayedClosingNoDays',       // Fixed: was "CARs Delayed Closing No Days"
+  'CARs Delayed closing No. days': 'carsDelayedClosingNoDays',
   'CARs Closed': 'carsClosed',
-  'No. of Obs Open': 'obsOpen',                                      // Fixed: was "Obs Open"
-  'Obs delayed closing No. of Days': 'obsDelayedClosingNoDays',      // Fixed: was "Obs Delayed Closing No Days"
+  'No. of Obs Open': 'obsOpen',
+  'Obs delayed closing No. of Days': 'obsDelayedClosingNoDays',
   'Obs Closed': 'obsClosed',
-  'Project KPIs Achieved %': 'projectKPIsAchievedPercent',           // Fixed: was "Project KPIs Achieved Percent"
-  'Project Compl. %': 'projectCompletionPercent',                    // Fixed: was "Project Completion Percent"
+  'Project KPIs Achieved %': 'projectKPIsAchievedPercent',
+  'Project Compl. %': 'projectCompletionPercent',
+  'Rejection of Deleverables %': 'rejectionOfDeliverablesPercent',     // ✅ NEW FIELD
+  'Cost of Poor Quality               in AED': 'costOfPoorQualityAED', // ✅ NEW FIELD
   'Remarks': 'remarks'
 };
 
@@ -111,11 +113,12 @@ export function useGoogleSheets(pollInterval = 60000) {
           // Handle specific field types based on your data structure
           if (['srNo', 'manHourForQuality', 'manhoursUsed', 'manhoursBalance',
                'delayInAuditsNoDays', 'carsOpen', 'carsDelayedClosingNoDays', 
-               'carsClosed', 'obsOpen', 'obsDelayedClosingNoDays', 'obsClosed'].includes(fieldName)) {
+               'carsClosed', 'obsOpen', 'obsDelayedClosingNoDays', 'obsClosed',
+               'costOfPoorQualityAED'].includes(fieldName)) {  // ✅ Added costOfPoorQualityAED
             // Convert to number
             item[fieldName] = value === '' ? 0 : Number(value);
           } else if (fieldName.includes('Percent') || fieldName.includes('percent')) {
-            // Keep percentage fields as strings (e.g., "100%")
+            // Keep percentage fields as strings (e.g., "100%") - rejectionOfDeliverablesPercent will be handled here
             item[fieldName] = value.toString();
           } else if (['projectStartingDate', 'projectClosingDate', 'projectExtension', 
                       'projectQualityPlanStatusIssueDate', 'projectAudit1', 'projectAudit2', 
@@ -143,7 +146,9 @@ export function useGoogleSheets(pollInterval = 60000) {
             delayInAuditsNoDays: item.delayInAuditsNoDays,
             carsDelayedClosingNoDays: item.carsDelayedClosingNoDays,
             obsDelayedClosingNoDays: item.obsDelayedClosingNoDays,
-            projectCompletionPercent: item.projectCompletionPercent
+            projectCompletionPercent: item.projectCompletionPercent,
+            rejectionOfDeliverablesPercent: item.rejectionOfDeliverablesPercent, // ✅ NEW DEBUG
+            costOfPoorQualityAED: item.costOfPoorQualityAED                      // ✅ NEW DEBUG
           });
         }
         

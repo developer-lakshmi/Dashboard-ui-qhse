@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
-import { AlertTriangle, FileText, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, FileText, TrendingUp, Users, Clock, XCircle, DollarSign } from "lucide-react";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -40,24 +40,26 @@ const countProjects = (data, fn) => data.filter(fn).length;
 
 const getBadge = (title, value) => {
   if (value === 0) return <span className="ml-2 rounded bg-green-200 px-2 py-0.5 text-xs text-green-800">OK</span>;
-  if (title.includes("Low") || title.includes("Overdue") || title.includes("Delayed")) {
-    if (value > 5) return <span className="ml-2 rounded bg-red-200 px-2 py-0.5 text-xs text-red-800">Critical</span>;
+  if (title.includes("Low") || title.includes("Overdue") || title.includes("CAR") || title.includes("OBS") || title.includes("Rejection") || title.includes("Cost")) {
+    if (value > 10) return <span className="ml-2 rounded bg-red-200 px-2 py-0.5 text-xs text-red-800">Critical</span>;
+    if (value > 5) return <span className="ml-2 rounded bg-orange-200 px-2 py-0.5 text-xs text-orange-800">High</span>;
     if (value > 0) return <span className="ml-2 rounded bg-yellow-200 px-2 py-0.5 text-xs text-yellow-800">Warning</span>;
   }
   return null;
 };
 
+// Updated filter functions for all cards including new ones
 const filterProjects = {
   "Projects with Overdue Audits": p => Number(p.delayInAuditsNoDays) > 0,
-  "Projects with Open CARs": p => Number(p.carsOpen) > 0,
-  "Projects with Open Observations": p => Number(p.obsOpen) > 0,
-  "Projects with Delayed CAR Closure": p => Number(p.carsDelayedClosingNoDays) > 0,
-  "Projects with Delayed OBS Closure": p => Number(p.obsDelayedClosingNoDays) > 0,
+  "CAR Management Issues": p => Number(p.carsOpen) > 0 || Number(p.carsDelayedClosingNoDays) > 0,
+  "Observation Management Issues": p => Number(p.obsOpen) > 0 || Number(p.obsDelayedClosingNoDays) > 0,
   "Projects with Low Billability (<90%)": p => Number(p.qualityBillabilityPercent?.toString().replace('%', '')) < 90,
   "Projects with Low Completion (<50%)": p => Number(p.projectCompletionPercent?.toString().replace('%', '')) < 50,
+  "Projects with Rejection Rate": p => Number(p.rejectionOfDeliverablesPercent?.toString().replace('%', '')) > 0, // ✅ CHANGED: Removed (>0%)
+  "Projects with Poor Quality Costs": p => Number(p.costOfPoorQualityAED) > 0, // ✅ CHANGED: Removed (>0 AED)
 };
 
-const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop with default empty array
+const SummaryCard = ({ projectsData = [] }) => {
   // Mock previous data (in production, fetch from previous period)
   const previousProjectsData = projectsData.map(p => ({
     ...p,
@@ -69,16 +71,24 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
 
   // Calculate counts using the passed projectsData
   const overdueAudits = countProjects(projectsData, p => Number(p.delayInAuditsNoDays) > 0);
-  const openCARs = countProjects(projectsData, p => Number(p.carsOpen) > 0);
-  const openObs = countProjects(projectsData, p => Number(p.obsOpen) > 0);
-  const delayedCARs = countProjects(projectsData, p => Number(p.carsDelayedClosingNoDays) > 0);
-  const delayedObs = countProjects(projectsData, p => Number(p.obsDelayedClosingNoDays) > 0);
+  
+  // Combined CAR issues (open CARs + delayed closures)
+  const carIssues = countProjects(projectsData, p => 
+    Number(p.carsOpen) > 0 || Number(p.carsDelayedClosingNoDays) > 0
+  );
+  
+  // Combined Observation issues (open observations + delayed closures)
+  const obsIssues = countProjects(projectsData, p => 
+    Number(p.obsOpen) > 0 || Number(p.obsDelayedClosingNoDays) > 0
+  );
+  
   const lowBillability = countProjects(projectsData, p => {
     const billability = typeof p.qualityBillabilityPercent === 'string' 
       ? Number(p.qualityBillabilityPercent.replace('%', ''))
       : Number(p.qualityBillabilityPercent);
     return billability < 90;
   });
+  
   const lowCompletion = countProjects(projectsData, p => {
     const completion = typeof p.projectCompletionPercent === 'string'
       ? Number(p.projectCompletionPercent.replace('%', ''))
@@ -86,41 +96,41 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
     return completion < 50;
   });
 
+  // ✅ UPDATED: Show ALL projects with any rejection rate (>0%)
+  const highRejection = countProjects(projectsData, p => {
+    const rejection = typeof p.rejectionOfDeliverablesPercent === 'string'
+      ? Number(p.rejectionOfDeliverablesPercent.replace('%', ''))
+      : Number(p.rejectionOfDeliverablesPercent);
+    return rejection > 0; // ✅ CHANGED: 5 → 0 (show ALL with rejection)
+  });
+
+  // ✅ NEW: Projects with significant poor quality costs (>1000 AED)
+  const highQualityCosts = countProjects(projectsData, p => {
+    const cost = Number(p.costOfPoorQualityAED) || 0;
+    return cost > 0; // ✅ CHANGED: 1000 → 0 (show ALL with costs)
+  });
+
   const importantSummary = [
     {
       title: "Projects with Overdue Audits",
       value: overdueAudits,
-      icon: AlertTriangle,
+      icon: Clock,
       color: "text-red-600 bg-red-100/60 dark:bg-red-900/30 dark:text-red-400",
-      description: "Projects with delayed audits"
+      description: "Projects with delayed audits requiring attention"
     },
     {
-      title: "Projects with Open CARs",
-      value: openCARs,
-      icon: FileText,
+      title: "CAR Management Issues",
+      value: carIssues,
+      icon: AlertTriangle,
       color: "text-orange-600 bg-orange-100/60 dark:bg-orange-900/30 dark:text-orange-400",
-      description: "Projects with unresolved CARs"
+      description: "Projects with open CARs or delayed closures"
     },
     {
-      title: "Projects with Open Observations",
-      value: openObs,
+      title: "Observation Management Issues",
+      value: obsIssues,
       icon: FileText,
       color: "text-yellow-600 bg-yellow-100/60 dark:bg-yellow-900/30 dark:text-yellow-400",
-      description: "Projects with open observations"
-    },
-    {
-      title: "Projects with Delayed CAR Closure",
-      value: delayedCARs,
-      icon: AlertTriangle,
-      color: "text-red-600 bg-red-100/60 dark:bg-red-900/30 dark:text-red-400",
-      description: "Projects with overdue CAR closure"
-    },
-    {
-      title: "Projects with Delayed OBS Closure",
-      value: delayedObs,
-      icon: FileText,
-      color: "text-red-600 bg-red-100/60 dark:bg-red-900/30 dark:text-red-400",
-      description: "Projects with overdue OBS closure"
+      description: "Projects with open observations or delayed closures"
     },
     {
       title: "Projects with Low Billability (<90%)",
@@ -135,6 +145,21 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
       icon: TrendingUp,
       color: "text-green-600 bg-green-100/60 dark:bg-green-900/30 dark:text-green-400",
       description: "Projects less than 50% complete"
+    },
+    // ✅ UPDATED CARDS: Removed range indicators
+    {
+      title: "Projects with Rejection Rate", // ✅ CHANGED: Removed (>0%)
+      value: highRejection,
+      icon: XCircle,
+      color: "text-purple-600 bg-purple-100/60 dark:bg-purple-900/30 dark:text-purple-400",
+      description: "Projects with deliverable rejection issues" // ✅ CHANGED: Simplified description
+    },
+    {
+      title: "Projects with Poor Quality Costs", // ✅ CHANGED: Removed (>0 AED)
+      value: highQualityCosts,
+      icon: DollarSign,
+      color: "text-pink-600 bg-pink-100/60 dark:bg-pink-900/30 dark:text-pink-400",
+      description: "Projects with poor quality cost impacts" // ✅ CHANGED: Simplified description
     }
   ];
 
@@ -149,6 +174,114 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
   };
 
   const handleClose = () => setOpen(false);
+
+  // Helper function to get the appropriate column header for each modal type
+  const getColumnHeader = (modalTitle) => {
+    switch (modalTitle) {
+      case "Projects with Overdue Audits":
+        return "Days Delayed";
+      case "CAR Management Issues":
+        return "Open CARs / Delayed Days";
+      case "Observation Management Issues":
+        return "Open Observations / Delayed Days";
+      case "Projects with Low Billability (<90%)":
+        return "Quality Billability";
+      case "Projects with Low Completion (<50%)":
+        return "Project Completion";
+      case "Projects with Rejection Rate": // ✅ CHANGED: Removed (>0%)
+        return "Rejection of Deliverables";
+      case "Projects with Poor Quality Costs": // ✅ CHANGED: Removed (>0 AED)
+        return "Cost of Poor Quality (AED)";
+      default:
+        return "Issue Details";
+    }
+  };
+
+  // Helper function to get detailed status information for modal
+  const getDetailedStatus = (project, modalTitle) => {
+    switch (modalTitle) {
+      case "Projects with Overdue Audits":
+        return {
+          value: project.delayInAuditsNoDays || 0,
+          severity: Number(project.delayInAuditsNoDays) > 10 ? "critical" : "warning"
+        };
+      
+      case "CAR Management Issues":
+        const openCars = Number(project.carsOpen) || 0;
+        const delayedCarDays = Number(project.carsDelayedClosingNoDays) || 0;
+        
+        if (openCars > 0 && delayedCarDays > 0) {
+          return {
+            value: `${openCars} open • ${delayedCarDays} days delayed`,
+            severity: openCars > 5 || delayedCarDays > 14 ? "critical" : "warning"
+          };
+        } else if (openCars > 0) {
+          return {
+            value: openCars,
+            severity: openCars > 5 ? "critical" : "warning"
+          };
+        } else {
+          return {
+            value: `${delayedCarDays} days`,
+            severity: delayedCarDays > 14 ? "critical" : "warning"
+          };
+        }
+      
+      case "Observation Management Issues":
+        const openObs = Number(project.obsOpen) || 0;
+        const delayedObsDays = Number(project.obsDelayedClosingNoDays) || 0;
+        
+        if (openObs > 0 && delayedObsDays > 0) {
+          return {
+            value: `${openObs} open • ${delayedObsDays} days delayed`,
+            severity: openObs > 10 || delayedObsDays > 14 ? "critical" : "warning"
+          };
+        } else if (openObs > 0) {
+          return {
+            value: openObs,
+            severity: openObs > 10 ? "critical" : "warning"
+          };
+        } else {
+          return {
+            value: `${delayedObsDays} days`,
+            severity: delayedObsDays > 14 ? "critical" : "warning"
+          };
+        }
+      
+      case "Projects with Low Billability (<90%)":
+        return {
+          value: project.qualityBillabilityPercent || "0%",
+          severity: Number(project.qualityBillabilityPercent?.toString().replace('%', '')) < 70 ? "critical" : "warning"
+        };
+      
+      case "Projects with Low Completion (<50%)":
+        return {
+          value: project.projectCompletionPercent || "0%",
+          severity: Number(project.projectCompletionPercent?.toString().replace('%', '')) < 25 ? "critical" : "warning"
+        };
+      
+      // ✅ UPDATED: Clean case names without ranges
+      case "Projects with Rejection Rate": // ✅ CHANGED: Removed (>0%)
+        const rejectionRate = Number(project.rejectionOfDeliverablesPercent?.toString().replace('%', '')) || 0;
+        return {
+          value: project.rejectionOfDeliverablesPercent || "0%",
+          severity: rejectionRate > 3 ? "critical" : rejectionRate > 1 ? "warning" : "info"
+        };
+      
+      case "Projects with Poor Quality Costs": // ✅ CHANGED: Removed (>0 AED)
+        const qualityCost = Number(project.costOfPoorQualityAED) || 0;
+        return {
+          value: `${qualityCost.toLocaleString()} AED`,
+          severity: qualityCost > 5000 ? "critical" : qualityCost > 1000 ? "warning" : "info"
+        };
+      
+      default:
+        return {
+          value: "Unknown",
+          severity: "info"
+        };
+    }
+  };
 
   // Show message if no data available
   if (!projectsData || projectsData.length === 0) {
@@ -175,7 +308,7 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
                 <item.icon size={26} />
               </div>
               <div className="flex items-center justify-between w-full">
-                <p className="card-title font-semibold">{item.title}</p>
+                <p className="card-title font-semibold text-sm">{item.title}</p>
                 {getBadge(item.title, item.value)}
               </div>
             </CardHeader>
@@ -187,7 +320,7 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
         ))}
       </div>
 
-      {/* Modal for project details */}
+      {/* Enhanced Modal for project details */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -201,7 +334,7 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
             left: '50%',
             transform: 'translate(-50%, 0)',
             bgcolor: 'transparent',
-            width: { xs: '95vw', md: 700 },
+            width: { xs: '95vw', md: 800 },
             maxHeight: 'calc(100vh - 100px)',
             overflowY: 'auto',
             outline: 'none',
@@ -216,6 +349,10 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
               <CloseIcon />
             </IconButton>
             <h2 id="project-details-modal" className="font-bold text-xl mb-4 text-blue-700">{modalTitle}</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Found {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''} matching this criteria
+            </p>
+            
             {modalProjects.length === 0 ? (
               <p className="text-center text-gray-500 py-8">No projects found for this criteria.</p>
             ) : (
@@ -223,46 +360,40 @@ const SummaryCard = ({ projectsData = [] }) => { // Accept projectsData as prop 
                 <table className="min-w-full text-sm border rounded-lg shadow">
                   <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900 z-10">
                     <tr>
-                      <th className="border px-2 py-2">Project No</th>
-                      <th className="border px-2 py-2">Title</th>
-                      <th className="border px-2 py-2">Manager</th>
-                      <th className="border px-2 py-2">Client</th>
-                      <th className="border px-2 py-2">Status</th>
+                      <th className="border px-2 py-2 text-left">Project No</th>
+                      <th className="border px-2 py-2 text-left">Title</th>
+                      <th className="border px-2 py-2 text-left">Manager</th>
+                      <th className="border px-2 py-2 text-left">Client</th>
+                      <th className="border px-2 py-2 text-center">{getColumnHeader(modalTitle)}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {modalProjects.map((p) => (
-                      <tr key={p.projectNo} className="hover:bg-blue-50 dark:hover:bg-blue-950 transition">
-                        <td className="border px-2 py-1 font-semibold">{p.projectNo}</td>
-                        <td className="border px-2 py-1">{p.projectTitle}</td>
-                        <td className="border px-2 py-1">{p.projectManager}</td>
-                        <td className="border px-2 py-1">{p.client}</td>
-                        <td className="border px-2 py-1">
-                          <span className={
-                            modalTitle.includes("CAR") || modalTitle.includes("OBS") || modalTitle.includes("Overdue")
-                              ? (Number(
-                                  modalTitle === "Projects with Open CARs" ? p.carsOpen :
-                                  modalTitle === "Projects with Open Observations" ? p.obsOpen :
-                                  modalTitle === "Projects with Delayed CAR Closure" ? p.carsDelayedClosingNoDays :
-                                  modalTitle === "Projects with Delayed OBS Closure" ? p.obsDelayedClosingNoDays :
-                                  modalTitle === "Projects with Overdue Audits" ? p.delayInAuditsNoDays : 0
-                                ) > 5
-                                ? "bg-red-200 text-red-800 px-2 py-1 rounded"
-                                : "bg-yellow-100 text-yellow-800 px-2 py-1 rounded"
-                              )
-                              : "bg-blue-100 text-blue-800 px-2 py-1 rounded"
-                          }>
-                            {modalTitle === "Projects with Open CARs" ? p.carsOpen :
-                              modalTitle === "Projects with Open Observations" ? p.obsOpen :
-                              modalTitle === "Projects with Delayed CAR Closure" ? p.carsDelayedClosingNoDays :
-                              modalTitle === "Projects with Delayed OBS Closure" ? p.obsDelayedClosingNoDays :
-                              modalTitle === "Projects with Low Billability (<90%)" ? p.qualityBillabilityPercent :
-                              modalTitle === "Projects with Low Completion (<50%)" ? p.projectCompletionPercent :
-                              modalTitle === "Projects with Overdue Audits" ? p.delayInAuditsNoDays : ""}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {modalProjects.map((project) => {
+                      const statusInfo = getDetailedStatus(project, modalTitle);
+                      return (
+                        <tr key={project.projectNo} className="hover:bg-blue-50 dark:hover:bg-blue-950 transition">
+                          <td className="border px-2 py-1 font-semibold">{project.projectNo}</td>
+                          <td className="border px-2 py-1" title={project.projectTitle}>
+                            {project.projectTitle?.length > 30 
+                              ? `${project.projectTitle.substring(0, 30)}...` 
+                              : project.projectTitle}
+                          </td>
+                          <td className="border px-2 py-1">{project.projectManager}</td>
+                          <td className="border px-2 py-1">{project.client}</td>
+                          <td className="border px-2 py-1 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                              statusInfo.severity === "critical" 
+                                ? "bg-red-200 text-red-800" 
+                                : statusInfo.severity === "warning"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}>
+                              {statusInfo.value}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
