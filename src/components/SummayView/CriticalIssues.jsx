@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import {
@@ -8,6 +8,22 @@ import {
   DollarSign,
   Eye
 } from 'lucide-react';
+
+// ✅ CORRECTED: Update thresholds for over-billability focus
+const THRESHOLDS = {
+  CARS_CRITICAL: 5,
+  CARS_HIGH: 3,
+  AUDIT_CRITICAL: 10,
+  AUDIT_HIGH: 5,
+  KPI_CRITICAL: 60,
+  KPI_HIGH: 70,
+  // ✅ FIXED: Over-billability thresholds (high values are the problem)
+  BILLABILITY_CRITICAL: 120,  // Over 120% is critical
+  BILLABILITY_HIGH: 100,      // Over 100% is high risk
+  OBS_CRITICAL_DELAY: 14,
+  OBS_HIGH_DELAY: 7,
+  OBS_HIGH_COUNT: 10
+};
 
 const iconMap = {
   CARs: <AlertTriangle className="w-7 h-7 text-red-500 drop-shadow" />,
@@ -24,17 +40,13 @@ const issueTypeMap = {
   "Billability Issues": "Billability"
 };
 
-// Helper function to safely parse percentage values
+// ✅ OPTIMIZED: Helper functions moved outside component
 const parsePercentage = (value) => {
   if (!value || value === '' || value === 'N/A') return 0;
-  
-  const stringValue = value.toString();
-  // Remove % symbol and parse as number
-  const numericValue = parseFloat(stringValue.replace('%', ''));
+  const numericValue = parseFloat(value.toString().replace('%', ''));
   return isNaN(numericValue) ? 0 : numericValue;
 };
 
-// Helper function to safely parse numeric values
 const parseNumber = (value) => {
   if (!value || value === '' || value === 'N/A') return 0;
   const numericValue = Number(value);
@@ -45,194 +57,167 @@ const CriticalIssues = ({ filteredProjects }) => {
   const [selectedType, setSelectedType] = useState(null);
   const detailsRef = useRef(null);
 
-  // Debug: Log the first project to see actual field structure
-  if (filteredProjects.length > 0) {
-    console.log('🔍 CriticalIssues - First project data structure:', {
-      projectTitle: filteredProjects[0].projectTitle,
-      projectNo: filteredProjects[0].projectNo,
-      carsOpen: filteredProjects[0].carsOpen,
-      carsDelayedClosingNoDays: filteredProjects[0].carsDelayedClosingNoDays,
-      delayInAuditsNoDays: filteredProjects[0].delayInAuditsNoDays,
-      projectKPIsAchievedPercent: filteredProjects[0].projectKPIsAchievedPercent,
-      qualityBillabilityPercent: filteredProjects[0].qualityBillabilityPercent,
-      obsOpen: filteredProjects[0].obsOpen,
-      obsDelayedClosingNoDays: filteredProjects[0].obsDelayedClosingNoDays
-    });
-  }
+  // ✅ OPTIMIZED: Memoized critical issues detection
+  const criticalIssues = useMemo(() => {
+    if (!filteredProjects?.length) return [];
 
-  // Dynamically detect critical issues using correct field names from Google Sheets
-  const getCriticalIssues = () => {
     const issues = [];
 
     filteredProjects.forEach(project => {
-      // Safely parse values using the correct field names from Google Sheets
-      const carsOpen = parseNumber(project.carsOpen);
-      const carsDelayedClosingNoDays = parseNumber(project.carsDelayedClosingNoDays);
-      const delayInAuditsNoDays = parseNumber(project.delayInAuditsNoDays);
-      const projectKPIsAchievedPercent = parsePercentage(project.projectKPIsAchievedPercent);
-      const qualityBillabilityPercent = parsePercentage(project.qualityBillabilityPercent);
-      const obsOpen = parseNumber(project.obsOpen);
-      const obsDelayedClosingNoDays = parseNumber(project.obsDelayedClosingNoDays);
+      // Parse values once per project
+      const projectData = {
+        carsOpen: parseNumber(project.carsOpen),
+        carsDelayedClosingNoDays: parseNumber(project.carsDelayedClosingNoDays),
+        delayInAuditsNoDays: parseNumber(project.delayInAuditsNoDays),
+        projectKPIsAchievedPercent: parsePercentage(project.projectKPIsAchievedPercent),
+        qualityBillabilityPercent: parsePercentage(project.qualityBillabilityPercent),
+        obsOpen: parseNumber(project.obsOpen),
+        obsDelayedClosingNoDays: parseNumber(project.obsDelayedClosingNoDays),
+        projectTitle: project.projectTitle || 'Unnamed Project',
+        projectNo: project.projectNo || project.srNo || 'No Project Number'
+      };
 
-      // Project identification with fallbacks
-      const projectTitle = project.projectTitle || 'Unnamed Project';
-      const projectNo = project.projectNo || project.srNo || 'No Project Number';
-
-      // High Priority CARs (>5 open CARs)
-      if (carsOpen > 5) {
+      // ✅ STREAMLINED: CARs Issues
+      if (projectData.carsOpen > THRESHOLDS.CARS_CRITICAL) {
         issues.push({
           type: 'CARs',
           severity: 'Critical',
-          title: `${carsOpen} Open CARs`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: carsDelayedClosingNoDays > 0 
-            ? `${carsDelayedClosingNoDays} days delayed closing`
+          title: `${projectData.carsOpen} Open CARs`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
+          details: projectData.carsDelayedClosingNoDays > 0 
+            ? `${projectData.carsDelayedClosingNoDays} days delayed closing`
             : 'Multiple open CARs requiring attention',
-          count: carsOpen,
-          sortValue: carsOpen
+          count: projectData.carsOpen,
+          sortValue: projectData.carsOpen
         });
-      }
-
-      // Medium Priority CARs (3-5 open CARs)
-      else if (carsOpen >= 3) {
+      } else if (projectData.carsOpen >= THRESHOLDS.CARS_HIGH) {
         issues.push({
           type: 'CARs',
           severity: 'High',
-          title: `${carsOpen} Open CARs`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: carsDelayedClosingNoDays > 0 
-            ? `${carsDelayedClosingNoDays} days delayed closing`
+          title: `${projectData.carsOpen} Open CARs`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
+          details: projectData.carsDelayedClosingNoDays > 0 
+            ? `${projectData.carsDelayedClosingNoDays} days delayed closing`
             : 'Several open CARs need attention',
-          count: carsOpen,
-          sortValue: carsOpen
+          count: projectData.carsOpen,
+          sortValue: projectData.carsOpen
         });
       }
 
-      // Critical Audit Delays (>10 days)
-      if (delayInAuditsNoDays > 10) {
+      // ✅ STREAMLINED: Audit Issues
+      if (projectData.delayInAuditsNoDays > THRESHOLDS.AUDIT_CRITICAL) {
         issues.push({
           type: 'Audit',
           severity: 'Critical',
-          title: `Audit Delayed ${delayInAuditsNoDays} Days`,
-          project: projectTitle,
-          projectNo: projectNo,
+          title: `Audit Delayed ${projectData.delayInAuditsNoDays} Days`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
           details: 'Critical audit timeline breach requiring immediate action',
-          count: delayInAuditsNoDays,
-          sortValue: delayInAuditsNoDays
+          count: projectData.delayInAuditsNoDays,
+          sortValue: projectData.delayInAuditsNoDays
         });
-      }
-
-      // Medium Audit Delays (5-10 days)
-      else if (delayInAuditsNoDays >= 5) {
+      } else if (projectData.delayInAuditsNoDays >= THRESHOLDS.AUDIT_HIGH) {
         issues.push({
           type: 'Audit',
           severity: 'High',
-          title: `Audit Delayed ${delayInAuditsNoDays} Days`,
-          project: projectTitle,
-          projectNo: projectNo,
+          title: `Audit Delayed ${projectData.delayInAuditsNoDays} Days`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
           details: 'Audit schedule needs attention',
-          count: delayInAuditsNoDays,
-          sortValue: delayInAuditsNoDays
+          count: projectData.delayInAuditsNoDays,
+          sortValue: projectData.delayInAuditsNoDays
         });
       }
 
-      // Critical KPI Performance (<60%)
-      if (projectKPIsAchievedPercent > 0 && projectKPIsAchievedPercent < 60) {
-        issues.push({
-          type: 'KPI',
-          severity: 'Critical',
-          title: `KPI Achievement: ${projectKPIsAchievedPercent}%`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: 'Significantly below acceptable performance threshold',
-          count: projectKPIsAchievedPercent,
-          sortValue: 100 - projectKPIsAchievedPercent // Higher sort value for lower percentage
-        });
+      // ✅ STREAMLINED: KPI Issues
+      if (projectData.projectKPIsAchievedPercent > 0) {
+        if (projectData.projectKPIsAchievedPercent < THRESHOLDS.KPI_CRITICAL) {
+          issues.push({
+            type: 'KPI',
+            severity: 'Critical',
+            title: `KPI Achievement: ${projectData.projectKPIsAchievedPercent}%`,
+            project: projectData.projectTitle,
+            projectNo: projectData.projectNo,
+            details: 'Significantly below acceptable performance threshold',
+            count: projectData.projectKPIsAchievedPercent,
+            sortValue: 100 - projectData.projectKPIsAchievedPercent
+          });
+        } else if (projectData.projectKPIsAchievedPercent < THRESHOLDS.KPI_HIGH) {
+          issues.push({
+            type: 'KPI',
+            severity: 'High',
+            title: `KPI Achievement: ${projectData.projectKPIsAchievedPercent}%`,
+            project: projectData.projectTitle,
+            projectNo: projectData.projectNo,
+            details: 'Below target performance threshold',
+            count: projectData.projectKPIsAchievedPercent,
+            sortValue: 100 - projectData.projectKPIsAchievedPercent
+          });
+        }
       }
 
-      // Poor KPI Performance (60-70%)
-      else if (projectKPIsAchievedPercent > 0 && projectKPIsAchievedPercent < 70) {
-        issues.push({
-          type: 'KPI',
-          severity: 'High',
-          title: `KPI Achievement: ${projectKPIsAchievedPercent}%`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: 'Below target performance threshold',
-          count: projectKPIsAchievedPercent,
-          sortValue: 100 - projectKPIsAchievedPercent
-        });
+      // ✅ CORRECTED: Billability Issues Logic
+      if (projectData.qualityBillabilityPercent > 0) {
+        if (projectData.qualityBillabilityPercent > THRESHOLDS.BILLABILITY_CRITICAL) {
+          issues.push({
+            type: 'Billability',
+            severity: 'Critical',
+            title: `Quality Billability: ${projectData.qualityBillabilityPercent}%`,
+            project: projectData.projectTitle,
+            projectNo: projectData.projectNo,
+            details: 'Critical over-billability - potential scope creep and budget impact',
+            count: projectData.qualityBillabilityPercent,
+            sortValue: projectData.qualityBillabilityPercent // Higher values = worse
+          });
+        } else if (projectData.qualityBillabilityPercent > THRESHOLDS.BILLABILITY_HIGH) {
+          issues.push({
+            type: 'Billability',
+            severity: 'High',
+            title: `Quality Billability: ${projectData.qualityBillabilityPercent}%`,
+            project: projectData.projectTitle,
+            projectNo: projectData.projectNo,
+            details: 'Over-billability detected - monitor for scope creep',
+            count: projectData.qualityBillabilityPercent,
+            sortValue: projectData.qualityBillabilityPercent
+          });
+        }
       }
 
-      // Critical Quality Billability Issues (<70%)
-      if (qualityBillabilityPercent > 0 && qualityBillabilityPercent < 70) {
-        issues.push({
-          type: 'Billability',
-          severity: 'Critical',
-          title: `Quality Billability: ${qualityBillabilityPercent}%`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: 'Significantly below target billability - revenue impact',
-          count: qualityBillabilityPercent,
-          sortValue: 100 - qualityBillabilityPercent
-        });
-      }
-
-      // Medium Quality Billability Issues (70-80%)
-      else if (qualityBillabilityPercent > 0 && qualityBillabilityPercent < 80) {
-        issues.push({
-          type: 'Billability',
-          severity: 'Medium',
-          title: `Quality Billability: ${qualityBillabilityPercent}%`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: 'Below target billability threshold',
-          count: qualityBillabilityPercent,
-          sortValue: 100 - qualityBillabilityPercent
-        });
-      }
-
-      // Critical Observation Delays (>14 days)
-      if (obsDelayedClosingNoDays > 14) {
+      // ✅ STREAMLINED: Observation Issues
+      if (projectData.obsDelayedClosingNoDays > THRESHOLDS.OBS_CRITICAL_DELAY) {
         issues.push({
           type: 'Observations',
           severity: 'Critical',
-          title: `${obsOpen} Open Observations`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: `${obsDelayedClosingNoDays} days delayed - critical overdue`,
-          count: obsOpen,
-          sortValue: obsDelayedClosingNoDays
+          title: `${projectData.obsOpen} Open Observations`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
+          details: `${projectData.obsDelayedClosingNoDays} days delayed - critical overdue`,
+          count: projectData.obsOpen,
+          sortValue: projectData.obsDelayedClosingNoDays
         });
-      }
-
-      // Medium Observation Delays (7-14 days)
-      else if (obsDelayedClosingNoDays >= 7) {
+      } else if (projectData.obsDelayedClosingNoDays >= THRESHOLDS.OBS_HIGH_DELAY) {
         issues.push({
           type: 'Observations',
           severity: 'Medium',
-          title: `${obsOpen} Open Observations`,
-          project: projectTitle,
-          projectNo: projectNo,
-          details: `${obsDelayedClosingNoDays} days delayed closing`,
-          count: obsOpen,
-          sortValue: obsDelayedClosingNoDays
+          title: `${projectData.obsOpen} Open Observations`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
+          details: `${projectData.obsDelayedClosingNoDays} days delayed closing`,
+          count: projectData.obsOpen,
+          sortValue: projectData.obsDelayedClosingNoDays
         });
-      }
-
-      // High Count of Open Observations (>10)
-      else if (obsOpen > 10) {
+      } else if (projectData.obsOpen > THRESHOLDS.OBS_HIGH_COUNT) {
         issues.push({
           type: 'Observations',
           severity: 'High',
-          title: `${obsOpen} Open Observations`,
-          project: projectTitle,
-          projectNo: projectNo,
+          title: `${projectData.obsOpen} Open Observations`,
+          project: projectData.projectTitle,
+          projectNo: projectData.projectNo,
           details: 'High volume of open observations requiring attention',
-          count: obsOpen,
-          sortValue: obsOpen
+          count: projectData.obsOpen,
+          sortValue: projectData.obsOpen
         });
       }
     });
@@ -242,18 +227,16 @@ const CriticalIssues = ({ filteredProjects }) => {
       const severityOrder = { 'Critical': 3, 'High': 2, 'Medium': 1 };
       const severityDiff = severityOrder[b.severity] - severityOrder[a.severity];
       if (severityDiff !== 0) return severityDiff;
-      return b.sortValue - a.sortValue; // Higher values first within same severity
+      return b.sortValue - a.sortValue;
     });
-  };
+  }, [filteredProjects]);
 
-  const criticalIssues = getCriticalIssues();
-
-  // Summary cards data using correct field names
-  const issuesData = [
+  // ✅ OPTIMIZED: Memoized summary data
+  const issuesData = useMemo(() => [
     {
       title: "Critical CARs",
-      count: filteredProjects.filter(p => parseNumber(p.carsOpen) > 5).length,
-      description: "Projects with >5 open CARs",
+      count: filteredProjects.filter(p => parseNumber(p.carsOpen) > THRESHOLDS.CARS_CRITICAL).length,
+      description: `Projects with >${THRESHOLDS.CARS_CRITICAL} open CARs`,
       icon: <AlertTriangle className="w-8 h-8 text-red-500 drop-shadow" />,
       bgColor: "bg-gradient-to-br from-red-50 via-white to-red-100",
       textColor: "text-red-800",
@@ -262,8 +245,8 @@ const CriticalIssues = ({ filteredProjects }) => {
     },
     {
       title: "Audit Delays",
-      count: filteredProjects.filter(p => parseNumber(p.delayInAuditsNoDays) > 10).length,
-      description: "Audits delayed >10 days",
+      count: filteredProjects.filter(p => parseNumber(p.delayInAuditsNoDays) > THRESHOLDS.AUDIT_CRITICAL).length,
+      description: `Audits delayed >${THRESHOLDS.AUDIT_CRITICAL} days`,
       icon: <Clock className="w-8 h-8 text-orange-500 drop-shadow" />,
       bgColor: "bg-gradient-to-br from-orange-50 via-white to-orange-100",
       textColor: "text-orange-800",
@@ -274,9 +257,9 @@ const CriticalIssues = ({ filteredProjects }) => {
       title: "Poor KPI Performance",
       count: filteredProjects.filter(p => {
         const kpiPercent = parsePercentage(p.projectKPIsAchievedPercent);
-        return kpiPercent > 0 && kpiPercent < 70;
+        return kpiPercent > 0 && kpiPercent < THRESHOLDS.KPI_HIGH;
       }).length,
-      description: "KPI achievement <70%",
+      description: `KPI achievement <${THRESHOLDS.KPI_HIGH}%`,
       icon: <BarChart2 className="w-8 h-8 text-red-500 drop-shadow" />,
       bgColor: "bg-gradient-to-br from-red-50 via-white to-red-100",
       textColor: "text-red-800",
@@ -285,41 +268,37 @@ const CriticalIssues = ({ filteredProjects }) => {
     },
     {
       title: "Billability Issues",
+      // ✅ FIXED: Count projects with over-billability (high values)
       count: filteredProjects.filter(p => {
         const billabilityPercent = parsePercentage(p.qualityBillabilityPercent);
-        return billabilityPercent > 0 && billabilityPercent < 80;
+        return billabilityPercent > THRESHOLDS.BILLABILITY_HIGH;
       }).length,
-      description: "Quality billability <80%",
+      description: `Quality billability >${THRESHOLDS.BILLABILITY_HIGH}%`, // ✅ FIXED: Show over-billability
       icon: <DollarSign className="w-8 h-8 text-yellow-500 drop-shadow" />,
       bgColor: "bg-gradient-to-br from-yellow-50 via-white to-yellow-100",
       textColor: "text-yellow-800",
       countColor: "text-yellow-600",
       borderColor: "border-yellow-200"
     }
-  ];
+  ], [filteredProjects]);
 
-  // Log summary for debugging
-  console.log('🔍 CriticalIssues Summary:', {
-    totalProjects: filteredProjects.length,
-    criticalCARs: issuesData[0].count,
-    auditDelays: issuesData[1].count,
-    poorKPI: issuesData[2].count,
-    billabilityIssues: issuesData[3].count,
-    totalIssues: criticalIssues.length
-  });
+  // ✅ OPTIMIZED: Memoized filtered details
+  const filteredDetails = useMemo(() => 
+    selectedType ? criticalIssues.filter(issue => issue.type === selectedType) : criticalIssues,
+    [criticalIssues, selectedType]
+  );
 
-  // Filtered issues for details section
-  const filteredDetails = selectedType
-    ? criticalIssues.filter(issue => issue.type === selectedType)
-    : criticalIssues;
-
-  // Scroll to details section when View Details is clicked
   const handleViewDetails = (type) => {
     setSelectedType(type);
     setTimeout(() => {
       detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   };
+
+  // ✅ EARLY RETURN: Show nothing if no projects
+  if (!filteredProjects?.length) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -423,21 +402,6 @@ const CriticalIssues = ({ filteredProjects }) => {
                   </div>
                 </div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Debug Info (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="text-sm font-semibold mb-2">Debug Info</h4>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div>Total Projects: {filteredProjects.length}</div>
-              <div>Critical Issues Found: {criticalIssues.length}</div>
-              <div>Selected Filter: {selectedType || 'All'}</div>
-              <div>Showing: {filteredDetails.length} issues</div>
             </div>
           </CardContent>
         </Card>
