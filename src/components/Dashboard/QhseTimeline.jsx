@@ -54,20 +54,20 @@ const QHSEProjectTooltip = ({ project, children }) => {
         {children}
       </div>
       {showTooltip && (
-        <div className="absolute z-50 p-3 sm:p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg shadow-lg w-72 sm:w-80 max-w-96 -top-2 left-8 sm:left-8">
-          <div className="space-y-3">
+        <div className="absolute z-50 p-3 sm:p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg shadow-lg w-64 sm:w-72 md:w-80 max-w-xs sm:max-w-sm md:max-w-md -top-2 left-8 sm:left-8">
+          <div className="space-y-2 sm:space-y-3">
             {/* Header with QHSE indicator */}
             <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-600">
               {getQHSEStatusIcon(project.qhseStatus, project.qhseScore)}
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
-                  <span className="truncate text-sm sm:text-base">
+                <div className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-1 sm:gap-2 flex-wrap">
+                  <span className="truncate text-xs sm:text-sm">
                     {project.projectNo && project.projectNo !== "" && project.projectNo !== "N/A" 
                       ? `${project.projectNo} - ${project.name}` 
                       : project.name}
                   </span>
                   {project.qhseScore >= 8 && (
-                    <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full animate-pulse">
+                    <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse">
                       HIGH RISK
                     </span>
                   )}
@@ -79,10 +79,10 @@ const QHSEProjectTooltip = ({ project, children }) => {
             </div>
 
             {/* ✅ RESPONSIVE: QHSE Priority Metrics */}
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+            <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs">
+              <div className="text-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-700 rounded">
                 <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">QHSE Risk</div>
-                <div className={`text-sm sm:text-lg font-bold ${
+                <div className={`text-xs sm:text-sm font-bold ${
                   project.qhseScore >= 8 ? "text-red-600" :
                   project.qhseScore >= 5 ? "text-orange-600" :
                   project.qhseScore >= 3 ? "text-yellow-600" : "text-green-600"
@@ -92,9 +92,9 @@ const QHSEProjectTooltip = ({ project, children }) => {
                    project.qhseScore >= 3 ? "MEDIUM" : "LOW"}
                 </div>
               </div>
-              <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+              <div className="text-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-700 rounded">
                 <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">KPI Status</div>
-                <div className={`text-sm sm:text-lg font-bold ${
+                <div className={`text-xs sm:text-sm font-bold ${
                   project.kpiStatus >= 90 ? "text-green-600" :
                   project.kpiStatus >= 70 ? "text-blue-600" :
                   project.kpiStatus >= 50 ? "text-yellow-600" : "text-red-600"
@@ -102,9 +102,9 @@ const QHSEProjectTooltip = ({ project, children }) => {
                   {Math.round(project.kpiStatus || 0)}%
                 </div>
               </div>
-              <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+              <div className="text-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-700 rounded">
                 <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">Billability</div>
-                <div className={`text-sm sm:text-lg font-bold ${
+                <div className={`text-xs sm:text-sm font-bold ${
                   project.billability >= 90 ? "text-green-600" :
                   project.billability >= 70 ? "text-blue-600" :
                   project.billability >= 50 ? "text-yellow-600" : "text-red-600"
@@ -114,41 +114,41 @@ const QHSEProjectTooltip = ({ project, children }) => {
               </div>
             </div>
 
-            {/* ✅ RESPONSIVE: QHSE Issues - Only show if there are actual issues */}
+            {/* ✅ RESPONSIVE: QHSE Issues */}
             {project.qhseIssues && project.qhseIssues.length > 0 && (
-              <div className="space-y-2 pt-2 border-t border-red-200 dark:border-red-800">
+              <div className="space-y-1 sm:space-y-2 pt-2 border-t border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-2">
-                  <Shield size={14} className="text-red-500 flex-shrink-0" />
+                  <Shield size={12} className="text-red-500 flex-shrink-0" />
                   <div className="text-xs text-red-600 dark:text-red-400 uppercase tracking-wide font-semibold">
-                    QHSE Issues Requiring Action
+                    QHSE Issues
                   </div>
                 </div>
-                <ul className="space-y-1 text-xs max-h-24 sm:max-h-32 overflow-y-auto">
+                <ul className="space-y-1 text-xs max-h-20 sm:max-h-24 overflow-y-auto">
                   {project.qhseIssues.map((issue, idx) => (
                     <li key={idx} className="text-red-600 dark:text-red-400 flex items-start gap-1">
-                      <span className="text-red-500 mt-1 flex-shrink-0">•</span>
-                      <span className="break-words">{issue}</span>
+                      <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                      <span className="break-words text-xs">{issue}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* ✅ RESPONSIVE: Team Info - Using QHSE-specific field names */}
+            {/* ✅ RESPONSIVE: Team Info */}
             {(project.qualityEngineer || project.client) && (
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">QHSE Team</div>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-1 text-xs sm:text-sm">
                   {project.qualityEngineer && (
-                    <div className="flex items-center gap-2">
-                      <User size={14} className="text-gray-400 flex-shrink-0" />
-                      <span className="text-gray-600 dark:text-gray-300 flex-shrink-0">Quality Engineer:</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <User size={12} className="text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 dark:text-gray-300 flex-shrink-0">QE:</span>
                       <span className="font-medium truncate">{project.qualityEngineer}</span>
                     </div>
                   )}
                   {project.client && (
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-gray-400 flex-shrink-0" />
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Calendar size={12} className="text-gray-400 flex-shrink-0" />
                       <span className="text-gray-600 dark:text-gray-300 flex-shrink-0">Client:</span>
                       <span className="font-medium truncate">{project.client}</span>
                     </div>
@@ -187,10 +187,12 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
 
   return (
     <div className={`card col-span-1 lg:col-span-1 xl:col-span-3 ${className}`}>
-      {/* ✅ FULLY RESPONSIVE: Header Section - Fixed Layout */}
+      {/* ✅ FULLY RESPONSIVE: Header Section */}
+      {/* ✅ FULLY RESPONSIVE: Header Section */}
       <div className="card-header flex-col p-3 sm:p-4 space-y-3">
-        {/* ✅ Main Title Row - Responsive layout */}
-        <div className="flex items-center space-x-2">
+        {/* ✅ Main Title Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center space-x-2">
           
              <Shield className="text-blue-600 flex-shrink-0" size={18} />
             <h3 className="card-title font-semibold text-sm sm:text-base truncate">
@@ -199,19 +201,11 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
           
                    
        </div>
+        </div>
         
-        <div className="flex flex-wrap items-start gap-2 sm:gap-4 w-full">
-  {/* Total Count */}
-  <div className="flex items-center gap-2">
-    {timelineData && (
-      <span className="flex items-center text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full whitespace-nowrap">
-        📊 {timelineData.length} total projects
-      </span>
-    )}
-  </div>
-
-  {/* Status Breakdown */}
-  <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end flex-1">
+        {/* ✅ QHSE-Focused Stats Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end flex-1">
     {validProjects.length > 0 ? (
       <>
         {validProjects.filter(p => p.qhseScore >= 8).length > 0 && (
@@ -239,27 +233,26 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
       </span>
     )}
   </div>
-</div>
-
+        </div>
       </div>
       
-      {/* ✅ FULLY RESPONSIVE: Card Body with proper scrolling */}
-      <div className="card-body space-y-2 sm:space-y-3 max-h-64 sm:max-h-80 lg:max-h-96 xl:max-h-[28rem] overflow-y-auto p-3 sm:p-4">
+      {/* ✅ FULLY RESPONSIVE: Card Body */}
+      <div className="card-body space-y-2 sm:space-y-3 max-h-48 xs:max-h-56 sm:max-h-64 md:max-h-80 lg:max-h-96 xl:max-h-[28rem] overflow-y-auto p-2 sm:p-3 md:p-4">
         {validProjects.length > 0 ? (
           validProjects.map((project, index) => (
             <div
               key={project.id || index}
-              className={`space-y-2 p-2 sm:p-3 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 ${
+              className={`space-y-1.5 sm:space-y-2 p-2 sm:p-3 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 ${
                 project.qhseScore >= 8 ? 
-                  'bg-gradient-to-r from-red-50 via-white to-red-50 dark:from-red-900/20 dark:via-gray-800 dark:to-red-900/20 border-red-200 dark:border-red-800' :
+                  'bg-gradient-to-r from-red-50 to-red-25 dark:from-red-900/20 dark:to-red-800/10 border-red-200 dark:border-red-700' :
                 project.qhseScore >= 5 ?
-                  'bg-gradient-to-r from-orange-50 via-white to-orange-50 dark:from-orange-900/20 dark:via-gray-800 dark:to-orange-900/20 border-orange-200 dark:border-orange-800' :
-                  'bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-blue-900/20 dark:via-gray-800 dark:to-blue-900/20 border-blue-200 dark:border-blue-800'
+                  'bg-gradient-to-r from-orange-50 to-orange-25 dark:from-orange-900/20 dark:to-orange-800/10 border-orange-200 dark:border-orange-700' :
+                  'bg-gradient-to-r from-blue-50 to-blue-25 dark:from-blue-900/20 dark:to-blue-800/10 border-blue-200 dark:border-blue-700'
               }`}
             >
               {/* ✅ FULLY RESPONSIVE: Project Header */}
-              <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:justify-between sm:items-start">
-                <div className="flex items-start gap-x-2 flex-1 min-w-0">
+              <div className="flex flex-col space-y-1.5 sm:space-y-0 sm:flex-row sm:justify-between sm:items-start">
+                <div className="flex items-start gap-x-1.5 sm:gap-x-2 flex-1 min-w-0">
                   <div className="pt-0.5 flex-shrink-0">
                     <QHSEProjectTooltip project={project}>
                       {getQHSEStatusIcon(project.qhseStatus, project.qhseScore)}
@@ -268,68 +261,97 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                   <div className="flex-1 min-w-0">
                     {/* Project Title and Badges */}
                     <div className="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:items-start sm:gap-2">
-                      <span className="font-semibold text-gray-800 dark:text-slate-200 text-sm leading-tight break-words">
+                      <span className="font-semibold text-gray-800 dark:text-slate-200 text-xs sm:text-sm leading-tight break-words">
                         {project.projectNo && project.projectNo !== "" && project.projectNo !== "N/A" 
                           ? `${project.projectNo} - ${project.name}` 
                           : project.name}
                       </span>
-                      <div className="flex gap-1 flex-wrap">
-                        {project.qualityPlanStatus === "Pending" && (
-                          <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-2 py-0.5 rounded-full">
-                            QP Pending
+                      <div className="flex gap-0.5 sm:gap-1 flex-wrap">
+                        {/* ✅ QHSE-Priority Badges - Responsive sizing */}
+                        {project.carsOpen > 0 && (
+                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse">
+                            🚨 {project.carsOpen} CARs
                           </span>
                         )}
-                        {project.qhseScore >= 8 && (
-                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full animate-pulse">
-                            HIGH RISK
+                        {project.obsOpen > 0 && (
+                          <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-1 sm:px-2 py-0.5 rounded-full">
+                            ⚠️ {project.obsOpen} Obs
+                          </span>
+                        )}
+                        {project.auditDelay > 0 && (
+                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse">
+                            🕐 {project.auditDelay}d
+                          </span>
+                        )}
+                        {project.rejectionRate > 0 && (
+                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full">
+                            📉 {Math.round(project.rejectionRate)}%
+                          </span>
+                        )}
+                        {project.qualityPlanStatus === "Pending" && (
+                          <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1 sm:px-2 py-0.5 rounded-full">
+                            📋 QP
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* ✅ RESPONSIVE: QHSE Metrics - Stack on mobile */}
+                    {/* ✅ RESPONSIVE: QHSE-Primary Metrics */}
                     <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 text-xs">
-                      <div className="flex items-center gap-1 text-gray-600 dark:text-slate-400">
-                        <Shield size={12} className="flex-shrink-0" />
+                      <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
+                        <Shield size={10} className="flex-shrink-0" />
+                        <span>Quality: {Math.round(100 - (project.rejectionRate || 0))}%</span>
+                      </div>
+                      <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
+                        <TrendingUp size={10} className="flex-shrink-0" />
+                        <span>Progress: {Math.round(project.progress || 0)}%</span>
+                      </div>
+                      <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
+                        <CheckCircle2 size={10} className="flex-shrink-0" />
                         <span>KPI: {Math.round(project.kpiStatus || 0)}%</span>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-600 dark:text-slate-400">
-                        <TrendingUp size={12} className="flex-shrink-0" />
-                        <span>Bill: {Math.round(project.billability || 0)}%</span>
-                      </div>
                       {project.qualityEngineer && (
-                        <div className="flex items-center gap-1 text-gray-600 dark:text-slate-400">
-                          <User size={12} className="flex-shrink-0" />
-                          <span className="truncate max-w-24 sm:max-w-32">{project.qualityEngineer}</span>
+                        <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
+                          <User size={10} className="flex-shrink-0" />
+                          <span className="truncate max-w-16 sm:max-w-24 md:max-w-32">{project.qualityEngineer}</span>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
                 
-                {/* Progress and Badge - Stack on mobile */}
-                <div className="flex items-center justify-between sm:justify-end gap-2 sm:flex-col sm:items-end sm:space-y-1">
-                  <span className="text-lg font-bold text-gray-800 dark:text-slate-200 whitespace-nowrap">
+                {/* ✅ RESPONSIVE: Progress and Badge - Stack on mobile */}
+                <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 sm:flex-col sm:items-end sm:space-y-1">
+                  <span className="text-base sm:text-lg font-bold text-gray-800 dark:text-slate-200 whitespace-nowrap">
                     {Math.round(project.progress || 0)}%
                   </span>
-                  <Badge variant={getQHSEBadgeVariant(project.qhseStatus)} className="whitespace-nowrap text-xs">
-                    {project.qhseStatus === "Critical QHSE Issues" ? "Critical" :
-                     project.qhseStatus === "Quality Issues" ? "Quality Issues" :
-                     project.qhseStatus === "Documentation Issues" ? "Doc Issues" :
-                     project.qhseStatus}
-                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <span className={`text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold ${
+                      project.qhseScore >= 8 ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                      project.qhseScore >= 5 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' : 
+                      project.qhseScore >= 3 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' : 
+                      'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    }`}>
+                      Risk: {project.qhseScore || 0}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* ✅ RESPONSIVE: Progress Bar */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 sm:space-x-2">
                 <Progress
                   value={project.progress || 0}
-                  className="flex-1 h-2 rounded-full"
+                  className="flex-1 h-1.5 sm:h-2 rounded-full"
                 />
                 {project.qhseIssues && project.qhseIssues.length > 0 && (
                   <span className="text-xs text-red-600 dark:text-red-400 font-semibold whitespace-nowrap">
-                    {project.qhseIssues.length} issues
+                    🚨 {project.qhseIssues.length}
+                  </span>
+                )}
+                {project.costOfPoorQualityAED > 0 && (
+                  <span className="text-xs text-red-600 dark:text-red-400 font-semibold whitespace-nowrap hidden sm:inline">
+                    💰 {project.costOfPoorQualityAED.toLocaleString()} AED
                   </span>
                 )}
               </div>
@@ -339,7 +361,7 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                 <div className="flex items-center gap-x-1 min-w-0">
                   {project.carsOpen > 0 || project.obsOpen > 0 || project.auditDelay > 0 ? (
                     <>
-                      <AlertTriangle className="text-red-500 animate-pulse flex-shrink-0" size={14} />
+                      <AlertTriangle className="text-red-500 animate-pulse flex-shrink-0" size={12} />
                       <span className="text-red-600 font-bold bg-red-100 dark:bg-red-900/30 px-1 rounded break-words">
                         🚨 {project.carsOpen || 0} CARs, {project.obsOpen || 0} Obs
                         {project.auditDelay > 0 && `, ${project.auditDelay}d delay`}
@@ -347,38 +369,36 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                     </>
                   ) : project.qualityPlanStatus === "Pending" ? (
                     <>
-                      <FileText className="text-orange-500 flex-shrink-0" size={14} />
+                      <FileText className="text-orange-500 flex-shrink-0" size={12} />
                       <span className="text-orange-600 font-semibold break-words">
-                        📋 Quality Plan Pending Approval
+                        📋 Quality Plan Pending
                       </span>
                     </>
                   ) : (
                     <>
-                      <Shield className="text-green-500 flex-shrink-0" size={14} />
-                      <span className="text-green-600 font-semibold">QHSE Compliant</span>
+                      <Shield className="text-green-500 flex-shrink-0" size={12} />
+                      <span className="text-green-600 font-semibold">✅ QHSE Compliant</span>
                     </>
                   )}
                 </div>
                 
-                {/* ✅ RESPONSIVE: QHSE Score */}
-                <div className="flex items-center gap-1 justify-start sm:justify-end flex-shrink-0">
-                  <span className="text-gray-500">QHSE Risk:</span>
-                  <span className={`font-bold text-xs px-1 rounded ${
-                    project.qhseScore >= 8 ? 'text-red-600 bg-red-100 dark:bg-red-900/30' :
-                    project.qhseScore >= 5 ? 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' : 
-                    project.qhseScore >= 3 ? 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' : 'text-green-600 bg-green-100 dark:bg-green-900/30'
-                  }`}>
-                    {project.qhseScore || 0}
-                  </span>
-                </div>
+                {/* ✅ RESPONSIVE: Quality Engineer Info */}
+                {project.qualityEngineer && (
+                  <div className="flex items-center gap-1 justify-start sm:justify-end flex-shrink-0">
+                    <User size={10} className="text-blue-500" />
+                    <span className="text-blue-600 dark:text-blue-400 font-medium truncate max-w-20 sm:max-w-none">
+                      {project.qualityEngineer}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center text-gray-400 py-6 sm:py-8">
-            <Shield className="mx-auto mb-4 text-4xl sm:text-6xl text-green-400" />
-            <p className="font-medium text-green-600 text-base sm:text-lg">🎉 Excellent QHSE Performance!</p>
-            <p className="text-sm text-gray-500 mt-2">All projects are QHSE compliant</p>
+          <div className="text-center text-gray-400 py-4 sm:py-6 md:py-8">
+            <Shield className="mx-auto mb-2 sm:mb-4 text-3xl sm:text-4xl md:text-6xl text-green-400" />
+            <p className="font-medium text-green-600 text-sm sm:text-base md:text-lg">🎉 Excellent QHSE Performance!</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">All projects are QHSE compliant</p>
             <p className="text-xs text-gray-400 mt-1">Data refreshed from Google Sheets</p>
           </div>
         )}
