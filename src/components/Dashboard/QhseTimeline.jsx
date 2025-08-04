@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/Progress";
 import { Badge } from "@/components/ui/Badge";
-import { CheckCircle2, AlertTriangle, Clock, TrendingUp, AlertCircle, User, Calendar, Shield, FileText, ClipboardCheck } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Clock, TrendingUp, AlertCircle, User, Calendar, Shield, FileText, ClipboardCheck, TrendingDown, Building2, Activity } from "lucide-react";
 
 // Enhanced status icon to show QHSE priority status
 const getQHSEStatusIcon = (status, qhseScore = 0) => {
-  const baseSize = 20;
+  const baseSize = 18;
   const isHighRisk = qhseScore >= 8;
   const pulseClass = isHighRisk ? "animate-pulse" : "";
   
@@ -148,7 +148,7 @@ const QHSEProjectTooltip = ({ project, children }) => {
                   )}
                   {project.client && (
                     <div className="flex items-center gap-1 sm:gap-2">
-                      <Calendar size={12} className="text-gray-400 flex-shrink-0" />
+                      <Building2 size={12} className="text-gray-400 flex-shrink-0" />
                       <span className="text-gray-600 dark:text-gray-300 flex-shrink-0">Client:</span>
                       <span className="font-medium truncate">{project.client}</span>
                     </div>
@@ -188,51 +188,47 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
   return (
     <div className={`card col-span-1 lg:col-span-1 xl:col-span-3 ${className}`}>
       {/* ✅ FULLY RESPONSIVE: Header Section */}
-      {/* ✅ FULLY RESPONSIVE: Header Section */}
       <div className="card-header flex-col p-3 sm:p-4 space-y-3">
         {/* ✅ Main Title Row */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center space-x-2">
-          
-             <Shield className="text-blue-600 flex-shrink-0" size={18} />
+            <Shield className="text-blue-600 flex-shrink-0" size={18} />
             <h3 className="card-title font-semibold text-sm sm:text-base truncate">
               QHSE Priority - Quality Attention Required
             </h3> 
-          
-                   
-       </div>
+          </div>
         </div>
         
         {/* ✅ QHSE-Focused Stats Row */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end flex-1">
-    {validProjects.length > 0 ? (
-      <>
-        {validProjects.filter(p => p.qhseScore >= 8).length > 0 && (
-          <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-2 py-1 rounded-full animate-pulse whitespace-nowrap">
-            {validProjects.filter(p => p.qhseScore >= 8).length} critical
-          </span>
-        )}
-        {validProjects.filter(p => p.qhseScore >= 5 && p.qhseScore < 8).length > 0 && (
-          <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-full whitespace-nowrap">
-            {validProjects.filter(p => p.qhseScore >= 5 && p.qhseScore < 8).length} high risk
-          </span>
-        )}
-        {validProjects.filter(p => p.qhseScore >= 3 && p.qhseScore < 5).length > 0 && (
-          <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-1 rounded-full whitespace-nowrap">
-            {validProjects.filter(p => p.qhseScore >= 3 && p.qhseScore < 5).length} medium
-          </span>
-        )}
-        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full whitespace-nowrap">
-          {validProjects.length} showing
-        </span>
-      </>
-    ) : (
-      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full whitespace-nowrap">
-        ✅ All Compliant
-      </span>
-    )}
-  </div>
+            {validProjects.length > 0 ? (
+              <>
+                {validProjects.filter(p => p.qhseScore >= 8).length > 0 && (
+                  <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-2 py-1 rounded-full animate-pulse whitespace-nowrap">
+                    {validProjects.filter(p => p.qhseScore >= 8).length} critical
+                  </span>
+                )}
+                {validProjects.filter(p => p.qhseScore >= 5 && p.qhseScore < 8).length > 0 && (
+                  <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-full whitespace-nowrap">
+                    {validProjects.filter(p => p.qhseScore >= 5 && p.qhseScore < 8).length} high risk
+                  </span>
+                )}
+                {validProjects.filter(p => p.qhseScore >= 3 && p.qhseScore < 5).length > 0 && (
+                  <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-1 rounded-full whitespace-nowrap">
+                    {validProjects.filter(p => p.qhseScore >= 3 && p.qhseScore < 5).length} medium
+                  </span>
+                )}
+                <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full whitespace-nowrap">
+                  {validProjects.length} showing
+                </span>
+              </>
+            ) : (
+              <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full whitespace-nowrap">
+                ✅ All Compliant
+              </span>
+            )}
+          </div>
         </div>
       </div>
       
@@ -267,52 +263,57 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                           : project.name}
                       </span>
                       <div className="flex gap-0.5 sm:gap-1 flex-wrap">
-                        {/* ✅ QHSE-Priority Badges - Responsive sizing */}
+                        {/* ✅ PROFESSIONAL BADGES - Standardized Icons */}
                         {project.carsOpen > 0 && (
-                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse">
-                            🚨 {project.carsOpen} CARs
+                          <span className="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap">
+                            <AlertTriangle size={12} className="flex-shrink-0" />
+                            <span>{project.carsOpen} CARs</span>
                           </span>
                         )}
                         {project.obsOpen > 0 && (
-                          <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-1 sm:px-2 py-0.5 rounded-full">
-                            ⚠️ {project.obsOpen} Obs
+                          <span className="inline-flex items-center gap-1 text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-1 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                            <AlertCircle size={12} className="flex-shrink-0" />
+                            <span>{project.obsOpen} Obs</span>
                           </span>
                         )}
                         {project.auditDelay > 0 && (
-                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse">
-                            🕐 {project.auditDelay}d
+                          <span className="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap">
+                            <Clock size={12} className="flex-shrink-0" />
+                            <span>{project.auditDelay}d</span>
                           </span>
                         )}
                         {project.rejectionRate > 0 && (
-                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full">
-                            📉 {Math.round(project.rejectionRate)}%
+                          <span className="inline-flex items-center gap-1 text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                            <TrendingDown size={12} className="flex-shrink-0" />
+                            <span>{Math.round(project.rejectionRate)}%</span>
                           </span>
                         )}
                         {project.qualityPlanStatus === "Pending" && (
-                          <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1 sm:px-2 py-0.5 rounded-full">
-                            📋 QP
+                          <span className="inline-flex items-center gap-1 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                            <FileText size={12} className="flex-shrink-0" />
+                            <span>QP</span>
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* ✅ RESPONSIVE: QHSE-Primary Metrics */}
+                    {/* ✅ RESPONSIVE: QHSE-Primary Metrics - Professional Icons */}
                     <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 text-xs">
-                      <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
-                        <Shield size={10} className="flex-shrink-0" />
+                      <div className="inline-flex items-center gap-1 text-gray-600 dark:text-slate-400 whitespace-nowrap">
+                        <Shield size={12} className="flex-shrink-0" />
                         <span>Quality: {Math.round(100 - (project.rejectionRate || 0))}%</span>
                       </div>
-                      <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
-                        <TrendingUp size={10} className="flex-shrink-0" />
+                      <div className="inline-flex items-center gap-1 text-gray-600 dark:text-slate-400 whitespace-nowrap">
+                        <TrendingUp size={12} className="flex-shrink-0" />
                         <span>Progress: {Math.round(project.progress || 0)}%</span>
                       </div>
-                      <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
-                        <CheckCircle2 size={10} className="flex-shrink-0" />
+                      <div className="inline-flex items-center gap-1 text-gray-600 dark:text-slate-400 whitespace-nowrap">
+                        <Activity size={12} className="flex-shrink-0" />
                         <span>KPI: {Math.round(project.kpiStatus || 0)}%</span>
                       </div>
                       {project.qualityEngineer && (
-                        <div className="flex items-center gap-0.5 sm:gap-1 text-gray-600 dark:text-slate-400">
-                          <User size={10} className="flex-shrink-0" />
+                        <div className="inline-flex items-center gap-1 text-gray-600 dark:text-slate-400 whitespace-nowrap">
+                          <User size={12} className="flex-shrink-0" />
                           <span className="truncate max-w-16 sm:max-w-24 md:max-w-32">{project.qualityEngineer}</span>
                         </div>
                       )}
@@ -326,13 +327,14 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                     {Math.round(project.progress || 0)}%
                   </span>
                   <div className="flex items-center gap-1">
-                    <span className={`text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold ${
+                    <span className={`inline-flex items-center gap-1 text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold whitespace-nowrap ${
                       project.qhseScore >= 8 ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
                       project.qhseScore >= 5 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' : 
                       project.qhseScore >= 3 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' : 
                       'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                     }`}>
-                      Risk: {project.qhseScore || 0}
+                      <AlertTriangle size={10} className="flex-shrink-0" />
+                      <span>Risk: {project.qhseScore || 0}</span>
                     </span>
                   </div>
                 </div>
@@ -345,13 +347,15 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                   className="flex-1 h-1.5 sm:h-2 rounded-full"
                 />
                 {project.qhseIssues && project.qhseIssues.length > 0 && (
-                  <span className="text-xs text-red-600 dark:text-red-400 font-semibold whitespace-nowrap">
-                    🚨 {project.qhseIssues.length}
+                  <span className="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 font-semibold whitespace-nowrap">
+                    <AlertTriangle size={12} className="flex-shrink-0" />
+                    <span>{project.qhseIssues.length}</span>
                   </span>
                 )}
                 {project.costOfPoorQualityAED > 0 && (
-                  <span className="text-xs text-red-600 dark:text-red-400 font-semibold whitespace-nowrap hidden sm:inline">
-                    💰 {project.costOfPoorQualityAED.toLocaleString()} AED
+                  <span className="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 font-semibold whitespace-nowrap hidden sm:flex">
+                    <TrendingDown size={12} className="flex-shrink-0" />
+                    <span>{project.costOfPoorQualityAED.toLocaleString()} AED</span>
                   </span>
                 )}
               </div>
@@ -361,31 +365,31 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
                 <div className="flex items-center gap-x-1 min-w-0">
                   {project.carsOpen > 0 || project.obsOpen > 0 || project.auditDelay > 0 ? (
                     <>
-                      <AlertTriangle className="text-red-500 animate-pulse flex-shrink-0" size={12} />
-                      <span className="text-red-600 font-bold bg-red-100 dark:bg-red-900/30 px-1 rounded break-words">
-                        🚨 {project.carsOpen || 0} CARs, {project.obsOpen || 0} Obs
+                      <AlertTriangle className="text-red-500 animate-pulse flex-shrink-0" size={14} />
+                      <span className="text-red-600 font-bold bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded break-words">
+                        URGENT: {project.carsOpen || 0} CARs, {project.obsOpen || 0} Obs
                         {project.auditDelay > 0 && `, ${project.auditDelay}d delay`}
                       </span>
                     </>
                   ) : project.qualityPlanStatus === "Pending" ? (
                     <>
-                      <FileText className="text-orange-500 flex-shrink-0" size={12} />
+                      <FileText className="text-orange-500 flex-shrink-0" size={14} />
                       <span className="text-orange-600 font-semibold break-words">
-                        📋 Quality Plan Pending
+                        Quality Plan Pending
                       </span>
                     </>
                   ) : (
                     <>
-                      <Shield className="text-green-500 flex-shrink-0" size={12} />
-                      <span className="text-green-600 font-semibold">✅ QHSE Compliant</span>
+                      <Shield className="text-green-500 flex-shrink-0" size={14} />
+                      <span className="text-green-600 font-semibold">QHSE Compliant</span>
                     </>
                   )}
                 </div>
                 
                 {/* ✅ RESPONSIVE: Quality Engineer Info */}
                 {project.qualityEngineer && (
-                  <div className="flex items-center gap-1 justify-start sm:justify-end flex-shrink-0">
-                    <User size={10} className="text-blue-500" />
+                  <div className="inline-flex items-center gap-1 justify-start sm:justify-end flex-shrink-0">
+                    <User size={12} className="text-blue-500 flex-shrink-0" />
                     <span className="text-blue-600 dark:text-blue-400 font-medium truncate max-w-20 sm:max-w-none">
                       {project.qualityEngineer}
                     </span>
@@ -397,7 +401,7 @@ const QhseTimeline = ({ timelineData, className = "" }) => {
         ) : (
           <div className="text-center text-gray-400 py-4 sm:py-6 md:py-8">
             <Shield className="mx-auto mb-2 sm:mb-4 text-3xl sm:text-4xl md:text-6xl text-green-400" />
-            <p className="font-medium text-green-600 text-sm sm:text-base md:text-lg">🎉 Excellent QHSE Performance!</p>
+            <p className="font-medium text-green-600 text-sm sm:text-base md:text-lg">Excellent QHSE Performance!</p>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">All projects are QHSE compliant</p>
             <p className="text-xs text-gray-400 mt-1">Data refreshed from Google Sheets</p>
           </div>
