@@ -12,14 +12,14 @@ import { EmptyDataState } from "../common/EmptyDataState"
 // Import dashboard-specific components
 import SummaryCard from "./SummaryCard"
 import QHSEOverviewChart from "./OverviewChart"
-import ProjectTimeline from "./ProjectTimeline"
+import QhseTimeline from "./QhseTimeline" // ✅ UPDATED: Use QhseTimeline component
 import ProjectStatus from "./ProjectStatus"
 
 import { 
   getMonthlyOverviewData, 
   getYearlyOverviewData 
 } from "../../utils"
-import { generateManagementTimelineData } from "../../utils/chartUtils" // NEW: Management-focused timeline data
+import { generateQHSETimelineData } from "../../utils/chartUtils" // ✅ UPDATED: Use QHSE function
 import { PageLayout } from '../../layouts/PageLayout'
 import { useGoogleSheets } from '../../hooks/useGoogleSheets'
 
@@ -32,17 +32,18 @@ const DashboardPage = () => {
     if (!projectsData || projectsData.length === 0) {
       return { monthlyData: [], yearlyData: [], timelineData: [] }
     }
+    const qhseTimelineData = generateQHSETimelineData(projectsData); // ✅ UPDATED: Use QHSE function with REAL data
 
     return {
       monthlyData: getMonthlyOverviewData(projectsData),
       yearlyData: getYearlyOverviewData(projectsData),
-      timelineData: generateManagementTimelineData(projectsData) // UPDATED: Use management-focused function
+      timelineData: qhseTimelineData // ✅ UPDATED: Use QHSE data
     }
   }, [projectsData])
 
   // Debug logging to see what we're getting
   React.useEffect(() => {
-    console.log("Dashboard - Generated timeline data:", chartData.timelineData);
+    console.log("🛡️ Dashboard - Generated QHSE timeline data:", chartData.timelineData);
   }, [chartData.timelineData]);
 
   // Loading state
@@ -111,14 +112,18 @@ const DashboardContent = ({ projectsData, chartData, loading, onRefresh }) => (
   </>
 )
 
-// Internal component (simple, dashboard-specific)
+// ✅ UPDATED: Fully responsive ChartsGrid for QHSE view
 const ChartsGrid = ({ monthlyData, yearlyData, timelineData }) => (
   <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-7">
     <QHSEOverviewChart 
       monthlyData={monthlyData} 
       yearlyData={yearlyData} 
+      className="col-span-1 lg:col-span-2 xl:col-span-4" // ✅ Responsive: Chart takes 4/7 columns on xl, full width on smaller screens
     />
-    <ProjectTimeline timelineData={timelineData} />
+    <QhseTimeline 
+      timelineData={timelineData} 
+      className="col-span-1 lg:col-span-2 xl:col-span-3" // ✅ Responsive: Timeline takes 3/7 columns on xl, full width on smaller screens
+    />
   </div>
 )
 

@@ -362,3 +362,202 @@ export const generateManagementTimelineData = (filteredProjects) => {
     .sort((a, b) => b.priority - a.priority)
     .slice(0, 10);
 };
+
+// ✅ REAL DATA: QHSE-focused timeline data using EXACT field names from Google Sheets
+export const generateQHSETimelineData = (filteredProjects) => {
+  console.log("🛡️ generateQHSETimelineData - Processing", filteredProjects?.length || 0, "projects");
+  
+  if (!filteredProjects || filteredProjects.length === 0) {
+    console.log("❌ No projects provided to generateQHSETimelineData");
+    return [];
+  }
+
+  // ✅ Log first project to see actual field names
+  console.log("🔍 Sample project data (first project):", filteredProjects[0]);
+  console.log("🔍 Available fields:", Object.keys(filteredProjects[0]));
+
+  const result = filteredProjects
+    .filter(project => {
+      // Using EXACT field names from your Google Sheets mapping
+      const hasValidId = project.srNo || project.projectNo;
+      const hasValidName = project.projectTitle && project.projectTitle !== "" && project.projectTitle !== "N/A";
+      console.log(`🔍 Project "${project.projectTitle}" - Valid ID: ${!!hasValidId}, Valid Name: ${!!hasValidName}`);
+      return hasValidId && hasValidName;
+    })
+    .map(project => {
+      console.log(`🔍 Processing project: ${project.projectTitle}`);
+      
+      // ✅ Using EXACT field names from your useGoogleSheets.js mapping
+      const completion = parsePercent(project.projectCompletionPercent);
+      const kpiStatus = parsePercentage(project.projectKPIsAchievedPercent);
+      const billability = parsePercentage(project.qualityBillabilityPercent);
+      
+      // ✅ Quality issues using EXACT field names
+      const carsOpen = Number(project.carsOpen) || 0;
+      const obsOpen = Number(project.obsOpen) || 0;
+      const auditDelay = Number(project.delayInAuditsNoDays) || 0;
+      
+      // ✅ New fields using EXACT field names
+      const rejectionRate = parsePercentage(project.rejectionOfDeliverablesPercent);
+      const costOfPoorQualityAED = Number(project.costOfPoorQualityAED) || 0;
+      
+      // ✅ Quality Plan status using EXACT field name
+      const qualityPlanStatus = project.projectQualityPlanStatusRev && 
+                               project.projectQualityPlanStatusRev !== "" && 
+                               project.projectQualityPlanStatusRev !== "N/A" ? "Approved" : "Pending";
+      
+      console.log(`📊 ${project.projectTitle} - Raw data:`, {
+        carsOpen: project.carsOpen,
+        obsOpen: project.obsOpen,
+        auditDelay: project.delayInAuditsNoDays,
+        kpiStatus: project.projectKPIsAchievedPercent,
+        billability: project.qualityBillabilityPercent,
+        rejectionRate: project.rejectionOfDeliverablesPercent,
+        costOfPoorQualityAED: project.costOfPoorQualityAED,
+        qualityPlanStatus: project.projectQualityPlanStatusRev
+      });
+      
+      console.log(`📊 ${project.projectTitle} - Parsed data:`, {
+        carsOpen, obsOpen, auditDelay, kpiStatus, billability, rejectionRate, costOfPoorQualityAED, qualityPlanStatus
+      });
+      
+      // ✅ QHSE Risk Score calculation with detailed logging
+      let qhseScore = 0;
+      let scoreBreakdown = [];
+      
+      // Audit delays (high impact)
+      if (auditDelay > 10) {
+        qhseScore += 4;
+        scoreBreakdown.push(`Audit delay >10 days: +4`);
+      } else if (auditDelay > 0) {
+        qhseScore += 2;
+        scoreBreakdown.push(`Audit delay >0 days: +2`);
+      }
+      
+      // CARs (high impact)
+      if (carsOpen > 5) {
+        qhseScore += 4;
+        scoreBreakdown.push(`CARs >5: +4`);
+      } else if (carsOpen > 0) {
+        qhseScore += 2;
+        scoreBreakdown.push(`CARs >0: +2`);
+      }
+      
+      // Observations (medium impact)
+      if (obsOpen > 3) {
+        qhseScore += 2;
+        scoreBreakdown.push(`Observations >3: +2`);
+      } else if (obsOpen > 0) {
+        qhseScore += 1;
+        scoreBreakdown.push(`Observations >0: +1`);
+      }
+      
+      // Quality Plan status (medium impact)
+      if (qualityPlanStatus === "Pending") {
+        qhseScore += 2;
+        scoreBreakdown.push(`Quality Plan Pending: +2`);
+      }
+      
+      // KPI achievement (low impact)
+      if (kpiStatus < 70) {
+        qhseScore += 2;
+        scoreBreakdown.push(`KPI <70%: +2`);
+      } else if (kpiStatus < 80) {
+        qhseScore += 1;
+        scoreBreakdown.push(`KPI <80%: +1`);
+      }
+      
+      // Billability (low impact)
+      if (billability < 80) {
+        qhseScore += 1;
+        scoreBreakdown.push(`Billability <80%: +1`);
+      }
+      
+      // Rejection rate (medium impact)
+      if (rejectionRate > 5) {
+        qhseScore += 3;
+        scoreBreakdown.push(`Rejection rate >5%: +3`);
+      } else if (rejectionRate > 0) {
+        qhseScore += 1;
+        scoreBreakdown.push(`Rejection rate >0%: +1`);
+      }
+      
+      // Quality costs (medium impact)
+      if (costOfPoorQualityAED > 5000) {
+        qhseScore += 3;
+        scoreBreakdown.push(`Quality costs >5000 AED: +3`);
+      } else if (costOfPoorQualityAED > 0) {
+        qhseScore += 1;
+        scoreBreakdown.push(`Quality costs >0 AED: +1`);
+      }
+      
+      console.log(`📈 ${project.projectTitle} - QHSE Score: ${qhseScore}`, scoreBreakdown);
+      
+      // QHSE Status assignment
+      let qhseStatus = "QHSE Compliant";
+      if (qhseScore >= 8) {
+        qhseStatus = "Critical QHSE Issues";
+      } else if (qhseScore >= 5) {
+        qhseStatus = "Quality Issues";
+      } else if (auditDelay > 0) {
+        qhseStatus = "Audit Required";
+      } else if (qualityPlanStatus === "Pending") {
+        qhseStatus = "Documentation Issues";
+      } else if (qhseScore > 0) {
+        qhseStatus = "Minor Issues";
+      }
+      
+      // QHSE Issues list
+      const qhseIssues = [
+        auditDelay > 0 && `Audit delayed by ${auditDelay} days`,
+        carsOpen > 0 && `${carsOpen} open CARs requiring closure`,
+        obsOpen > 0 && `${obsOpen} open observations`,
+        qualityPlanStatus === "Pending" && `Quality plan pending approval`,
+        kpiStatus < 70 && `Low KPI achievement (${Math.round(kpiStatus)}%)`,
+        billability < 80 && `Low quality billability (${Math.round(billability)}%)`,
+        rejectionRate > 0 && `${Math.round(rejectionRate)}% deliverable rejection rate`,
+        costOfPoorQualityAED > 0 && `${costOfPoorQualityAED.toLocaleString()} AED quality costs`
+      ].filter(Boolean);
+      
+      // ✅ REAL DATA: Only show projects that actually need QHSE attention
+      const needsQHSEAttention = qhseScore >= 3;
+      
+      console.log(`✅ ${project.projectTitle} - Status: ${qhseStatus}, Needs Attention: ${needsQHSEAttention}, Score: ${qhseScore}`);
+      
+      return {
+        id: project.srNo || project.projectNo || `qhse-${Date.now()}-${Math.random()}`,
+        projectNo: project.projectNo,
+        name: project.projectTitle,
+        client: project.client || null,
+        qualityEngineer: project.projectQualityEng || null, // ✅ Using correct field name
+        progress: completion,
+        qhseStatus: qhseStatus,
+        qhseScore: qhseScore,
+        kpiStatus: kpiStatus,
+        billability: billability,
+        carsOpen: carsOpen,
+        obsOpen: obsOpen,
+        auditDelay: auditDelay,
+        qualityPlanStatus: qualityPlanStatus,
+        rejectionRate: rejectionRate,
+        costOfPoorQualityAED: costOfPoorQualityAED,
+        qhseIssues: qhseIssues,
+        needsQHSEAttention: needsQHSEAttention,
+        scoreBreakdown: scoreBreakdown // ✅ For debugging
+      };
+    })
+    .filter(project => project.needsQHSEAttention) // ✅ REAL DATA: Filter by actual QHSE attention needed
+    .sort((a, b) => b.qhseScore - a.qhseScore); // ✅ Sort by highest risk first
+
+  console.log(`🎯 generateQHSETimelineData - Final result: ${result.length} projects need QHSE attention`);
+  console.log("📋 Projects requiring attention:", result.map(p => `${p.name} (Score: ${p.qhseScore})`));
+  
+  return result;
+};
+
+// ✅ REMOVE THE DEMO DATA FUNCTION - We're using real data now
+// Keep the demo function for reference only
+export const generateDemoQHSETimelineData = () => {
+  // Demo data kept for reference/testing - not used in production
+  return [];
+};
