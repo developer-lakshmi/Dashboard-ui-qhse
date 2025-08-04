@@ -107,7 +107,7 @@ export const CarsObsChart = ({ data = [] }) => {
         ObsOpen: Number(item.ObsOpen) || 0,
         ObsClosed: Number(item.ObsClosed) || 0
       }))
-      .filter(item => item.CARsOpen > 0 || item.CARsClosed > 0 || item.ObsOpen > 0 || item.ObsClosed > 0); // Only show projects with CAR/Obs data
+      .filter(item => item.CARsOpen > 0 || item.CARsClosed > 0 || item.ObsOpen > 0 || item.ObsClosed > 0);
   }, [data]);
 
   const hasData = processedData.length > 0;
@@ -144,7 +144,7 @@ export const CarsObsChart = ({ data = [] }) => {
               CARs Open
             </span>
             <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-              <span className="inline-block w-4 h-3 rounded mr-2 bg-green-600" />
+              <span className="inline-block w-4 h-3 rounded mr-2 bg-green-700" />
               CARs Closed
             </span>
             <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -152,7 +152,7 @@ export const CarsObsChart = ({ data = [] }) => {
               Obs Open
             </span>
             <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-              <span className="inline-block w-4 h-3 rounded mr-2 bg-yellow-500" />
+              <span className="inline-block w-4 h-3 rounded mr-2 bg-green-400" />
               Obs Closed
             </span>
           </div>
@@ -168,7 +168,7 @@ export const CarsObsChart = ({ data = [] }) => {
             CARs Open
           </span>
           <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-            <span className="inline-block w-4 h-3 rounded mr-2 bg-green-600" />
+            <span className="inline-block w-4 h-3 rounded mr-2 bg-green-700" />
             CARs Closed
           </span>
           <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -176,7 +176,7 @@ export const CarsObsChart = ({ data = [] }) => {
             Obs Open
           </span>
           <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-            <span className="inline-block w-4 h-3 rounded mr-2 bg-yellow-500" />
+            <span className="inline-block w-4 h-3 rounded mr-2 bg-green-400" />
             Obs Closed
           </span>
         </div>
@@ -197,7 +197,7 @@ export const CarsObsChart = ({ data = [] }) => {
         </span>
       </div>
 
-      {/* Chart Container with Horizontal Scroll - Same UI as ManhoursChart */}
+      {/* Chart Container with Horizontal Scroll */}
       <div className="flex-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
         <div className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-red-200 dark:scrollbar-thumb-red-900 scrollbar-track-transparent">
           <div className="min-w-[900px] w-full">
@@ -210,8 +210,8 @@ export const CarsObsChart = ({ data = [] }) => {
                 layout="vertical"
                 data={processedData}
                 margin={{ top: 20, right: 80, left: 320, bottom: 40 }}
-                barCategoryGap="10%" // Reduced from 15% to give more space for 4 bars
-                barGap={2} // Reduced from 6 to make bars closer together
+                barCategoryGap="10%"
+                barGap={2}
               >
                 <CartesianGrid 
                   strokeDasharray="3 3" 
@@ -307,7 +307,7 @@ export const CarsObsChart = ({ data = [] }) => {
                 
                 <Bar 
                   dataKey="CARsClosed" 
-                  fill="#16a34a" 
+                  fill="#15803d" 
                   name="CARs Closed"
                   radius={[0, 4, 4, 0]}
                   maxBarSize={25}
@@ -323,7 +323,7 @@ export const CarsObsChart = ({ data = [] }) => {
                 
                 <Bar 
                   dataKey="ObsClosed" 
-                  fill="#eab308" 
+                  fill="#4ade80" 
                   name="Obs Closed"
                   radius={[0, 4, 4, 0]}
                   maxBarSize={25}
@@ -334,7 +334,7 @@ export const CarsObsChart = ({ data = [] }) => {
         </div>
       </div>
 
-      {/* Legend and Summary - Same UI as ManhoursChart */}
+      {/* Legend and Summary */}
       <div className="mt-6 space-y-4">
         {/* Legend */}
         <div className="flex justify-center gap-6">
@@ -343,7 +343,7 @@ export const CarsObsChart = ({ data = [] }) => {
             CARs Open
           </span>
           <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-            <span className="inline-block w-4 h-3 rounded mr-2 bg-green-600" />
+            <span className="inline-block w-4 h-3 rounded mr-2 bg-green-700" />
             CARs Closed
           </span>
           <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -351,7 +351,7 @@ export const CarsObsChart = ({ data = [] }) => {
             Obs Open
           </span>
           <span className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-            <span className="inline-block w-4 h-3 rounded mr-2 bg-yellow-500" />
+            <span className="inline-block w-4 h-3 rounded mr-2 bg-green-400" />
             Obs Closed
           </span>
         </div>
@@ -380,15 +380,6 @@ export const CarsObsChart = ({ data = [] }) => {
                 const closureRate = total > 0 ? (totalClosed / total * 100) : 0;
                 return `${closureRate.toFixed(1)}%`;
               })()}
-
-{/* 
-              Project A: 5 CARs Open, 3 CARs Closed, 2 Obs Open, 4 Obs Closed
-Project B: 2 CARs Open, 6 CARs Closed, 1 Obs Open, 3 Obs Closed
-
-Total Open = (5 + 2) + (2 + 1) = 10
-Total Closed = (3 + 6) + (4 + 3) = 16
-Total Items = 10 + 16 = 26
-Closure Rate = (16 ÷ 26) × 100 = 61.5% */}
             </div>
           </div>
         </div>

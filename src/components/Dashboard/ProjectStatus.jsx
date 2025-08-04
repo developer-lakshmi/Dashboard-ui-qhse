@@ -107,7 +107,7 @@ const getRiskLevel = (project) => {
   return 'LOW';
 };
 
-// Enhanced table head with proper column widths
+// Enhanced table head with proper column widths including Quality Engineer
 const EnhancedTableHead = ({ order, orderBy, onRequestSort }) => {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
@@ -125,67 +125,73 @@ const EnhancedTableHead = ({ order, orderBy, onRequestSort }) => {
       id: 'projectNo', 
       label: 'Project No', 
       sortable: true, 
-      width: '140px'
+      width: '90px'
     },
     { 
       id: 'projectTitle', 
       label: 'Project Title', 
       sortable: true, 
       width: 'auto', // Let this column expand
-      minWidth: '250px'
+      minWidth: '180px'
     },
     { 
       id: 'client', 
       label: 'Client', 
       sortable: true, 
-      width: '180px'
+      width: '140px'
     },
     { 
       id: 'projectManager', 
       label: 'Project Manager', 
       sortable: true, 
-      width: '160px'
+      width: '140px'
+    },
+    { 
+      id: 'projectQualityEng', // ✅ Fix: Use correct field name
+      label: 'Quality Engineer', 
+      sortable: true, 
+      width: '140px'
     },
     { 
       id: 'qualityBillabilityPercent', 
       label: 'Billability (%)', 
       sortable: true, 
-      width: '110px', 
+      width: '100px', 
       align: 'center' 
     },
     { 
       id: 'carsOpen', 
-      label: 'CARs Open', 
+      label: 'CARs', 
       sortable: true, 
-      width: '90px', 
+      width: '70px', 
       align: 'center' 
     },
     { 
       id: 'obsOpen', 
-      label: 'OBS Open', 
+      label: 'OBS', 
       sortable: true, 
-      width: '90px', 
+      width: '70px', 
       align: 'center' 
     },
     { 
       id: 'projectKPIsAchievedPercent', 
       label: 'KPIs (%)', 
       sortable: true, 
-      width: '100px', 
+      width: '85px', 
       align: 'center' 
     },
     { 
       id: 'delayInAuditsNoDays', 
-      label: 'Audit Delay (Days)', 
+      label: 'Audit Delay', 
       sortable: true, 
-      width: '130px', 
+      width: '100px', 
       align: 'center' 
     },
     { 
       id: 'projectCompletionPercent', 
       label: 'Completion (%)', 
       sortable: true, 
-      width: '120px', 
+      width: '110px', 
       align: 'center' 
     },
   ];
@@ -208,7 +214,8 @@ const EnhancedTableHead = ({ order, orderBy, onRequestSort }) => {
               top: 0,
               zIndex: 10,
               whiteSpace: 'nowrap',
-              padding: '12px 8px'
+              padding: '12px 6px',
+              fontSize: '0.875rem'
             }}
           >
             {headCell.sortable ? (
@@ -266,7 +273,9 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
       project.projectNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.projectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.projectManager?.toLowerCase().includes(searchTerm.toLowerCase())
+      project.projectManager?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // ✅ Fix: Use the correct field name from Google Sheets mapping
+      project.projectQualityEng?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Apply active filter
@@ -483,7 +492,8 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             size="small"
             sx={{
               tableLayout: 'fixed',
-              width: '100%'
+              width: '100%',
+              minWidth: '1400px' // Ensure minimum width for all columns
             }}
           >
             <EnhancedTableHead
@@ -524,7 +534,8 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       sx={{ 
                         fontWeight: 600,
                         color: 'primary.main',
-                        fontSize: '0.875rem'
+                        fontSize: '0.875rem',
+                        padding: '8px 6px'
                       }}
                     >
                       {project.displaySrNo}
@@ -535,7 +546,8 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       fontWeight: 500,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      padding: '8px 6px'
                     }}>
                       <Typography variant="body2" component="div">
                         {project.projectNo || 'N/A'}
@@ -544,9 +556,10 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     
                     {/* Project Title - Expandable width */}
                     <TableCell sx={{ 
-                      minWidth: '250px',
+                      minWidth: '200px',
                       wordBreak: 'break-word',
-                      whiteSpace: 'normal'
+                      whiteSpace: 'normal',
+                      padding: '8px 6px'
                     }}>
                       <Typography 
                         variant="body2" 
@@ -569,7 +582,8 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     <TableCell sx={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      padding: '8px 6px'
                     }}>
                       <Typography 
                         variant="body2"
@@ -583,7 +597,8 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     <TableCell sx={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      padding: '8px 6px'
                     }}>
                       <Typography 
                         variant="body2"
@@ -593,58 +608,81 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       </Typography>
                     </TableCell>
                     
-                    {/* Metric columns - All centered with fixed widths */}
-                    <TableCell align="center">
+                    {/* Quality Engineer - Fixed field name */}
+                    <TableCell sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      padding: '8px 6px'
+                    }}>
+                      <Typography 
+                        variant="body2"
+                        title={project.projectQualityEng} // ✅ Fix: Use correct field name
+                        sx={{
+                          color: project.projectQualityEng && project.projectQualityEng !== 'N/A' 
+                            ? 'primary.main' 
+                            : 'text.secondary',
+                          fontWeight: project.projectQualityEng && project.projectQualityEng !== 'N/A' 
+                            ? 500 
+                            : 400
+                        }}
+                      >
+                        {project.projectQualityEng || 'N/A'} {/* ✅ Fix: Use correct field name */}
+                      </Typography>
+                    </TableCell>
+                    
+                    {/* Metric columns - All centered with optimized widths */}
+                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatPercentage(project.qualityBillabilityPercent)}
                         color={getChipColor(project.qualityBillabilityPercent, "billability")}
                         size="small"
-                        sx={{ minWidth: '60px', fontWeight: 600 }}
+                        sx={{ minWidth: '55px', fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
                     
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatNumber(project.carsOpen)}
                         color={getChipColor(project.carsOpen, "cars")}
                         size="small"
-                        sx={{ minWidth: '50px', fontWeight: 600 }}
+                        sx={{ minWidth: '40px', fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
                     
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatNumber(project.obsOpen)}
                         color={getChipColor(project.obsOpen, "obs")}
                         size="small"
-                        sx={{ minWidth: '50px', fontWeight: 600 }}
+                        sx={{ minWidth: '40px', fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
                     
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatPercentage(project.projectKPIsAchievedPercent)}
                         color={getChipColor(project.projectKPIsAchievedPercent, "kpi")}
                         size="small"
-                        sx={{ minWidth: '60px', fontWeight: 600 }}
+                        sx={{ minWidth: '50px', fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
                     
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
                       <Chip
-                        label={formatNumber(project.delayInAuditsNoDays)}
+                        label={`${formatNumber(project.delayInAuditsNoDays)}d`}
                         color={formatNumber(project.delayInAuditsNoDays) > 0 ? "error" : "success"}
                         size="small"
-                        sx={{ minWidth: '50px', fontWeight: 600 }}
+                        sx={{ minWidth: '45px', fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
                     
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatPercentage(project.projectCompletionPercent)}
                         color={getChipColor(project.projectCompletionPercent, "kpi")}
                         size="small"
-                        sx={{ minWidth: '60px', fontWeight: 600 }}
+                        sx={{ minWidth: '55px', fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
                   </TableRow>
@@ -653,7 +691,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
               
               {paginatedProjects.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6 }}>
                     <Typography variant="h6" color="text.secondary" gutterBottom>
                       {searchTerm ? 'No projects match your search' : `No ${activeFilter.toLowerCase().replace('_', ' ')} projects found`}
                     </Typography>
