@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   Typography, Box, Chip, TablePagination, TableSortLabel, TextField, 
   InputAdornment, IconButton, Tooltip, LinearProgress, useTheme, 
   useMediaQuery, Button, ButtonGroup
@@ -204,10 +204,10 @@ const EnhancedTableHead = ({ order, orderBy, onRequestSort }) => {
             key={headCell.id}
             sortDirection={orderBy === headCell.id ? order : false}
             align={headCell.align || 'left'}
+            className="!bg-gray-50 dark:!bg-slate-800 !border-gray-200 dark:!border-slate-700 !text-gray-900 dark:!text-slate-100"
             sx={{ 
               fontWeight: 600,
-              backgroundColor: '#f8fafc',
-              borderBottom: '2px solid #e2e8f0',
+              borderBottom: '2px solid',
               width: headCell.width,
               minWidth: headCell.minWidth,
               position: 'sticky',
@@ -223,6 +223,7 @@ const EnhancedTableHead = ({ order, orderBy, onRequestSort }) => {
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
+                className="!text-gray-900 dark:!text-slate-100"
                 sx={{ 
                   '& .MuiTableSortLabel-icon': {
                     fontSize: '1rem'
@@ -357,6 +358,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
         <ButtonGroup 
           variant="outlined" 
           size="small"
+          className="bg-white dark:bg-slate-800"
           sx={{
             '& .MuiButton-root': {
               borderRadius: 1,
@@ -368,6 +370,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             variant={activeFilter === 'ALL' ? 'contained' : 'outlined'}
             onClick={() => handleFilterChange('ALL')}
             startIcon={<FilterIcon />}
+            className="!text-gray-900 dark:!text-slate-100 !border-gray-300 dark:!border-slate-600"
           >
             All ({stats.total})
           </Button>
@@ -376,6 +379,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             color="error"
             onClick={() => handleFilterChange('CRITICAL')}
             startIcon={<CriticalIcon />}
+            className="!border-gray-300 dark:!border-slate-600"
           >
             Critical ({stats.critical})
           </Button>
@@ -384,6 +388,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             color="warning"
             onClick={() => handleFilterChange('HIGH_RISK')}
             startIcon={<WarningIcon />}
+            className="!border-gray-300 dark:!border-slate-600"
           >
             High Risk ({stats.highRisk})
           </Button>
@@ -392,6 +397,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             color="info"
             onClick={() => handleFilterChange('MEDIUM_RISK')}
             startIcon={<DelayIcon />}
+            className="!border-gray-300 dark:!border-slate-600"
           >
             Medium ({stats.mediumRisk})
           </Button>
@@ -400,6 +406,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             color="success"
             onClick={() => handleFilterChange('ON_TRACK')}
             startIcon={<CheckCircleIcon />}
+            className="!border-gray-300 dark:!border-slate-600"
           >
             On Track ({stats.onTrack})
           </Button>
@@ -407,20 +414,9 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
       </Box>
 
       {/* Main Table */}
-      <Paper 
-        sx={{ 
-          width: '100%', 
-          mb: 2,
-          boxShadow: 2,
-          borderRadius: 2
-        }}
-      >
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-lg">
         {/* Header */}
-        <Box sx={{ 
-          p: 3, 
-          borderBottom: '1px solid #e0e0e0',
-          backgroundColor: '#fafafa'
-        }}>
+        <div className="p-6 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-t-xl">
           <Box 
             display="flex" 
             alignItems="center" 
@@ -429,10 +425,18 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             gap={2}
           >
             <Box>
-              <Typography variant="h6" component="div" fontWeight={600}>
+              <Typography 
+                variant="h6" 
+                component="div" 
+                fontWeight={600}
+                className="!text-gray-900 dark:!text-slate-100"
+              >
                 Project Status Overview
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography 
+                variant="body2" 
+                className="!text-gray-600 dark:!text-slate-400"
+              >
                 {filteredProjects.length} projects
                 {activeFilter !== 'ALL' && (
                   <span> • Filtered by: {activeFilter.replace('_', ' ')}</span>
@@ -446,17 +450,27 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                 placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-white dark:bg-slate-700"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon />
+                      <SearchIcon className="text-gray-500 dark:text-slate-400" />
                     </InputAdornment>
                   ),
+                  className: "!text-gray-900 dark:!text-slate-100"
                 }}
                 sx={{ 
                   minWidth: isMobile ? '200px' : '300px',
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: 2
+                    borderRadius: 2,
+                    '& fieldset': {
+                      borderColor: 'rgb(209 213 219)', // gray-300
+                    },
+                    '.dark &': {
+                      '& fieldset': {
+                        borderColor: 'rgb(71 85 105)', // slate-600
+                      }
+                    }
                   }
                 }}
               />
@@ -465,28 +479,25 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                 <IconButton 
                   onClick={onRefresh} 
                   disabled={loading}
-                  sx={{
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark'
-                    }
-                  }}
+                  className="!bg-blue-600 hover:!bg-blue-700 !text-white"
                 >
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
             </Box>
           </Box>
-        </Box>
+        </div>
 
-        {loading && <LinearProgress />}
+        {loading && <LinearProgress className="!bg-blue-100 dark:!bg-slate-700" />}
 
         {/* Table with proper column widths */}
-        <TableContainer sx={{ 
-          maxHeight: isMobile ? 500 : 600,
-          overflowX: 'auto'
-        }}>
+        <TableContainer 
+          className="bg-white dark:bg-slate-900"
+          sx={{ 
+            maxHeight: isMobile ? 500 : 600,
+            overflowX: 'auto'
+          }}
+        >
           <Table 
             stickyHeader 
             size="small"
@@ -504,36 +515,31 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             <TableBody>
               {paginatedProjects.map((project, index) => {
                 // Apply subtle row highlighting based on risk
-                const getRowColor = (riskLevel) => {
+                const getRowClasses = (riskLevel, index) => {
+                  const baseClasses = "hover:bg-gray-50 dark:hover:bg-slate-800";
                   switch (riskLevel) {
                     case 'CRITICAL':
-                      return '#ffebee'; // Light red
+                      return `bg-red-50 dark:bg-red-950/20 ${baseClasses}`;
                     case 'HIGH':
-                      return '#fff3e0'; // Light orange
+                      return `bg-orange-50 dark:bg-orange-950/20 ${baseClasses}`;
                     default:
-                      return index % 2 === 0 ? '#fafafa' : 'white';
+                      return index % 2 === 0 
+                        ? `bg-gray-50 dark:bg-slate-800/50 ${baseClasses}` 
+                        : `bg-white dark:bg-slate-900 ${baseClasses}`;
                   }
                 };
 
                 return (
                   <TableRow
                     key={`project-${project.displaySrNo}`}
-                    hover
-                    sx={{ 
-                      backgroundColor: getRowColor(project.riskLevel),
-                      '&:hover': {
-                        backgroundColor: getRowColor(project.riskLevel) === 'white' 
-                          ? '#f5f5f5' 
-                          : `${getRowColor(project.riskLevel)}cc`,
-                      }
-                    }}
+                    className={getRowClasses(project.riskLevel, index)}
                   >
                     {/* Sr.No - Fixed width, centered */}
                     <TableCell 
                       align="center"
+                      className="!text-blue-600 dark:!text-blue-400 !border-gray-200 dark:!border-slate-700"
                       sx={{ 
                         fontWeight: 600,
-                        color: 'primary.main',
                         fontSize: '0.875rem',
                         padding: '8px 6px'
                       }}
@@ -542,25 +548,31 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     </TableCell>
                     
                     {/* Project No - Fixed width */}
-                    <TableCell sx={{ 
-                      fontWeight: 500,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      padding: '8px 6px'
-                    }}>
+                    <TableCell 
+                      className="!text-gray-900 dark:!text-slate-100 !border-gray-200 dark:!border-slate-700"
+                      sx={{ 
+                        fontWeight: 500,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        padding: '8px 6px'
+                      }}
+                    >
                       <Typography variant="body2" component="div">
                         {project.projectNo || 'N/A'}
                       </Typography>
                     </TableCell>
                     
                     {/* Project Title - Expandable width */}
-                    <TableCell sx={{ 
-                      minWidth: '200px',
-                      wordBreak: 'break-word',
-                      whiteSpace: 'normal',
-                      padding: '8px 6px'
-                    }}>
+                    <TableCell 
+                      className="!text-gray-900 dark:!text-slate-100 !border-gray-200 dark:!border-slate-700"
+                      sx={{ 
+                        minWidth: '200px',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal',
+                        padding: '8px 6px'
+                      }}
+                    >
                       <Typography 
                         variant="body2" 
                         component="div"
@@ -579,12 +591,15 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     </TableCell>
                     
                     {/* Client - Fixed width with ellipsis */}
-                    <TableCell sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      padding: '8px 6px'
-                    }}>
+                    <TableCell 
+                      className="!text-gray-900 dark:!text-slate-100 !border-gray-200 dark:!border-slate-700"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        padding: '8px 6px'
+                      }}
+                    >
                       <Typography 
                         variant="body2"
                         title={project.client}
@@ -594,12 +609,15 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     </TableCell>
                     
                     {/* Project Manager - Fixed width with ellipsis */}
-                    <TableCell sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      padding: '8px 6px'
-                    }}>
+                    <TableCell 
+                      className="!text-gray-900 dark:!text-slate-100 !border-gray-200 dark:!border-slate-700"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        padding: '8px 6px'
+                      }}
+                    >
                       <Typography 
                         variant="body2"
                         title={project.projectManager}
@@ -609,30 +627,29 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                     </TableCell>
                     
                     {/* Quality Engineer - Fixed field name */}
-                    <TableCell sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      padding: '8px 6px'
-                    }}>
+                    <TableCell 
+                      className="!border-gray-200 dark:!border-slate-700"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        padding: '8px 6px'
+                      }}
+                    >
                       <Typography 
                         variant="body2"
-                        title={project.projectQualityEng} // ✅ Fix: Use correct field name
-                        sx={{
-                          color: project.projectQualityEng && project.projectQualityEng !== 'N/A' 
-                            ? 'primary.main' 
-                            : 'text.secondary',
-                          fontWeight: project.projectQualityEng && project.projectQualityEng !== 'N/A' 
-                            ? 500 
-                            : 400
-                        }}
+                        title={project.projectQualityEng}
+                        className={project.projectQualityEng && project.projectQualityEng !== 'N/A' 
+                          ? "!text-blue-600 dark:!text-blue-400 !font-medium" 
+                          : "!text-gray-500 dark:!text-slate-400"
+                        }
                       >
-                        {project.projectQualityEng || 'N/A'} {/* ✅ Fix: Use correct field name */}
+                        {project.projectQualityEng || 'N/A'}
                       </Typography>
                     </TableCell>
                     
                     {/* Metric columns - All centered with optimized widths */}
-                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
+                    <TableCell align="center" className="!border-gray-200 dark:!border-slate-700" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatPercentage(project.qualityBillabilityPercent)}
                         color={getChipColor(project.qualityBillabilityPercent, "billability")}
@@ -641,7 +658,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       />
                     </TableCell>
                     
-                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
+                    <TableCell align="center" className="!border-gray-200 dark:!border-slate-700" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatNumber(project.carsOpen)}
                         color={getChipColor(project.carsOpen, "cars")}
@@ -650,7 +667,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       />
                     </TableCell>
                     
-                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
+                    <TableCell align="center" className="!border-gray-200 dark:!border-slate-700" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatNumber(project.obsOpen)}
                         color={getChipColor(project.obsOpen, "obs")}
@@ -659,7 +676,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       />
                     </TableCell>
                     
-                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
+                    <TableCell align="center" className="!border-gray-200 dark:!border-slate-700" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatPercentage(project.projectKPIsAchievedPercent)}
                         color={getChipColor(project.projectKPIsAchievedPercent, "kpi")}
@@ -668,7 +685,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       />
                     </TableCell>
                     
-                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
+                    <TableCell align="center" className="!border-gray-200 dark:!border-slate-700" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={`${formatNumber(project.delayInAuditsNoDays)}d`}
                         color={formatNumber(project.delayInAuditsNoDays) > 0 ? "error" : "success"}
@@ -677,7 +694,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                       />
                     </TableCell>
                     
-                    <TableCell align="center" sx={{ padding: '8px 4px' }}>
+                    <TableCell align="center" className="!border-gray-200 dark:!border-slate-700" sx={{ padding: '8px 4px' }}>
                       <Chip
                         label={formatPercentage(project.projectCompletionPercent)}
                         color={getChipColor(project.projectCompletionPercent, "kpi")}
@@ -691,12 +708,17 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
               
               {paginatedProjects.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6 }}>
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                  <TableCell 
+                    colSpan={12} 
+                    align="center" 
+                    className="!text-gray-500 dark:!text-slate-400 !border-gray-200 dark:!border-slate-700"
+                    sx={{ py: 6 }}
+                  >
+                    <Typography variant="h6" className="!text-gray-500 dark:!text-slate-400" gutterBottom>
                       {searchTerm ? 'No projects match your search' : `No ${activeFilter.toLowerCase().replace('_', ' ')} projects found`}
                     </Typography>
                     {searchTerm && (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" className="!text-gray-400 dark:!text-slate-500">
                         Try adjusting your search terms or clear the filter
                       </Typography>
                     )}
@@ -708,10 +730,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
         </TableContainer>
 
         {/* Enhanced Pagination */}
-        <Box sx={{ 
-          borderTop: '1px solid #e0e0e0',
-          backgroundColor: '#fafafa'
-        }}>
+        <div className="border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-b-xl">
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 50, 100]}
             component="div"
@@ -720,17 +739,21 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            className="!text-gray-900 dark:!text-slate-100"
             sx={{
               '& .MuiTablePagination-toolbar': {
                 minHeight: '52px'
               },
               '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
                 fontWeight: 500
+              },
+              '& .MuiIconButton-root': {
+                color: 'inherit'
               }
             }}
           />
-        </Box>
-      </Paper>
+        </div>
+      </div>
     </Box>
   );
 };
