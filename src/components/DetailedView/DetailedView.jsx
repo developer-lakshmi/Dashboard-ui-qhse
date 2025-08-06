@@ -454,8 +454,12 @@ const DetailedView = () => {
               fontWeight: 700,
               lineHeight: 1.2,
               textAlign: 'center',
-              color: header.priority === 'alert' ? '#d97706' : 
-                     header.priority === 'focus' ? '#2563eb' : '#374151'
+              color: header.priority === 'alert' ? '#d97706 !important' : 
+                     header.priority === 'focus' ? '#2563eb !important' : '#374151 !important',
+              '.dark &': {
+                color: header.priority === 'alert' ? '#fbbf24 !important' : 
+                       header.priority === 'focus' ? '#60a5fa !important' : 'rgb(241 245 249) !important',
+              }
             }}>
               {header.label}
             </Typography>
@@ -477,13 +481,17 @@ const DetailedView = () => {
                 width: '100%'
               }}>
                 <Typography variant="body2" sx={{ 
-                  color: "#d97706",
+                  color: "#d97706 !important",
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   backgroundColor: '#fef3c7',
                   px: 1,
                   py: 0.25,
-                  borderRadius: 1
+                  borderRadius: 1,
+                  '.dark &': {
+                    color: "#fbbf24 !important",
+                    backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                  }
                 }}>
                   {formattedValue}
                 </Typography>
@@ -499,13 +507,17 @@ const DetailedView = () => {
                 width: '100%'
               }}>
                 <Typography variant="body2" sx={{ 
-                  color: "#2563eb",
+                  color: "#2563eb !important",
                   fontWeight: 500,
                   fontSize: '0.8rem',
                   backgroundColor: '#dbeafe',
                   px: 1,
                   py: 0.25,
-                  borderRadius: 1
+                  borderRadius: 1,
+                  '.dark &': {
+                    color: "#60a5fa !important",
+                    backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                  }
                 }}>
                   {formattedValue}
                 </Typography>
@@ -515,14 +527,19 @@ const DetailedView = () => {
             return (
               <Typography variant="body2" sx={{ 
                 color: formattedValue === '-' || formattedValue === 'N/A' || formattedValue === 'TBD' || formattedValue === '0'
-                  ? "#94a3b8" 
-                  : "#374151",
+                  ? "#94a3b8 !important" 
+                  : "#374151 !important",
                 fontSize: '0.8rem',
                 fontWeight: formattedValue === '-' || formattedValue === 'N/A' || formattedValue === 'TBD' ? 400 : 500,
                 wordBreak: header.key === "remarks" ? 'break-word' : 'normal',
                 textAlign: ["remarks", "projectTitle"].includes(header.key) ? 'left' : 'center',
                 width: '100%',
-                fontStyle: formattedValue === 'N/A' || formattedValue === 'TBD' ? 'italic' : 'normal'
+                fontStyle: formattedValue === 'N/A' || formattedValue === 'TBD' ? 'italic' : 'normal',
+                '.dark &': {
+                  color: formattedValue === '-' || formattedValue === 'N/A' || formattedValue === 'TBD' || formattedValue === '0'
+                    ? "rgb(148 163 184) !important" 
+                    : "rgb(241 245 249) !important",
+                }
               }}>
                 {formattedValue}
               </Typography>
@@ -563,13 +580,18 @@ const DetailedView = () => {
   }
 
   return (
+    
     <Box sx={{ 
       height: '100%', 
       width: '100%', 
       p: 2,
       overflow: 'hidden'
-    }}>
-      <Paper 
+    }}
+              // className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-lg "
+
+    >
+
+      <Paper                                     
         elevation={2} 
         sx={{
           height: '100%',
@@ -580,8 +602,12 @@ const DetailedView = () => {
         }}
       >
         {/* Header Section */}
+                <div className="p-6 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-t-xl  ">
+        
         <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: "primary.main" }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2,  }}
+          className="!text-gray-900 dark:!text-slate-100"
+          >
             📊 Detailed Project Information
           </Typography>
 
@@ -589,6 +615,8 @@ const DetailedView = () => {
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Box sx={{ flex: '0 0 auto', minWidth: '300px', maxWidth: '400px' }}>
               <TextField
+             className="bg-white dark:bg-slate-700"
+              
                 variant="outlined"
                 size="small"
                 placeholder="Search projects..."
@@ -596,8 +624,8 @@ const DetailedView = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <Search size={16} style={{ color: '#6b7280' }} />
+                    <InputAdornment    position="start">
+                      <Search size={16} style={{ color: '#6b7280' }} className="text-gray-500 dark:text-slate-400" />
                     </InputAdornment>
                   ),
                   endAdornment: searchTerm && (
@@ -704,7 +732,7 @@ const DetailedView = () => {
           </Box>
 
           {/* View Mode Buttons */}
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+          <Stack  direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}className="!text-gray-600 dark:!text-slate-400">
             {["all", "alerts", "focus", "standard", "everything"].map((mode) => (
               <Button
                 key={mode}
@@ -728,7 +756,9 @@ const DetailedView = () => {
           </Stack>
 
           {/* Compact Info Bar */}
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+          <Typography className="!text-gray-600 dark:!text-slate-400"
+          
+           variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
             {rows.length} projects • {filteredHeaders.length} columns • {
               viewMode === "everything" ? "All fields" : 
               viewMode === "alerts" ? "Alert fields" :
@@ -737,10 +767,13 @@ const DetailedView = () => {
             }
           </Typography>
         </Box>
+        </div>
 
         {/* DataGrid Container */}
-        <Box sx={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+        <Box 
+sx={{ flex: 1, width: '100%', overflow: 'hidden' }}>
           <DataGrid
+           className="bg-white dark:bg-slate-900"
             rows={rows}
             columns={columns}
             pagination={true}
@@ -761,10 +794,23 @@ const DetailedView = () => {
                 overflow: 'hidden'
               },
               '& .MuiDataGrid-columnHeaders': { 
-                backgroundColor: "#f8fafc",
+                backgroundColor: "#f8fafc", // light gray-blue instead of red
                 borderBottom: "2px solid #e2e8f0",
+                '.dark &': {
+                  backgroundColor: "rgb(51 65 85)", // slate-700
+                  borderBottomColor: "#334155", // slate-600
+                },
                 '& .MuiDataGrid-columnHeader': {
                   padding: '8px 4px',
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    color: '#374151 !important', // gray-700
+                    '.dark &': {
+                      color: ' #F1F5F9 !important', // slate-100
+                    }
+                  },
+                  '& .MuiDataGrid-columnHeaderTitleContainer': {
+                    color: 'inherit !important',
+                  }
                 }
               },
               '& .MuiDataGrid-cell': { 
@@ -772,28 +818,77 @@ const DetailedView = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderBottom: '1px solid #f1f5f9'
+                borderBottom: '1px solid #f1f5f9',
+                color: '#374151', // gray-700
+                '.dark &': {
+                  borderBottomColor: 'rgb(71 85 105)', // slate-600
+                  color: 'rgb(241 245 249)', // slate-100
+                }
               },
               '& .MuiDataGrid-row': {
+                backgroundColor: 'white',
+                '.dark &': {
+                  backgroundColor: 'rgb(15 23 42)', // slate-900
+                },
                 '&:hover': {
-                  backgroundColor: "#f8fafc"
+                  backgroundColor: "#f8fafc",
+                  '.dark &': {
+                    backgroundColor: 'rgb(51 65 85)', // slate-700
+                  }
                 },
                 '&:nth-of-type(even)': {
-                  backgroundColor: '#fafbfb'
+                  backgroundColor: '#fafbfb',
+                  '.dark &': {
+                    backgroundColor: 'rgba(51, 65, 85, 0.5)', // slate-700/50
+                  }
                 }
               },
               '& .MuiDataGrid-columnSeparator': {
                 visibility: 'visible',
-                color: '#e2e8f0'
+                color: '#e2e8f0',
+                '.dark &': {
+                  color: 'rgb(71 85 105)', // slate-600
+                }
               },
               '& .MuiDataGrid-footerContainer': {
                 borderTop: '2px solid #e2e8f0',
-                backgroundColor: '#f8fafc'
+                backgroundColor: '#f8fafc',
+                '.dark &': {
+                  borderTopColor: 'rgb(71 85 105)', // slate-600
+                  backgroundColor: 'rgb(51 65 85)', // slate-700
+                },
+                '& .MuiTablePagination-root': {
+                  color: '#374151', // gray-700
+                  '.dark &': {
+                    color: 'rgb(241 245 249)', // slate-100
+                  }
+                },
+                '& .MuiIconButton-root': {
+                  color: '#6b7280', // gray-500
+                  '.dark &': {
+                    color: 'rgb(203 213 225)', // slate-300
+                  }
+                }
+              },
+              // Style the sort icons
+              '& .MuiDataGrid-sortIcon': {
+                color: '#6b7280', // gray-500
+                '.dark &': {
+                  color: 'rgb(203 213 225)', // slate-300
+                }
+              },
+              // Style pagination controls
+              '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                color: '#374151', // gray-700
+                '.dark &': {
+                  color: 'rgb(241 245 249)', // slate-100
+                }
               }
             }}
           />
         </Box>
       </Paper>
+
     </Box>
   );
 };
