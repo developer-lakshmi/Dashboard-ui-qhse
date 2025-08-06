@@ -593,12 +593,17 @@ const DetailedView = () => {
 
       <Paper                                     
         elevation={2} 
+        className="bg-white dark:bg-slate-900"
         sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           borderRadius: 2,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          backgroundColor: 'white',
+          '.dark &': {
+            backgroundColor: 'rgb(15 23 42)', // slate-900
+          }
         }}
       >
         {/* Header Section */}
@@ -794,22 +799,60 @@ sx={{ flex: 1, width: '100%', overflow: 'hidden' }}>
                 overflow: 'hidden'
               },
               '& .MuiDataGrid-columnHeaders': { 
-                backgroundColor: "#f8fafc", // light gray-blue instead of red
+                backgroundColor: "#f8fafc !important", // Add !important
                 borderBottom: "2px solid #e2e8f0",
                 '.dark &': {
-                  backgroundColor: "rgb(51 65 85)", // slate-700
-                  borderBottomColor: "#334155", // slate-600
+                  backgroundColor: "rgb(30 41 59) !important", // slate-800 with !important
+                  borderBottomColor: "rgb(51 65 85) !important", // slate-700 with !important
                 },
                 '& .MuiDataGrid-columnHeader': {
                   padding: '8px 4px',
+                  borderRight: '1px solid #e2e8f0',
+                  '.dark &': {
+                    borderRightColor: 'rgb(51 65 85)',
+                    backgroundColor: 'rgb(30 41 59) !important', // Ensure individual headers get dark bg
+                  },
+                  '&:hover': {
+                    backgroundColor: '#f1f5f9 !important',
+                    '.dark &': {
+                      backgroundColor: 'rgb(51 65 85) !important', // slate-700
+                    }
+                  },
                   '& .MuiDataGrid-columnHeaderTitle': {
                     color: '#374151 !important', // gray-700
+                    fontWeight: '600 !important',
+                    fontSize: '0.75rem !important',
                     '.dark &': {
-                      color: ' #F1F5F9 !important', // slate-100
+                      color: 'rgb(226 232 240) !important', // slate-200
                     }
                   },
                   '& .MuiDataGrid-columnHeaderTitleContainer': {
                     color: 'inherit !important',
+                    justifyContent: 'center',
+                    '.dark &': {
+                      color: 'rgb(226 232 240) !important',
+                    }
+                  },
+                  // Target the custom Typography in renderHeader
+                  '& .MuiTypography-caption': {
+                    color: '#374151 !important',
+                    '.dark &': {
+                      color: 'rgb(226 232 240) !important',
+                    }
+                  },
+                  '& .MuiDataGrid-iconButtonContainer': {
+                    '& .MuiIconButton-root': {
+                      color: '#6b7280 !important',
+                      '.dark &': {
+                        color: 'rgb(203 213 225) !important', // slate-300
+                      }
+                    }
+                  },
+                  '& .MuiDataGrid-menuIcon': {
+                    color: '#6b7280 !important',
+                    '.dark &': {
+                      color: 'rgb(203 213 225) !important',
+                    }
                   }
                 }
               },
@@ -883,7 +926,42 @@ sx={{ flex: 1, width: '100%', overflow: 'hidden' }}>
                 '.dark &': {
                   color: 'rgb(241 245 249)', // slate-100
                 }
-              }
+              },
+               // Add filler area styling to match column headers
+              '& .MuiDataGrid-filler': {
+                backgroundColor: "#f8fafc !important",
+                '.dark &': {
+                  backgroundColor: "rgb(30 41 59) !important", // slate-800 - same as column headers
+                }
+              },
+              // Add scrollbar filler styling to match column headers
+              '& .MuiDataGrid-scrollbarFiller': {
+                backgroundColor: "#f8fafc !important",
+                '.dark &': {
+                  backgroundColor: "rgb(30 41 59) !important", // slate-800 - same as column headers
+                }
+              },
+              // Add header scrollbar filler styling
+              '& .MuiDataGrid-scrollbarFiller--header': {
+                backgroundColor: "#f8fafc !important",
+                '.dark &': {
+                  backgroundColor: "rgb(30 41 59) !important", // slate-800 - same as column headers
+                }
+              },
+              // Add virtual scroller background
+              '& .MuiDataGrid-virtualScroller': {
+                backgroundColor: 'white',
+                '.dark &': {
+                  backgroundColor: 'rgb(15 23 42)', // slate-900 - same as main background
+                }
+              },
+              // Add overlay wrapper background
+              '& .MuiDataGrid-overlayWrapper': {
+                backgroundColor: 'white',
+                '.dark &': {
+                  backgroundColor: 'rgb(15 23 42)', // slate-900 - same as main background
+                }
+              },
             }}
           />
         </Box>
