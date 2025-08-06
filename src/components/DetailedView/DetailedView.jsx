@@ -2,10 +2,10 @@ import React, { useState, useMemo } from "react";
 import { fieldPriorities } from "../../data"; // Keep this for field priorities configuration
 import { useGoogleSheets } from '../../hooks/useGoogleSheets'; // Add this import
 import {
-  Paper, Typography, Box, Chip, Button, Stack
+  Paper, Typography, Box, Chip, Button, Stack, TextField, InputAdornment
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { AlertTriangle, Star, Info, User, Calendar, ClipboardList, BadgeCheck, TrendingUp } from "lucide-react";
+import { AlertTriangle, Star, Info, User, Calendar, ClipboardList, BadgeCheck, TrendingUp, Search, X } from "lucide-react";
 
 // Import common components for consistent loading/error states
 import { LoadingState } from "../common/LoadingState";
@@ -281,6 +281,7 @@ const getCellChip = (header, value) => {
 const DetailedView = () => {
   const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets();
   const [viewMode, setViewMode] = useState("all");
+  const [searchTerm, setSearchTerm] = useState(""); // Add search state
 
   // Debug: Log first project to verify field structure (only when data exists)
   if (projectsData && projectsData.length > 0) {
@@ -393,6 +394,41 @@ const DetailedView = () => {
     return value;
   };
 
+  // Enhanced rows with search filtering (KEEP THIS ONE)
+  const rows = useMemo(() => {
+    if (!projectsData) return [];
+    
+    let filteredData = projectsData;
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filteredData = projectsData.filter(row => {
+        const searchableFields = [
+          row.projectNo,
+          row.projectTitle,
+          row.client,
+          row.projectManager,
+          row.projectQualityEng
+        ];
+        
+        return searchableFields.some(field => 
+          field && field.toString().toLowerCase().includes(searchLower)
+        );
+      });
+    }
+    
+    return filteredData.map((row, idx) => ({
+      id: row.srNo || idx + 1,
+      ...row,
+    }));
+  }, [projectsData, searchTerm]);
+
+  // Clear search function
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
   // DataGrid columns with enhanced rendering
   const columns = useMemo(
     () =>
@@ -497,15 +533,6 @@ const DetailedView = () => {
     [filteredHeaders]
   );
 
-  // DataGrid expects each row to have an id
-  const rows = useMemo(() => {
-    if (!projectsData) return [];
-    return projectsData.map((row, idx) => ({
-      id: row.srNo || idx + 1,
-      ...row,
-    }));
-  }, [projectsData]);
-
   // NOW HANDLE CONDITIONAL RETURNS AFTER ALL HOOKS
   
   // Loading state
@@ -554,14 +581,130 @@ const DetailedView = () => {
       >
         {/* Header Section */}
         <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: "primary.main" }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: "primary.main" }}>
             📊 Detailed Project Information
           </Typography>
 
-        
+          {/* Compact Professional Search Bar */}
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ flex: '0 0 auto', minWidth: '300px', maxWidth: '400px' }}>
+              <TextField
+                variant="outlined"
+                size="small"
+                placeholder="Search projects..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search size={16} style={{ color: '#6b7280' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchTerm && (
+                    <InputAdornment position="end">
+                      <Box
+                        component="button"
+                        onClick={clearSearch}
+                        sx={{
+                          border: 'none',
+                          background: 'none',
+                          cursor: 'pointer',
+                          p: 0.5,
+                          borderRadius: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          color: '#6b7280',
+                          '&:hover': {
+                            backgroundColor: '#f3f4f6',
+                            color: '#374151'
+                          }
+                        }}
+                      >
+                        <X size={14} />
+                      </Box>
+                    </InputAdornment>
+                  )
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    height: '40px',
+                    border: '1px solid #d1d5db',
+                    '&:hover': {
+                      borderColor: '#9ca3af',
+                    },
+                    '&.Mui-focused': {
+                      borderColor: '#3b82f6',
+                      boxShadow: '0 0 0 1px rgba(59, 130, 246, 0.1)',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#3b82f6',
+                      }
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'transparent'
+                    },
+                    '& input': {
+                      padding: '10px 12px',
+                      '&::placeholder': {
+                        color: '#9ca3af',
+                        opacity: 1
+                      }
+                    }
+                  }
+                }}
+              />
+            </Box>
+
+            {/* Search Results - Compact Display */}
+            {searchTerm && (
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 0.5,
+                backgroundColor: '#f1f5f9',
+                borderRadius: '6px',
+                px: 1.5,
+                py: 0.5,
+                fontSize: '0.8rem'
+              }}>
+                <Box sx={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: '50%',
+                  backgroundColor: rows.length > 0 ? '#10b981' : '#f59e0b'
+                }} />
+                <Typography variant="caption" sx={{ 
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
+                  color: '#374151'
+                }}>
+                  {rows.length} result{rows.length !== 1 ? 's' : ''}
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={clearSearch}
+                  sx={{
+                    fontSize: '0.7rem',
+                    color: '#6b7280',
+                    textTransform: 'none',
+                    minWidth: 'auto',
+                    p: 0.25,
+                    ml: 0.5,
+                    '&:hover': {
+                      backgroundColor: '#e5e7eb'
+                    }
+                  }}
+                >
+                  ✕
+                </Button>
+              </Box>
+            )}
+          </Box>
 
           {/* View Mode Buttons */}
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
             {["all", "alerts", "focus", "standard", "everything"].map((mode) => (
               <Button
                 key={mode}
@@ -570,7 +713,6 @@ const DetailedView = () => {
                 size="small"
                 onClick={() => setViewMode(mode)}
                 sx={{ 
-                  mb: 0.5,
                   fontSize: '0.75rem',
                   px: 1.5,
                   py: 0.5
@@ -585,13 +727,13 @@ const DetailedView = () => {
             ))}
           </Stack>
 
-          {/* Current view info */}
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Showing {filteredHeaders.length} columns • {
-              viewMode === "everything" ? "All available fields" : 
-              viewMode === "alerts" ? "High priority fields only" :
-              viewMode === "focus" ? "Focus tracking fields" :
-              viewMode === "standard" ? "Basic information fields" : "Key project fields"
+          {/* Compact Info Bar */}
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+            {rows.length} projects • {filteredHeaders.length} columns • {
+              viewMode === "everything" ? "All fields" : 
+              viewMode === "alerts" ? "Alert fields" :
+              viewMode === "focus" ? "Focus fields" :
+              viewMode === "standard" ? "Standard fields" : "Key fields"
             }
           </Typography>
         </Box>
