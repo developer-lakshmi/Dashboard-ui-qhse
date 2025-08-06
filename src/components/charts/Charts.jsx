@@ -79,8 +79,8 @@ const Charts = ({
             key={chart.id}
             className={chart.fullWidth ? "md:col-span-2" : ""}
           >
-            <Card className="h-full min-h-[400px] flex flex-col hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-              <CardContent className="p-6 flex flex-col h-full">
+            <Card className="h-full min-h-[400px] flex flex-col hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden">
+              <CardContent className="p-6 flex flex-col h-full bg-white dark:bg-slate-900">
                 {chart.component}
               </CardContent>
             </Card>

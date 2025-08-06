@@ -235,13 +235,10 @@ const CriticalIssues = ({ filteredProjects }) => {
   const issuesData = useMemo(() => [
     {
       title: "Critical CARs",
-      count: filteredProjects.filter(p => parseNumber(p.carsOpen) > THRESHOLDS.CARS_CRITICAL).length,
-      description: `Projects with >${THRESHOLDS.CARS_CRITICAL} open CARs`,
-      icon: <AlertTriangle className="w-8 h-8 text-red-500 drop-shadow" />,
-      bgColor: "bg-gradient-to-br from-red-50 via-white to-red-100",
-      textColor: "text-red-800",
-      countColor: "text-red-600",
-      borderColor: "border-red-200"
+      bgColor: "bg-gradient-to-br from-red-50 via-white to-red-100 dark:from-red-950 dark:via-slate-900 dark:to-red-900",
+      textColor: "text-red-800 dark:text-red-200",
+      countColor: "text-red-600 dark:text-red-400",
+      borderColor: "border-red-200 dark:border-red-800"
     },
     {
       title: "Audit Delays",

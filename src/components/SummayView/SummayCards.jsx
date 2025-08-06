@@ -28,6 +28,37 @@ const iconMap = {
   "Revenue Quality": <DollarSign className="w-8 h-8 text-green-500 dark:text-green-400" />
 };
 
+// Fixed color mappings for dark mode (replace dynamic classes)
+const getCardClasses = (color) => {
+  const colorMap = {
+    red: "border-l-4 border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950/20",
+    orange: "border-l-4 border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-950/20",
+    blue: "border-l-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/20",
+    green: "border-l-4 border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-950/20"
+  };
+  return colorMap[color] || colorMap.blue;
+};
+
+const getTextClasses = (color) => {
+  const colorMap = {
+    red: "text-red-600 dark:text-red-400",
+    orange: "text-orange-600 dark:text-orange-400",
+    blue: "text-blue-600 dark:text-blue-400",
+    green: "text-green-600 dark:text-green-400"
+  };
+  return colorMap[color] || colorMap.blue;
+};
+
+const getValueClasses = (color) => {
+  const colorMap = {
+    red: "text-red-800 dark:text-red-300",
+    orange: "text-orange-800 dark:text-orange-300",
+    blue: "text-blue-800 dark:text-blue-300",
+    green: "text-green-800 dark:text-green-300"
+  };
+  return colorMap[color] || colorMap.blue;
+};
+
 /**
  * HELPER FUNCTIONS
  */
@@ -100,47 +131,47 @@ const getModalColumns = (cardTitle) => {
 };
 
 /**
- * SIMPLIFIED CELL FORMATTING
+ * SIMPLIFIED CELL FORMATTING - Fixed for dark mode
  */
 const getCellValue = (project, columnKey) => {
   const value = project[columnKey];
   
   if (!value || value === '' || value === 'N/A') {
-    return <span className="text-gray-400">-</span>;
+    return <span className="text-gray-400 dark:text-slate-500">-</span>;
   }
   
   // KPI Performance coloring
   if (columnKey === 'projectKPIsAchievedPercent') {
     const numVal = parsePercent(value);
-    const className = numVal >= 80 ? "bg-green-100 text-green-800 px-2 py-1 rounded text-xs" : 
-                     numVal >= 70 ? "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs" : 
-                     "bg-red-100 text-red-800 px-2 py-1 rounded text-xs";
+    const className = numVal >= 80 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
+                     numVal >= 70 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
+                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value}</span>;
   }
   
   // Revenue Quality coloring
   if (columnKey === 'qualityBillabilityPercent') {
     const numVal = parsePercent(value);
-    const className = numVal >= 85 ? "bg-green-100 text-green-800 px-2 py-1 rounded text-xs" : 
-                     numVal >= 70 ? "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs" : 
-                     "bg-red-100 text-red-800 px-2 py-1 rounded text-xs";
+    const className = numVal >= 85 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
+                     numVal >= 70 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
+                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value}</span>;
   }
   
   // Issues coloring
   if (columnKey === 'carsOpen' || columnKey === 'obsOpen') {
     const numVal = parseNumber(value);
-    if (numVal === 0) return <span className="text-gray-400">0</span>;
-    const className = numVal > 3 ? "bg-red-100 text-red-800 px-2 py-1 rounded text-xs" : 
-                     "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs";
+    if (numVal === 0) return <span className="text-gray-400 dark:text-slate-500">0</span>;
+    const className = numVal > 3 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs" : 
+                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value}</span>;
   }
   
   // Audit delays
   if (columnKey === 'delayInAuditsNoDays') {
     const numVal = parseNumber(value);
-    const className = numVal > 15 ? "bg-red-100 text-red-800 px-2 py-1 rounded text-xs" : 
-                     "bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs";
+    const className = numVal > 15 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs" : 
+                     "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value} days</span>;
   }
   
@@ -283,15 +314,15 @@ const SummaryCards = ({ filteredProjects = [] }) => {
             {summaryData.filter(item => item.priority === 'alert').map((item, index) => (
               <Card 
                 key={index} 
-                className={`border-l-4 border-${item.color}-500 bg-${item.color}-50 dark:bg-${item.color}-950 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
+                className={`${getCardClasses(item.color)} cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border border-gray-200 dark:border-slate-700`}
                 onClick={() => handleCardClick(item.title)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-4 bg-white dark:bg-slate-800">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.title}</p>
                     <div>{iconMap[item.title]}</div>
                   </div>
-                  <p className={`text-3xl font-bold text-${item.color}-600 dark:text-${item.color}-400 mb-1`}>{item.value}</p>
+                  <p className={`text-3xl font-bold ${getValueClasses(item.color)} mb-1`}>{item.value}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">{item.description}</p>
                 </CardContent>
               </Card>
@@ -309,15 +340,15 @@ const SummaryCards = ({ filteredProjects = [] }) => {
             {summaryData.filter(item => item.priority === 'focus').map((item, index) => (
               <Card 
                 key={index} 
-                className={`border-l-4 border-${item.color}-500 bg-${item.color}-50 dark:bg-${item.color}-950 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
+                className={`${getCardClasses(item.color)} cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border border-gray-200 dark:border-slate-700`}
                 onClick={() => handleCardClick(item.title)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-4 bg-white dark:bg-slate-800">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.title}</p>
                     <div>{iconMap[item.title]}</div>
                   </div>
-                  <p className={`text-3xl font-bold text-${item.color}-600 dark:text-${item.color}-400 mb-1`}>{item.value}</p>
+                  <p className={`text-3xl font-bold ${getValueClasses(item.color)} mb-1`}>{item.value}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">{item.description}</p>
                 </CardContent>
               </Card>
@@ -326,7 +357,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
         </div>
       </div>
 
-      {/* SIMPLIFIED MODAL */}
+      {/* ENHANCED MODAL WITH PROPER DARK MODE */}
       <Modal
         open={modalOpen}
         onClose={handleCloseModal}
@@ -345,41 +376,46 @@ const SummaryCards = ({ filteredProjects = [] }) => {
             outline: 'none',
           }}
         >
-          <Paper elevation={6} sx={{ borderRadius: 3, p: 3, position: 'relative' }}>
+          <Paper 
+            elevation={6} 
+            className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700"
+            sx={{ borderRadius: 3, p: 3, position: 'relative' }}
+          >
             <IconButton
               onClick={handleCloseModal}
+              className="!text-gray-500 dark:!text-slate-400 hover:!text-gray-700 dark:hover:!text-slate-200"
               sx={{ position: 'absolute', right: 12, top: 12 }}
             >
               <CloseIcon />
             </IconButton>
             
-            <h2 className="font-bold text-xl mb-4 text-blue-700 pr-8">
+            <h2 className="font-bold text-xl mb-4 text-blue-700 dark:text-blue-400 pr-8">
               {modalTitle}
             </h2>
             
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
               {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''}
             </p>
             
             {modalProjects.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No projects found.</p>
+              <p className="text-center text-gray-500 dark:text-slate-400 py-8">No projects found.</p>
             ) : (
-              <div style={{ maxHeight: 400, overflowY: 'auto' }}>
-                <table className="min-w-full text-sm border rounded-lg">
+              <div style={{ maxHeight: 400, overflowY: 'auto' }} className="bg-white dark:bg-slate-900">
+                <table className="min-w-full text-sm border border-gray-200 dark:border-slate-700 rounded-lg">
                   <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900">
                     <tr>
                       {modalColumns.map(column => (
-                        <th key={column.key} className="border px-3 py-2 text-left font-semibold">
+                        <th key={column.key} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-left font-semibold text-gray-900 dark:text-slate-100">
                           {column.label}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="bg-white dark:bg-slate-900">
                     {modalProjects.map((project, idx) => (
-                      <tr key={idx} className="hover:bg-blue-50 dark:hover:bg-blue-950">
+                      <tr key={idx} className="hover:bg-blue-50 dark:hover:bg-blue-950/30">
                         {modalColumns.map(column => (
-                          <td key={column.key} className="border px-3 py-2">
+                          <td key={column.key} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100">
                             {getCellValue(project, column.key)}
                           </td>
                         ))}

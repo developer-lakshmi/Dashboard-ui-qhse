@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // Your Google Sheets configuration
 const SHEET_ID = '1gPwSaDEY84dkfqf78nzhdtxT-j1TaJWsaS_15gpraV4';
-const SHEET_NAME = 'Sheet1';
+// const SHEET_NAME = 'Sheet1';
+const SHEET_NAME = 'QHSE running projects status'; // Ensure this matches your actual sheet name
 const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';
 
 // Updated field mapping to match your ACTUAL Google Sheets headers

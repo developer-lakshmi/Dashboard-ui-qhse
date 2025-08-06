@@ -136,106 +136,146 @@ const basicHeaders = [
   { key: "remarks", label: "Remarks", priority: "standard", color: colorMap.standard }
 ];
 
+// Updated getCellChip function - Clean and minimal
 const getCellChip = (header, value) => {
-  if (header.priority === "alert") {
-    return (
-      <Chip
-        icon={<AlertTriangle size={14} />}
-        label="Alert"
-        color="warning"
-        size="small"
-        sx={{ ml: 0.5, fontWeight: 600, fontSize: '0.7rem' }}
-      />
-    );
-  }
-  if (header.priority === "focus") {
-    return (
-      <Chip
-        icon={<Info size={14} />}
-        label="Focus"
-        color="info"
-        size="small"
-        sx={{ ml: 0.5, fontWeight: 600, fontSize: '0.7rem' }}
-      />
-    );
-  }
-  
   // Handle KPI status colors based on percentage values
   if (header.key === "projectKPIsAchievedPercent" || header.key === "qualityBillabilityPercent") {
+    // Check if value is empty, N/A, or contains Excel error
+    if (!value || value === '' || value === 'N/A' || value === null || value === undefined || 
+        value === '#DIV/0!' || String(value).includes('#DIV/0!') || String(value).includes('#ERROR')) {
+      return (
+        <Typography variant="body2" sx={{ 
+          color: "#94a3b8", 
+          fontSize: '0.8rem',
+          fontStyle: 'italic',
+          fontWeight: 400
+        }}>
+          N/A
+        </Typography>
+      );
+    }
+
+    // If we have a value, process it normally
     const numericValue = parseFloat(value?.toString().replace('%', '')) || 0;
     let color = "default";
-    if (numericValue >= 90) color = "success";
-    else if (numericValue >= 70) color = "info";
-    else if (numericValue >= 50) color = "warning";
-    else color = "error";
+    let chipBgColor = '#f3f4f6';
+    let chipTextColor = '#6b7280';
     
+    if (numericValue >= 90) {
+      color = "success";
+      chipBgColor = '#f0fdf4';
+      chipTextColor = '#15803d';
+    } else if (numericValue >= 70) {
+      color = "info";
+      chipBgColor = '#e0f2fe';
+      chipTextColor = '#0369a1';
+    } else if (numericValue >= 50) {
+      color = "warning";
+      chipBgColor = '#fffbeb';
+      chipTextColor = '#f59e0b';
+    } else {
+      color = "error";
+      chipBgColor = '#fef2f2';
+      chipTextColor = '#ef4444';
+    }
+    
+    // Show ONLY the chip with percentage and icon - clean and minimal
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
-        <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{value}</span>
         <Chip
+          icon={<AlertTriangle size={14} />}
           label={`${Math.round(numericValue)}%`}
           color={color}
           size="small"
-          sx={{ fontWeight: 600, fontSize: '0.7rem', minWidth: 'auto' }}
+          sx={{ 
+            fontWeight: 600, 
+            fontSize: '0.7rem', 
+            minWidth: 'auto',
+            backgroundColor: chipBgColor,
+            color: chipTextColor,
+          }}
         />
+      </Box>
+    );
+  }
+
+  // For alert priority fields - CLEAN: Show value + icon only
+  if (header.priority === "alert") {
+    if (!value || value === '' || value === 'N/A' || value === null || value === undefined ||
+        value === '#DIV/0!' || String(value).includes('#DIV/0!') || String(value).includes('#ERROR')) {
+      return (
+        <Typography variant="body2" sx={{ 
+          color: "#94a3b8", 
+          fontSize: '0.8rem',
+          fontStyle: 'italic',
+          fontWeight: 400
+        }}>
+          {header.key.includes('Percent') ? 'N/A' : 
+           ['carsOpen', 'obsOpen', 'carsClosed', 'obsClosed'].includes(header.key) ? '0' :
+           header.key.includes('Date') ? 'TBD' : '-'}
+        </Typography>
+      );
+    }
+
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        gap: 0.5, 
+        width: '100%'
+      }}>
+        <AlertTriangle size={16} color="#d97706" />
+        <Typography variant="body2" sx={{ 
+          color: "#d97706",
+          fontWeight: 500,
+          fontSize: '0.8rem'
+        }}>
+          {value}
+        </Typography>
+      </Box>
+    );
+  }
+
+  // For focus priority fields - CLEAN: Show value + icon only
+  if (header.priority === "focus") {
+    if (!value || value === '' || value === 'N/A' || value === null || value === undefined ||
+        value === '#DIV/0!' || String(value).includes('#DIV/0!') || String(value).includes('#ERROR')) {
+      return (
+        <Typography variant="body2" sx={{ 
+          color: "#94a3b8", 
+          fontSize: '0.8rem',
+          fontStyle: 'italic',
+          fontWeight: 400
+        }}>
+          {header.key.includes('Percent') ? 'N/A' : 
+           ['carsOpen', 'obsOpen', 'carsClosed', 'obsClosed'].includes(header.key) ? '0' :
+           header.key.includes('Date') ? 'TBD' : '-'}
+        </Typography>
+      );
+    }
+
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        gap: 0.5, 
+        width: '100%'
+      }}>
+        <Info size={16} color="#2563eb" />
+        <Typography variant="body2" sx={{ 
+          color: "#2563eb",
+          fontWeight: 500,
+          fontSize: '0.8rem'
+        }}>
+          {value}
+        </Typography>
       </Box>
     );
   }
   
   return null;
-};
-
-const iconForHeader = (header) => {
-  // Alert (orange) - critical fields that need attention
-  if (
-    [
-      "qualityBillabilityPercent",
-      "projectQualityPlanStatusRev",
-      "projectQualityPlanStatusIssueDate",
-      "delayInAuditsNoDays",
-      "carsOpen",
-      "carsDelayedClosingNoDays",
-      "obsOpen",
-      "obsDelayedClosingNoDays",
-      "projectKPIsAchievedPercent"
-    ].includes(header.key)
-  ) {
-    return <AlertTriangle size={14} />;
-  }
-  // Focus (blue) - important tracking fields
-  if (
-    [
-      "projectAudit1",
-      "projectAudit2",
-      "projectAudit3",
-      "projectAudit4",
-      "clientAudit1",
-      "clientAudit2",
-      "carsClosed",
-      "obsClosed"
-    ].includes(header.key)
-  ) {
-    return <Info size={14} />;
-  }
-  // Standard (gray) - basic information
-  switch (header.key) {
-    case "projectNo":
-      return <ClipboardList size={14} />;
-    case "projectTitle":
-      return <Star size={14} />;
-    case "client":
-    case "projectManager":
-    case "projectQualityEng":
-      return <User size={14} />;
-    case "projectStartingDate":
-    case "projectClosingDate":
-    case "projectExtension":
-      return <Calendar size={14} />;
-    case "projectCompletionPercent":
-      return <TrendingUp size={14} />;
-    default:
-      return null;
-  }
 };
 
 const DetailedView = () => {
@@ -327,6 +367,32 @@ const DetailedView = () => {
     }
   };
 
+  // Enhanced empty value handling
+  const formatCellValue = (value, header) => {
+    if (value === null || value === undefined || value === '' || value === 'N/A' ||
+        value === '#DIV/0!' || String(value).includes('#DIV/0!') || String(value).includes('#ERROR')) {
+      // For percentage fields, show more context
+      if (header.key.includes('Percent') || header.key.includes('%')) {
+        return 'N/A';
+      }
+      // For count fields (numbers), show 0 or -
+      if (['carsOpen', 'obsOpen', 'carsClosed', 'obsClosed'].includes(header.key)) {
+        return '0';
+      }
+      // For manhours fields, show 0
+      if (header.key.includes('manhour') || header.key.includes('manHour')) {
+        return '0';
+      }
+      // For dates, show more descriptive
+      if (header.key.includes('Date')) {
+        return 'TBD';
+      }
+      // Default for text fields
+      return '-';
+    }
+    return value;
+  };
+
   // DataGrid columns with enhanced rendering
   const columns = useMemo(
     () =>
@@ -343,16 +409,17 @@ const DetailedView = () => {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            gap: 0.5,
             width: '100%',
-            textAlign: 'center'
+            textAlign: 'center',
+            py: 1
           }}>
-            {iconForHeader(header)}
             <Typography variant="caption" sx={{ 
               fontSize: '0.75rem', 
               fontWeight: 700,
               lineHeight: 1.2,
-              textAlign: 'center'
+              textAlign: 'center',
+              color: header.priority === 'alert' ? '#d97706' : 
+                     header.priority === 'focus' ? '#2563eb' : '#374151'
             }}>
               {header.label}
             </Typography>
@@ -360,50 +427,68 @@ const DetailedView = () => {
         ),
         renderCell: (params) => {
           const value = params.value;
+          const formattedValue = formatCellValue(value, header);
           
           if (header.key === "projectKPIsAchievedPercent" || header.key === "qualityBillabilityPercent") {
             return getCellChip(header, value);
-          } else if (header.priority === "alert" || header.priority === "focus") {
+          } else if (header.priority === "alert") {
             return (
               <Box sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
                 gap: 0.5, 
-                width: '100%',
-                flexWrap: 'wrap'
+                width: '100%'
               }}>
                 <Typography variant="body2" sx={{ 
-                  color: header.priority === "alert" ? "#d97706" : "#2563eb",
+                  color: "#d97706",
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  backgroundColor: '#fef3c7',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1
+                }}>
+                  {formattedValue}
+                </Typography>
+              </Box>
+            );
+          } else if (header.priority === "focus") {
+            return (
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: 0.5, 
+                width: '100%'
+              }}>
+                <Typography variant="body2" sx={{ 
+                  color: "#2563eb",
                   fontWeight: 500,
                   fontSize: '0.8rem',
-                  textAlign: 'center'
+                  backgroundColor: '#dbeafe',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1
                 }}>
-                  {value}
+                  {formattedValue}
                 </Typography>
-                <Chip
-                  color={header.color}
-                  size="small"
-                  icon={iconForHeader(header)}
-                  sx={{ 
-                    fontWeight: 600, 
-                    fontSize: '0.65rem',
-                    height: '20px',
-                    '& .MuiChip-label': { px: 0.5 }
-                  }}
-                />
               </Box>
             );
           } else {
             return (
               <Typography variant="body2" sx={{ 
-                color: "#64748b",
+                color: formattedValue === '-' || formattedValue === 'N/A' || formattedValue === 'TBD' || formattedValue === '0'
+                  ? "#94a3b8" 
+                  : "#374151",
                 fontSize: '0.8rem',
+                fontWeight: formattedValue === '-' || formattedValue === 'N/A' || formattedValue === 'TBD' ? 400 : 500,
                 wordBreak: header.key === "remarks" ? 'break-word' : 'normal',
                 textAlign: ["remarks", "projectTitle"].includes(header.key) ? 'left' : 'center',
-                width: '100%'
+                width: '100%',
+                fontStyle: formattedValue === 'N/A' || formattedValue === 'TBD' ? 'italic' : 'normal'
               }}>
-                {value || '-'}
+                {formattedValue}
               </Typography>
             );
           }

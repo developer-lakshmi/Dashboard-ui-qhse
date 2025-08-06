@@ -158,67 +158,53 @@ export const ManhoursChart = ({ data = [] }) => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <BarChart2 className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-            Manhours: Planned vs Used
-          </h3>
-          <span className="text-xs bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-            {processedData.length} project{processedData.length !== 1 ? 's' : ''} tracked
-          </span>
-      
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <BarChart2 className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          Manhours: Planned vs Used
+        </h3>
+        <span className="text-xs bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+          {processedData.length} project{processedData.length !== 1 ? 's' : ''} tracked
+        </span>
       </div>
 
-      {/* Chart Container with Horizontal Scroll */}
-      <div className="flex-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-        <div className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-blue-200 dark:scrollbar-thumb-blue-900 scrollbar-track-transparent">
-          <div className="min-w-[900px] w-full">
-            <ResponsiveContainer 
-              width="100%" 
-              minWidth={900}
-              height={Math.max(400, processedData.length * 50)}
-            >
-              <BarChart
-                layout="vertical"
-                data={processedData}
-                margin={{ top: 20, right: 80, left: 320, bottom: 40 }}
-                barCategoryGap="15%"
-                barGap={6}
+      <div className="flex-1 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-6">
+        {/* Chart Container with Horizontal Scroll */}
+        <div className="flex-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
+          <div className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-blue-200 dark:scrollbar-thumb-blue-900 scrollbar-track-transparent">
+            <div className="min-w-[900px] w-full">
+              <ResponsiveContainer 
+                width="100%" 
+                minWidth={900}
+                height={Math.max(400, processedData.length * 50)}
               >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="#e5e7eb" 
-                  strokeOpacity={0.7}
-                  horizontal={true}
-                  vertical={true}
-                />
-                
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={320}
-                  tick={({ x, y, payload }) => {
-                    const [line1, line2] = splitTextIntoLines(payload.value, 35);
-                    
-                    return (
-                      <g transform={`translate(${x},${y})`}>
-                        <text
-                          x={-15}
-                          y={line2 ? -6 : 0}
-                          dy={4}
-                          textAnchor="end"
-                          fill="#374151"
-                          fontSize={12}
-                          fontWeight={500}
-                          className="fill-gray-700 dark:fill-gray-300"
-                        >
-                          {line1}
-                        </text>
-                        {line2 && (
+                <BarChart
+                  layout="vertical"
+                  data={processedData}
+                  margin={{ top: 20, right: 80, left: 320, bottom: 40 }}
+                  barCategoryGap="15%"
+                  barGap={6}
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#e5e7eb" 
+                    strokeOpacity={0.7}
+                    horizontal={true}
+                    vertical={true}
+                  />
+                  
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    width={320}
+                    tick={({ x, y, payload }) => {
+                      const [line1, line2] = splitTextIntoLines(payload.value, 35);
+                      
+                      return (
+                        <g transform={`translate(${x},${y})`}>
                           <text
                             x={-15}
-                            y={6}
+                            y={line2 ? -6 : 0}
                             dy={4}
                             textAnchor="end"
                             fill="#374151"
@@ -226,67 +212,81 @@ export const ManhoursChart = ({ data = [] }) => {
                             fontWeight={500}
                             className="fill-gray-700 dark:fill-gray-300"
                           >
-                            {line2}
+                            {line1}
                           </text>
-                        )}
-                      </g>
-                    );
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                  interval={0}
-                  label={{
-                    value: "Projects",
-                    angle: -90,
-                    position: "insideLeft",
-                    offset: -25,
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: "#6b7280",
-                      fontSize: "13px",
-                      fontWeight: "600"
-                    }
-                  }}
-                />
-                
-                <XAxis
-                  type="number"
-                  tick={{ fill: "#6b7280", fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={{ stroke: "#d1d5db", strokeWidth: 1 }}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  label={{
-                    value: "Manhours",
-                    position: "insideBottom",
-                    offset: -5,
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: "#6b7280",
-                      fontSize: "13px",
-                      fontWeight: "600"
-                    }
-                  }}
-                />
-                
-                <Tooltip content={<ManhoursTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }} />
-                
-                <Bar 
-                  dataKey="Planned" 
-                  fill="#3b82f6" 
-                  name="Planned"
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={30}
-                />
-                
-                <Bar 
-                  dataKey="Used" 
-                  fill="#ef4444" 
-                  name="Used"
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={30}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                          {line2 && (
+                            <text
+                              x={-15}
+                              y={6}
+                              dy={4}
+                              textAnchor="end"
+                              fill="#374151"
+                              fontSize={12}
+                              fontWeight={500}
+                              className="fill-gray-700 dark:fill-gray-300"
+                            >
+                              {line2}
+                            </text>
+                          )}
+                        </g>
+                      );
+                    }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval={0}
+                    label={{
+                      value: "Projects",
+                      angle: -90,
+                      position: "insideLeft",
+                      offset: -25,
+                      style: { 
+                        textAnchor: 'middle',
+                        fill: "#6b7280",
+                        fontSize: "13px",
+                        fontWeight: "600"
+                      }
+                    }}
+                  />
+                  
+                  <XAxis
+                    type="number"
+                    tick={{ fill: "#6b7280", fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#d1d5db", strokeWidth: 1 }}
+                    tickFormatter={(value) => value.toLocaleString()}
+                    label={{
+                      value: "Manhours",
+                      position: "insideBottom",
+                      offset: -5,
+                      style: { 
+                        textAnchor: 'middle',
+                        fill: "#6b7280",
+                        fontSize: "13px",
+                        fontWeight: "600"
+                      }
+                    }}
+                  />
+                  
+                  <Tooltip content={<ManhoursTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }} />
+                  
+                  <Bar 
+                    dataKey="Planned" 
+                    fill="#3b82f6" 
+                    name="Planned"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={30}
+                  />
+                  
+                  <Bar 
+                    dataKey="Used" 
+                    fill="#ef4444" 
+                    name="Used"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={30}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </div>
