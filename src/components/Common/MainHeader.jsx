@@ -25,11 +25,15 @@ export const MainHeader = ({
         <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
           {subtitle}
         </p>
-        {lastUpdated && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Last updated: {lastUpdated.toLocaleString()}
-          </p>
-        )}
+        {/* Data Source Information - More compact */}
+      <div className=" p-2"> {/* Reduced padding */}
+        <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-xs font-medium"> {/* Smaller text */}
+            Live data from Google Sheets • Auto-updating
+          </span>
+        </div>
+      </div>
       </div>
     </div>
   </header>

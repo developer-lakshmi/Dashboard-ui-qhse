@@ -12,14 +12,14 @@ import { EmptyDataState } from "../common/EmptyDataState"
 // Import dashboard-specific components
 import SummaryCard from "./SummaryCard"
 import QHSEOverviewChart from "./OverviewChart"
-import QhseTimeline from "./QhseTimeline" // ✅ UPDATED: Use QhseTimeline component
+import QhseTimeline from "./QhseTimeline"
 import ProjectStatus from "./ProjectStatus"
 
 import { 
   getMonthlyOverviewData, 
   getYearlyOverviewData 
 } from "../../utils"
-import { generateQHSETimelineData } from "../../utils/chartUtils" // ✅ UPDATED: Use QHSE function
+import { generateQHSETimelineData } from "../../utils/chartUtils"
 import { PageLayout } from '../../layouts/PageLayout'
 import { useGoogleSheets } from '../../hooks/useGoogleSheets'
 
@@ -32,12 +32,12 @@ const DashboardPage = () => {
     if (!projectsData || projectsData.length === 0) {
       return { monthlyData: [], yearlyData: [], timelineData: [] }
     }
-    const qhseTimelineData = generateQHSETimelineData(projectsData); // ✅ UPDATED: Use QHSE function with REAL data
+    const qhseTimelineData = generateQHSETimelineData(projectsData);
 
     return {
       monthlyData: getMonthlyOverviewData(projectsData),
       yearlyData: getYearlyOverviewData(projectsData),
-      timelineData: qhseTimelineData // ✅ UPDATED: Use QHSE data
+      timelineData: qhseTimelineData
     }
   }, [projectsData])
 
@@ -79,7 +79,11 @@ const DashboardPage = () => {
   // Main dashboard
   return (
     <PageLayout>
-      <MainHeader lastUpdated={lastUpdated} />
+      {/* Responsive MainHeader */}
+      <MainHeader 
+        lastUpdated={lastUpdated}
+        className="mb-4 sm:mb-5 md:mb-6"
+      />
       
       <DashboardContent 
         projectsData={projectsData}
@@ -88,42 +92,63 @@ const DashboardPage = () => {
         onRefresh={refetch}
       />
       
-      <Footer />
+      {/* Responsive Footer */}
+      <Footer className="mt-6 sm:mt-8 md:mt-10 lg:mt-12" />
     </PageLayout>
   )
 }
 
-// Internal component (dashboard-specific, not reusable)
+// Internal component with full responsive design
 const DashboardContent = ({ projectsData, chartData, loading, onRefresh }) => (
-  <>
-    <SummaryCard projectsData={projectsData} />
+  <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-7 xl:space-y-8">
+    {/* Summary Cards Section - Fully responsive */}
+    <section className="w-full">
+      <SummaryCard projectsData={projectsData} />
+    </section>
     
-    <ChartsGrid 
-      monthlyData={chartData.monthlyData}
-      yearlyData={chartData.yearlyData}
-      timelineData={chartData.timelineData}
-    />
+    {/* Charts Section - Responsive grid */}
+    <section className="w-full">
+      <ChartsGrid 
+        monthlyData={chartData.monthlyData}
+        yearlyData={chartData.yearlyData}
+        timelineData={chartData.timelineData}
+      />
+    </section>
     
-    <ProjectStatus 
-      projectsData={projectsData} 
-      loading={loading}
-      onRefresh={onRefresh}
-    />
-  </>
+    {/* Project Status Section - Full width responsive */}
+    <section className="w-full">
+      <ProjectStatus 
+        projectsData={projectsData} 
+        loading={loading}
+        onRefresh={onRefresh}
+        className="w-full"
+      />
+    </section>
+  </div>
 )
 
-// ✅ UPDATED: Fully responsive ChartsGrid for QHSE view
+// Fully responsive ChartsGrid for all device sizes with 2-row layout on lg screens
 const ChartsGrid = ({ monthlyData, yearlyData, timelineData }) => (
-  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-7">
-    <QHSEOverviewChart 
-      monthlyData={monthlyData} 
-      yearlyData={yearlyData} 
-      className="col-span-1 lg:col-span-2 xl:col-span-4" // ✅ Responsive: Chart takes 4/7 columns on xl, full width on smaller screens
-    />
-    <QhseTimeline 
-      timelineData={timelineData} 
-      className="col-span-1 lg:col-span-2 xl:col-span-3" // ✅ Responsive: Timeline takes 3/7 columns on xl, full width on smaller screens
-    />
+  <div className="w-full">
+    {/* Responsive container with proper spacing and 2-row layout for lg screens */}
+    <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-1 lg:grid-rows-2 lg:gap-4 xl:grid-cols-7 xl:grid-rows-1 xl:gap-6 2xl:gap-8">
+      {/* Overview Chart - Responsive column spans with better height control */}
+      <div className="col-span-1 lg:col-span-1 lg:row-span-1 xl:col-span-4 xl:row-span-1 w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px]">
+        <QHSEOverviewChart 
+          monthlyData={monthlyData} 
+          yearlyData={yearlyData} 
+          className="w-full h-full"
+        />
+      </div>
+      
+      {/* Timeline Chart - Responsive column spans with better height control */}
+      <div className="col-span-1 lg:col-span-1 lg:row-span-1 xl:col-span-3 xl:row-span-1 w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px]">
+        <QhseTimeline 
+          timelineData={timelineData} 
+          className="w-full h-full"
+        />
+      </div>
+    </div>
   </div>
 )
 

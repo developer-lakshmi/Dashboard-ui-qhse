@@ -5,7 +5,7 @@ import axios from 'axios';
 const SHEET_ID = '1gPwSaDEY84dkfqf78nzhdtxT-j1TaJWsaS_15gpraV4';
 // const SHEET_NAME = 'Sheet1';
 const SHEET_NAME = 'QHSE running projects status'; // Ensure this matches your actual sheet name
-const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';
+const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';//google account API key
 
 // Updated field mapping to match your ACTUAL Google Sheets headers
 const FIELD_MAPPING = {
@@ -39,8 +39,8 @@ const FIELD_MAPPING = {
   'Obs Closed': 'obsClosed',
   'Project KPIs Achieved %': 'projectKPIsAchievedPercent',
   'Project Compl. %': 'projectCompletionPercent',
-  'Rejection of Deleverables %': 'rejectionOfDeliverablesPercent',     // ✅ NEW FIELD
-  'Cost of Poor Quality               in AED': 'costOfPoorQualityAED', // ✅ NEW FIELD
+  'Rejection of Deleverables %': 'rejectionOfDeliverablesPercent',     
+  'Cost of Poor Quality               in AED': 'costOfPoorQualityAED', 
   'Remarks': 'remarks'
 };
 

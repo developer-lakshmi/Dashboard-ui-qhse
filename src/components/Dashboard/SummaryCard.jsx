@@ -67,11 +67,11 @@ const getTrendPercent = (current, previous) => {
 const countProjects = (data, fn) => data.filter(fn).length;
 
 const getBadge = (title, value) => {
-  if (value === 0) return <span className="ml-2 rounded bg-green-200 px-2 py-0.5 text-xs text-green-800">OK</span>;
+  if (value === 0) return <span className="ml-1 sm:ml-2 rounded bg-green-200 px-1.5 sm:px-2 py-0.5 text-xs text-green-800">OK</span>;
   if (title.includes("Low") || title.includes("Overdue") || title.includes("CAR") || title.includes("OBS") || title.includes("Rejection") || title.includes("Cost")) {
-    if (value > 10) return <span className="ml-2 rounded bg-red-200 px-2 py-0.5 text-xs text-red-800">Critical</span>;
-    if (value > 5) return <span className="ml-2 rounded bg-orange-200 px-2 py-0.5 text-xs text-orange-800">High</span>;
-    if (value > 0) return <span className="ml-2 rounded bg-yellow-200 px-2 py-0.5 text-xs text-yellow-800">Warning</span>;
+    if (value > 10) return <span className="ml-1 sm:ml-2 rounded bg-red-200 px-1.5 sm:px-2 py-0.5 text-xs text-red-800">Critical</span>;
+    if (value > 5) return <span className="ml-1 sm:ml-2 rounded bg-orange-200 px-1.5 sm:px-2 py-0.5 text-xs text-orange-800">High</span>;
+    if (value > 0) return <span className="ml-1 sm:ml-2 rounded bg-yellow-200 px-1.5 sm:px-2 py-0.5 text-xs text-yellow-800">Warning</span>;
   }
   return null;
 };
@@ -338,9 +338,9 @@ const SummaryCard = ({ projectsData = [] }) => {
   // Show message if no data available
   if (!projectsData || projectsData.length === 0) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         <div className="col-span-full text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400">No project data available for summary cards.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">No project data available for summary cards.</p>
         </div>
       </div>
     );
@@ -348,31 +348,39 @@ const SummaryCard = ({ projectsData = [] }) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      {/* Responsive Grid - Optimized for all screen sizes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {importantSummary.map((item) => (
           <Card
             key={item.title}
-            className="hover:scale-[1.03] transition-transform shadow-lg min-w-[320px] max-w-[400px] mx-auto cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800"
-            onClick={() => handleOpen(item)}
+            className="hover:scale-[1.02] sm:hover:scale-[1.03] transition-transform duration-300 shadow-lg cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 w-full max-w-none"
           >
-            <CardHeader>
+            <CardHeader className="p-3 sm:p-4 md:p-5" onClick={() => handleOpen(item)}>
               <div className={`w-fit rounded-lg p-2 transition-colors ${item.color}`}>
-                <item.icon size={26} />
+                <item.icon size={20} className="sm:w-6 sm:h-6 md:w-7 md:h-7" />
               </div>
-              <div className="flex items-center justify-between w-full">
-                <p className="card-title font-semibold text-sm">{item.title}</p>
-                {getBadge(item.title, item.value)}
+              <div className="flex items-start justify-between w-full gap-2">
+                <p className="card-title font-semibold text-xs sm:text-sm md:text-sm leading-tight flex-1">
+                  {item.title}
+                </p>
+                <div className="flex-shrink-0">
+                  {getBadge(item.title, item.value)}
+                </div>
               </div>
             </CardHeader>
-            <CardBody className="bg-slate-100 dark:bg-slate-950 rounded-b-xl">
-              <p className="text-3xl font-bold text-slate-900 dark:text-slate-50 animate-pulse">{item.value}</p>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{item.description}</span>
+            <CardBody className="bg-slate-100 dark:bg-slate-950 rounded-b-xl p-3 sm:p-4 md:p-5" onClick={() => handleOpen(item)}>
+              <p className="text-2xl sm:text-3xl md:text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1 sm:mb-2">
+                {item.value}
+              </p>
+              <span className="text-xs sm:text-xs text-slate-500 dark:text-slate-400 leading-relaxed block">
+                {item.description}
+              </span>
             </CardBody>
           </Card>
         ))}
       </div>
 
-      {/* Enhanced Modal for project details */}
+      {/* Enhanced Responsive Modal */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -382,72 +390,140 @@ const SummaryCard = ({ projectsData = [] }) => {
         <Box
           sx={{
             position: 'fixed',
-            top: { xs: '60px', md: '80px' },
+            top: { xs: '20px', sm: '40px', md: '60px', lg: '80px' },
             left: '50%',
             transform: 'translate(-50%, 0)',
             bgcolor: 'transparent',
-            width: { xs: '95vw', md: 800 },
-            maxHeight: 'calc(100vh - 100px)',
+            width: { 
+              xs: '95vw', 
+              sm: '90vw', 
+              md: '85vw', 
+              lg: '800px',
+              xl: '900px',
+              '2xl': '1000px'
+            },
+            maxHeight: { 
+              xs: 'calc(100vh - 40px)', 
+              sm: 'calc(100vh - 80px)', 
+              md: 'calc(100vh - 120px)',
+              lg: 'calc(100vh - 160px)'
+            },
             overflowY: 'auto',
             outline: 'none',
           }}
         >
-          <Paper elevation={6} sx={{ borderRadius: 4, p: 3, position: 'relative' }}>
+          <Paper elevation={6} sx={{ 
+            borderRadius: { xs: 2, sm: 3, md: 4 }, 
+            p: { xs: 2, sm: 3, md: 3 }, 
+            position: 'relative',
+            bgcolor: 'background.paper'
+          }}>
             <IconButton
               aria-label="close"
               onClick={handleClose}
-              sx={{ position: 'absolute', right: 12, top: 12, color: 'grey.600' }}
+              sx={{ 
+                position: 'absolute', 
+                right: { xs: 8, sm: 12 }, 
+                top: { xs: 8, sm: 12 }, 
+                color: 'grey.600',
+                p: { xs: 1, sm: 1.5 }
+              }}
             >
-              <CloseIcon />
+              <CloseIcon fontSize="small" />
             </IconButton>
-            <h2 id="project-details-modal" className="font-bold text-xl mb-4 text-blue-700">{modalTitle}</h2>
-            <p className="text-sm text-gray-600 mb-4">
+            
+            <h2 id="project-details-modal" className="font-bold text-lg sm:text-xl md:text-xl mb-3 sm:mb-4 text-blue-700 pr-8 sm:pr-12">
+              {modalTitle}
+            </h2>
+            
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
               Found {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''} matching this criteria
             </p>
             
             {modalProjects.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No projects found for this criteria.</p>
+              <p className="text-center text-gray-500 py-6 sm:py-8 text-sm sm:text-base">
+                No projects found for this criteria.
+              </p>
             ) : (
-              <div style={{ maxHeight: 400, overflowY: 'auto' }}>
-                <table className="min-w-full text-sm border rounded-lg shadow">
-                  <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900 z-10">
-                    <tr>
-                      <th className="border px-2 py-2 text-left">Project No</th>
-                      <th className="border px-2 py-2 text-left">Title</th>
-                      <th className="border px-2 py-2 text-left">Manager</th>
-                      <th className="border px-2 py-2 text-left">Client</th>
-                      <th className="border px-2 py-2 text-center">{getColumnHeader(modalTitle)}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {modalProjects.map((project) => {
-                      const statusInfo = getDetailedStatus(project, modalTitle);
-                      return (
-                        <tr key={project.projectNo} className="hover:bg-blue-50 dark:hover:bg-blue-950 transition">
-                          <td className="border px-2 py-1 font-semibold">{project.projectNo}</td>
-                          <td className="border px-2 py-1" title={project.projectTitle}>
-                            {project.projectTitle?.length > 30 
-                              ? `${project.projectTitle.substring(0, 30)}...` 
-                              : project.projectTitle}
-                          </td>
-                          <td className="border px-2 py-1">{project.projectManager}</td>
-                          <td className="border px-2 py-1">{project.client}</td>
-                          <td className="border px-2 py-1 text-center">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              statusInfo.severity === "critical" 
-                                ? "bg-red-200 text-red-800" 
-                                : statusInfo.severity === "warning"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
-                            }`}>
-                              {statusInfo.value}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="overflow-hidden">
+                <div 
+                  style={{ 
+                    maxHeight: '60vh', 
+                    overflowY: 'auto',
+                    overflowX: 'auto'
+                  }}
+                  className="border rounded-lg shadow-sm"
+                >
+                  <table className="min-w-full text-xs sm:text-sm">
+                    <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900 z-10">
+                      <tr>
+                        <th className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-2 text-left font-semibold">
+                          Project No
+                        </th>
+                        <th className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-2 text-left font-semibold min-w-[120px] sm:min-w-[150px]">
+                          Title
+                        </th>
+                        <th className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-2 text-left font-semibold hidden sm:table-cell">
+                          Manager
+                        </th>
+                        <th className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-2 text-left font-semibold">
+                          Client
+                        </th>
+                        <th className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-2 text-center font-semibold min-w-[100px] sm:min-w-[120px]">
+                          {getColumnHeader(modalTitle)}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {modalProjects.map((project) => {
+                        const statusInfo = getDetailedStatus(project, modalTitle);
+                        return (
+                          <tr 
+                            key={project.projectNo} 
+                            className="hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors"
+                          >
+                            <td className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 font-semibold text-xs sm:text-sm">
+                              {project.projectNo}
+                            </td>
+                            <td 
+                              className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 text-xs sm:text-sm" 
+                              title={project.projectTitle}
+                            >
+                              <div className="max-w-[100px] sm:max-w-[150px] md:max-w-[200px] overflow-hidden">
+                                {project.projectTitle?.length > (window.innerWidth < 640 ? 20 : 30)
+                                  ? `${project.projectTitle.substring(0, window.innerWidth < 640 ? 20 : 30)}...` 
+                                  : project.projectTitle}
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hidden sm:table-cell">
+                              <div className="max-w-[120px] overflow-hidden text-ellipsis">
+                                {project.projectManager}
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 text-xs sm:text-sm">
+                              <div className="max-w-[80px] sm:max-w-[120px] overflow-hidden text-ellipsis">
+                                {project.client}
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 text-center">
+                              <span className={`px-1.5 sm:px-2 py-1 rounded text-xs font-semibold inline-block max-w-full ${
+                                statusInfo.severity === "critical" 
+                                  ? "bg-red-200 text-red-800" 
+                                  : statusInfo.severity === "warning"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}>
+                                <div className="truncate">
+                                  {statusInfo.value}
+                                </div>
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </Paper>
