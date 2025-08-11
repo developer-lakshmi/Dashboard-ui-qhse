@@ -26,7 +26,15 @@ import { useGoogleSheets } from '../../hooks/useGoogleSheets'
 const DashboardPage = () => {
   // Hooks
   const { theme } = useTheme()
-  const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets()
+  const { 
+    data: projectsData, 
+    loading, 
+    isRefreshing, 
+    error, 
+    refetch, 
+    lastUpdated,
+    dataLastChanged // ✅ CHANGED: Use dataLastChanged instead of sheetLastModified
+  } = useGoogleSheets();
 
   const chartData = React.useMemo(() => {
     if (!projectsData || projectsData.length === 0) {
@@ -81,7 +89,11 @@ const DashboardPage = () => {
     <PageLayout>
       {/* Responsive MainHeader */}
       <MainHeader 
+        title="QHSE Dashboard"
+        subtitle={`Quality, Health, Safety & Environment monitoring for ${projectsData.length} active projects`}
         lastUpdated={lastUpdated}
+        dataLastChanged={dataLastChanged} // ✅ CHANGED: Pass dataLastChanged
+        isRefreshing={isRefreshing}
         className="mb-4 sm:mb-5 md:mb-6"
       />
       

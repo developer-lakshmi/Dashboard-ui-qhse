@@ -3,9 +3,8 @@ import axios from 'axios';
 
 // Your Google Sheets configuration
 const SHEET_ID = '1gPwSaDEY84dkfqf78nzhdtxT-j1TaJWsaS_15gpraV4';
-// const SHEET_NAME = 'Sheet1';
-const SHEET_NAME = 'QHSE running projects status'; // Ensure this matches your actual sheet name
-const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';//google account API key
+const SHEET_NAME = 'QHSE running projects status';
+const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';
 
 // Updated field mapping to match your ACTUAL Google Sheets headers
 const FIELD_MAPPING = {
@@ -70,20 +69,41 @@ const parseEuropeanDate = (dateString) => {
   return dateString; // Return as-is for other formats
 };
 
-export function useGoogleSheets(pollInterval = 60000) {
+// ✅ NEW: Function to create a hash of the data content
+const createDataHash = (data) => {
+  const dataString = JSON.stringify(data);
+  let hash = 0;
+  for (let i = 0; i < dataString.length; i++) {
+    const char = dataString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return hash;
+};
+
+// ✅ UPDATED: Changed default polling interval from 60 seconds to 1 hour
+export function useGoogleSheets(pollInterval = 3600000) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [dataLastChanged, setDataLastChanged] = useState(null); // ✅ NEW: Track when data actually changed
+  const [previousDataHash, setPreviousDataHash] = useState(null); // ✅ NEW: Track data changes
 
-  const fetchSheetData = useCallback(async () => {
+  const fetchSheetData = useCallback(async (isInitialLoad = false) => {
     try {
-      setLoading(true);
-      const res = await axios.get(
+      if (isInitialLoad) {
+        setLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
+
+      const dataRes = await axios.get(
         `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
       );
 
-      const rows = res.data.values;
+      const rows = dataRes.data.values;
       if (!rows || rows.length === 0) {
         setData([]);
         return;
@@ -91,12 +111,14 @@ export function useGoogleSheets(pollInterval = 60000) {
 
       const headers = rows[0];
       
-      // 🔍 DEBUG: Log headers to see mapping status
-      console.log('🔍 Updated mapping status:');
-      headers.forEach((header, index) => {
-        const mappedField = FIELD_MAPPING[header];
-        console.log(`  ${index}: "${header}" -> ${mappedField ? `✅ ${mappedField}` : '❌ UNMAPPED'}`);
-      });
+      // 🔍 DEBUG: Log headers to see mapping status (only on initial load to reduce console spam)
+      if (isInitialLoad) {
+        console.log('🔍 Google Sheets mapping status:');
+        headers.forEach((header, index) => {
+          const mappedField = FIELD_MAPPING[header];
+          console.log(`  ${index}: "${header}" -> ${mappedField ? `✅ ${mappedField}` : '❌ UNMAPPED'}`);
+        });
+      }
 
       const items = rows.slice(1).map((row, index) => {
         let item = {};
@@ -106,8 +128,8 @@ export function useGoogleSheets(pollInterval = 60000) {
           // Map header to camelCase field name
           const fieldName = FIELD_MAPPING[header] || toCamelCase(header);
           
-          // 🔍 DEBUG: Log the first 5 basic fields for the first row
-          if (index === 0 && ['Sr No', 'Project No', 'Project Title', 'Client', 'Project Manager'].includes(header)) {
+          // 🔍 DEBUG: Log the first 5 basic fields for the first row (only on initial load)
+          if (isInitialLoad && index === 0 && ['Sr No', 'Project No', 'Project Title', 'Client', 'Project Manager'].includes(header)) {
             console.log(`🔍 Row 0 - Header: "${header}" -> Field: "${fieldName}" -> Value: "${value}"`);
           }
           
@@ -115,11 +137,11 @@ export function useGoogleSheets(pollInterval = 60000) {
           if (['srNo', 'manHourForQuality', 'manhoursUsed', 'manhoursBalance',
                'delayInAuditsNoDays', 'carsOpen', 'carsDelayedClosingNoDays', 
                'carsClosed', 'obsOpen', 'obsDelayedClosingNoDays', 'obsClosed',
-               'costOfPoorQualityAED'].includes(fieldName)) {  // ✅ Added costOfPoorQualityAED
+               'costOfPoorQualityAED'].includes(fieldName)) {
             // Convert to number
             item[fieldName] = value === '' ? 0 : Number(value);
           } else if (fieldName.includes('Percent') || fieldName.includes('percent')) {
-            // Keep percentage fields as strings (e.g., "100%") - rejectionOfDeliverablesPercent will be handled here
+            // Keep percentage fields as strings (e.g., "100%")
             item[fieldName] = value.toString();
           } else if (['projectStartingDate', 'projectClosingDate', 'projectExtension', 
                       'projectQualityPlanStatusIssueDate', 'projectAudit1', 'projectAudit2', 
@@ -132,9 +154,9 @@ export function useGoogleSheets(pollInterval = 60000) {
           }
         });
         
-        // 🔍 DEBUG: Log the mapped basic fields for first item
-        if (index === 0) {
-          console.log('🔍 First item basic fields (after mapping fix):', {
+        // 🔍 DEBUG: Log the mapped basic fields for first item (only on initial load)
+        if (isInitialLoad && index === 0) {
+          console.log('🔍 First item basic fields (after mapping):', {
             srNo: item.srNo,
             projectNo: item.projectNo,
             projectTitle: item.projectTitle,
@@ -148,33 +170,72 @@ export function useGoogleSheets(pollInterval = 60000) {
             carsDelayedClosingNoDays: item.carsDelayedClosingNoDays,
             obsDelayedClosingNoDays: item.obsDelayedClosingNoDays,
             projectCompletionPercent: item.projectCompletionPercent,
-            rejectionOfDeliverablesPercent: item.rejectionOfDeliverablesPercent, // ✅ NEW DEBUG
-            costOfPoorQualityAED: item.costOfPoorQualityAED                      // ✅ NEW DEBUG
+            rejectionOfDeliverablesPercent: item.rejectionOfDeliverablesPercent,
+            costOfPoorQualityAED: item.costOfPoorQualityAED
           });
         }
         
         return item;
       });
 
+      // ✅ NEW: Check if data actually changed
+      const currentDataHash = createDataHash(items);
+      const dataChanged = isInitialLoad || (previousDataHash !== null && currentDataHash !== previousDataHash);
+      
+      if (dataChanged) {
+        console.log('📊 Data content changed - updating timestamp');
+        setDataLastChanged(new Date());
+      } else {
+        console.log('📊 Data content unchanged - keeping previous timestamp');
+      }
+
       setData(items);
       setError(null);
-      setLastUpdated(new Date());
-      console.log('✅ Google Sheets data loaded with corrected mapping:', items.length, 'projects');
+      setLastUpdated(new Date()); // When we last fetched
+      setPreviousDataHash(currentDataHash); // Store hash for next comparison
+      
+      // ✅ UPDATED: Better logging with data change status
+      const logMessage = isInitialLoad 
+        ? `✅ Google Sheets data loaded: ${items.length} projects`
+        : `🔄 Google Sheets data refreshed: ${items.length} projects ${dataChanged ? '(DATA CHANGED)' : '(NO CHANGES)'} (${new Date().toLocaleTimeString()})`;
+      console.log(logMessage);
       
     } catch (err) {
       console.error('❌ Error fetching sheet data:', err);
       setError(err.message || 'Failed to fetch Google Sheets data');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  }, []);
+  }, [previousDataHash]);
+
+  // Manual refresh function that can be called by user
+  const manualRefresh = useCallback(() => {
+    console.log('🔄 Manual refresh triggered');
+    fetchSheetData(false);
+  }, [fetchSheetData]);
 
   useEffect(() => {
-    fetchSheetData();
-    // Poll for updates every 60 seconds
-    const interval = setInterval(fetchSheetData, pollInterval);
+    // Initial load
+    fetchSheetData(true);
+    
+    // Set up polling for updates every hour
+    const interval = setInterval(() => {
+      console.log('🕐 Hourly auto-refresh triggered');
+      fetchSheetData(false);
+    }, pollInterval);
+
     return () => clearInterval(interval);
   }, [fetchSheetData, pollInterval]);
 
-  return { data, loading, error, refetch: fetchSheetData, lastUpdated };
+  // ✅ UPDATED: Return data change timestamp instead of access timestamp
+  return { 
+    data, 
+    loading,           // True only during initial load
+    isRefreshing,      // True during background refreshes
+    error, 
+    refetch: manualRefresh,  // Manual refresh function
+    lastUpdated,       // When we last fetched data
+    dataLastChanged    // ✅ NEW: When the data content actually changed
+  };
 }
