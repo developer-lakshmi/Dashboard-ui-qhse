@@ -70,7 +70,7 @@ const SummaryView = () => {
       <PageLayout>
         <MainHeader 
           title="Dashboard Summary"
-          subtitle="Get a quick overview of your most important QHSE project metrics."
+          subtitle="Get a quick overview of all QHSE Activities"
         />
         <LoadingState message="Loading Google Sheets data..." />
       </PageLayout>

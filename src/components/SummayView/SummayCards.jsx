@@ -17,20 +17,19 @@ import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 
 /**
- * ✅ UPDATED: PROJECT OVERVIEW CARDS - Shows all projects with respective details
- * Changed from filtering to showing comprehensive overviews
+ * ✅ UPDATED: PROJECT OVERVIEW CARDS - Shows comprehensive overviews with exact Google Sheets headers
  */
 
 // ✅ UPDATED: Icon mapping with new overview icons
 const iconMap = {
-  "Project Overview": <Eye className="w-8 h-8 text-blue-500 dark:text-blue-400" />,
+  "Running Projects Quality Plan Overview": <FileText className="w-8 h-8 text-blue-500 dark:text-blue-400" />,
   "Audit Overview": <Clock className="w-8 h-8 text-orange-500 dark:text-orange-400" />,
   "KPI Overview": <BarChart2 className="w-8 h-8 text-green-500 dark:text-green-400" />,
-  "CAR/Observation Overview": <Wrench className="w-8 h-8 text-red-500 dark:text-red-400" />,
+  "CARs/Observation Overview": <Wrench className="w-8 h-8 text-red-500 dark:text-red-400" />,
   "Billability Overview": <DollarSign className="w-8 h-8 text-purple-500 dark:text-purple-400" />
 };
 
-// ✅ UPDATED: Color mappings for new overview cards
+// Color mappings (keep existing)
 const getCardClasses = (color) => {
   const colorMap = {
     red: "border-l-4 border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950/20",
@@ -78,7 +77,7 @@ const parsePercent = (val) => {
   return Number(cleaned) || 0;
 };
 
-// ✅ NEW: Function to validate if project has meaningful data
+// ✅ Function to validate if project has meaningful data
 const isValidProject = (project) => {
   return project && 
          project.projectNo && 
@@ -90,52 +89,50 @@ const isValidProject = (project) => {
 };
 
 /**
- * ✅ UPDATED: Project filters - Now show ALL VALID projects for each overview with proper filtering
+ * ✅ UPDATED: Project filters with exact Google Sheets field names
  */
 const projectFilters = {
-  "Project Overview": (projects) => {
-    // ✅ FIXED: Filter out invalid/empty projects
+  "Running Projects Quality Plan Overview": (projects) => {
     return projects.filter(project => isValidProject(project));
   },
   
   "Audit Overview": (projects) => {
-    // ✅ FIXED: Show projects with audit information OR delay information
     return projects.filter(project => 
       isValidProject(project) && (
         project.projectAudit1 || 
         project.projectAudit2 || 
         project.projectAudit3 || 
         project.projectAudit4 ||
+        project.clientAudit1 ||
+        project.clientAudit2 ||
         (project.delayInAuditsNoDays && parseNumber(project.delayInAuditsNoDays) >= 0)
       )
     );
   },
   
   "KPI Overview": (projects) => {
-    // ✅ FIXED: Show projects with KPI, completion, or rejection data
     return projects.filter(project => 
       isValidProject(project) && (
         (project.projectKPIsAchievedPercent && project.projectKPIsAchievedPercent !== 'N/A') ||
-        (project.projectCompletionPercent && project.projectCompletionPercent !== 'N/A') ||
-        (project.rejectionOfDeliverablesPercent && project.rejectionOfDeliverablesPercent !== 'N/A')
+        (project.projectCompletionPercent && project.projectCompletionPercent !== 'N/A')
       )
     );
   },
   
-  "CAR/Observation Overview": (projects) => {
-    // ✅ FIXED: Show projects with CAR/OBS data (open or closed)
+  "CARs/Observation Overview": (projects) => {
     return projects.filter(project => 
       isValidProject(project) && (
         (project.carsOpen && parseNumber(project.carsOpen) >= 0) ||
         (project.carsClosed && parseNumber(project.carsClosed) >= 0) ||
         (project.obsOpen && parseNumber(project.obsOpen) >= 0) ||
-        (project.obsClosed && parseNumber(project.obsClosed) >= 0)
+        (project.obsClosed && parseNumber(project.obsClosed) >= 0) ||
+        (project.carsDelayedClosingNoDays && parseNumber(project.carsDelayedClosingNoDays) >= 0) ||
+        (project.obsDelayedClosingNoDays && parseNumber(project.obsDelayedClosingNoDays) >= 0)
       )
     );
   },
   
   "Billability Overview": (projects) => {
-    // ✅ FIXED: Show projects with billability or manhour data
     return projects.filter(project => 
       isValidProject(project) && (
         (project.qualityBillabilityPercent && project.qualityBillabilityPercent !== 'N/A') ||
@@ -147,44 +144,50 @@ const projectFilters = {
 };
 
 /**
- * ✅ UPDATED: Modal columns - Show relevant details for each overview
+ * ✅ UPDATED: Modal columns with exact Google Sheets headers
  */
 const getModalColumns = (cardTitle) => {
   const baseColumns = [
     { key: 'projectNo', label: 'Project No' },
     { key: 'projectTitle', label: 'Project Title' },
-    { key: 'projectManager', label: 'Manager' },
+    { key: 'projectManager', label: 'Project Manager' },
     { key: 'client', label: 'Client' }
   ];
 
   const specificColumns = {
-    "Project Overview": [
-      { key: 'projectStartingDate', label: 'Start Date' },
-      { key: 'projectClosingDate', label: 'End Date' },
-      { key: 'projectQualityEng', label: 'Quality Engineer' }
+    "Running Projects Quality Plan Overview": [
+      { key: 'projectStartingDate', label: 'Project Starting Date' },
+      { key: 'projectClosingDate', label: 'Project closing Date' },
+      { key: 'projectExtension', label: 'Project Extension' },
+      { key: 'projectQualityPlanStatusRev', label: 'Project Quality Plan status - Rev' },
+      { key: 'projectQualityPlanStatusIssueDate', label: 'Project Quality Plan status - Issued Date' }
     ],
     "Audit Overview": [
-      { key: 'projectAudit1', label: 'Audit 1' },
-      { key: 'projectAudit2', label: 'Audit 2' },
-      { key: 'projectAudit3', label: 'Audit 3' },
-      { key: 'delayInAuditsNoDays', label: 'Delay Days' }
+      { key: 'projectAudit1', label: 'Project Audit -1' },
+      { key: 'projectAudit2', label: 'Project Audit -2' },
+      { key: 'projectAudit3', label: 'Project Audit -3' },
+      { key: 'projectAudit4', label: 'Project Audit -4' },
+      { key: 'clientAudit1', label: 'Client Audit -1' },
+      { key: 'clientAudit2', label: 'Client Audit -2' },
+      { key: 'delayInAuditsNoDays', label: 'Delay in Audits - No. of Days' }
     ],
     "KPI Overview": [
-      { key: 'projectKPIsAchievedPercent', label: 'KPI %' },
-      { key: 'projectCompletionPercent', label: 'Completion %' },
-      { key: 'rejectionOfDeliverablesPercent', label: 'Rejection %' }
+      { key: 'projectKPIsAchievedPercent', label: 'Project KPIs Achieved %' },
+      { key: 'projectCompletionPercent', label: 'Project Compl. %' }
     ],
-    "CAR/Observation Overview": [
+    "CARs/Observation Overview": [
       { key: 'carsOpen', label: 'CARs Open' },
       { key: 'carsClosed', label: 'CARs Closed' },
-      { key: 'obsOpen', label: 'OBS Open' },
-      { key: 'obsClosed', label: 'OBS Closed' }
+      { key: 'carsDelayedClosingNoDays', label: 'CARs Delayed closing No. days' },
+      { key: 'obsOpen', label: 'No. of Obs Open' },
+      { key: 'obsClosed', label: 'Obs Closed' },
+      { key: 'obsDelayedClosingNoDays', label: 'Obs delayed closing No. of Days' }
     ],
     "Billability Overview": [
-      { key: 'qualityBillabilityPercent', label: 'Billability %' },
-      { key: 'manHourForQuality', label: 'Budgeted Hours' },
-      { key: 'manhoursUsed', label: 'Used Hours' },
-      { key: 'manhoursBalance', label: 'Balance Hours' }
+      { key: 'manHourForQuality', label: 'Man hour for Quality' },
+      { key: 'manhoursUsed', label: 'Manhours Used' },
+      { key: 'manhoursBalance', label: 'Manhours Balance' },
+      { key: 'qualityBillabilityPercent', label: 'Quality billability %' }
     ]
   };
 
@@ -192,34 +195,60 @@ const getModalColumns = (cardTitle) => {
 };
 
 /**
- * ✅ ENHANCED: Cell formatting for overview data
+ * ✅ UPDATED: Enhanced cell formatting - ONLY KPI Achieved % column gets badges
  */
 const getCellValue = (project, columnKey) => {
   const value = project[columnKey];
   
   if (!value || value === '' || value === 'N/A') {
-    return <span className="text-gray-400 dark:text-slate-500">-</span>;
+    return <span className="text-gray-400 dark:text-slate-500 italic">Missing</span>;
   }
   
-  // KPI Performance coloring
+  // ✅ UPDATED: ONLY Project KPI Achieved % gets badges (not Project Compl. %)
   if (columnKey === 'projectKPIsAchievedPercent') {
-    const numVal = parsePercent(value);
-    const className = numVal >= 80 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
-                     numVal >= 70 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
-                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
-    return <span className={className}>{value}</span>;
+    const completion = parsePercent(project.projectCompletionPercent);
+    const kpi = parsePercent(value);
+    
+    // Logic: Compare completion % with KPI achieved %
+    let className, badge;
+    
+    // If project completion > 95%, show achievement level
+    if (completion > 95) {
+      if (completion === 100) {
+        className = "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-bold";
+        badge = "Perfect 🏆";
+      } else {
+        className = "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-bold";
+        badge = "Achieved ✅";
+      }
+    } else {
+      // For projects < 95% completion, check KPI performance
+      if (kpi >= 90) {
+        className = "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-bold";
+        badge = "Achieved ✅";
+      } else {
+        className = "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold";
+        badge = "Needs Improvement ⚠️";
+      }
+    }
+    
+    return <span className={className}>{badge} ({value})</span>;
   }
   
-  // Completion percentage coloring
+  // ✅ UPDATED: Project Completion % - NO BADGES, just normal coloring
   if (columnKey === 'projectCompletionPercent') {
     const numVal = parsePercent(value);
-    const className = numVal >= 90 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
+    const className = numVal === 100 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-bold" :
+                     numVal > 95 ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-bold" :
+                     numVal >= 90 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
                      numVal >= 75 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
                      "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
+    
+    // NO BADGES - just return the value with color
     return <span className={className}>{value}</span>;
   }
   
-  // Billability coloring
+  // Billability coloring (no badges)
   if (columnKey === 'qualityBillabilityPercent') {
     const numVal = parsePercent(value);
     const className = numVal >= 85 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
@@ -228,16 +257,26 @@ const getCellValue = (project, columnKey) => {
     return <span className={className}>{value}</span>;
   }
   
-  // CAR/OBS coloring
+  // CAR/OBS coloring (no badges)
   if (columnKey === 'carsOpen' || columnKey === 'obsOpen') {
     const numVal = parseNumber(value);
     if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">0</span>;
-    const className = numVal > 3 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs" : 
+    const className = numVal > 3 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" : 
                      "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value}</span>;
   }
   
-  // Closed CARs/OBS (positive indicator)
+  // ✅ NEW: Delayed closing days coloring (no badges)
+  if (columnKey === 'carsDelayedClosingNoDays' || columnKey === 'obsDelayedClosingNoDays') {
+    const numVal = parseNumber(value);
+    if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">On Time</span>;
+    const className = numVal > 30 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" : 
+                     numVal > 15 ? "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs" : 
+                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
+    return <span className={className}>{value} days</span>;
+  }
+  
+  // Closed CARs/OBS (positive indicator) (no badges)
   if (columnKey === 'carsClosed' || columnKey === 'obsClosed') {
     const numVal = parseNumber(value);
     const className = numVal > 0 ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs" : 
@@ -245,28 +284,47 @@ const getCellValue = (project, columnKey) => {
     return <span className={className}>{value}</span>;
   }
   
-  // Audit delays
+  // Audit delays (no badges)
   if (columnKey === 'delayInAuditsNoDays') {
     const numVal = parseNumber(value);
     if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">On Time</span>;
-    const className = numVal > 15 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs" : 
+    const className = numVal > 15 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" : 
                      "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value} days</span>;
   }
   
-  // Rejection percentage
-  if (columnKey === 'rejectionOfDeliverablesPercent') {
-    const numVal = parsePercent(value);
-    if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">0%</span>;
-    const className = numVal > 5 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs" : 
-                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
-    return <span className={className}>{value}</span>;
+  // ✅ UPDATED: Quality Plan status (no badges)
+  if (columnKey === 'projectQualityPlanStatusRev') {
+    if (!value || value === '' || value === 'N/A') {
+      return <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold">Pending</span>;
+    }
+    return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">{value}</span>;
   }
   
-  // Hours (numerical values)
+  // ✅ NEW: Audit status coloring (no badges)
+  if (columnKey.includes('Audit') && (columnKey.includes('project') || columnKey.includes('client'))) {
+    const lowerValue = value.toLowerCase();
+    if (lowerValue.includes('pending') || lowerValue.includes('overdue') || lowerValue.includes('delayed')) {
+      return <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold">{value}</span>;
+    }
+    if (lowerValue.includes('completed') || lowerValue.includes('done') || lowerValue.includes('finished')) {
+      return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">{value}</span>;
+    }
+    if (lowerValue.includes('in progress') || lowerValue.includes('ongoing') || lowerValue.includes('started')) {
+      return <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">{value}</span>;
+    }
+    return <span className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-xs">{value}</span>;
+  }
+  
+  // Hours (numerical values) (no badges)
   if (['manHourForQuality', 'manhoursUsed', 'manhoursBalance'].includes(columnKey)) {
     const numVal = parseNumber(value);
     return <span className="text-gray-900 dark:text-gray-100 font-mono">{numVal.toLocaleString()}</span>;
+  }
+  
+  // Dates (no badges)
+  if (columnKey.includes('Date') || columnKey.includes('Extension')) {
+    return <span className="text-gray-700 dark:text-gray-300 text-sm">{value}</span>;
   }
   
   return <span className="text-gray-900 dark:text-gray-100">{value}</span>;
@@ -280,67 +338,66 @@ const SummaryCards = ({ filteredProjects = [] }) => {
   const [modalProjects, setModalProjects] = useState([]);
   const [modalColumns, setModalColumns] = useState([]);
   
-  // ✅ NEW: Filter out invalid projects first
+  // ✅ Filter out invalid projects first
   const validProjects = filteredProjects.filter(project => isValidProject(project));
   
-  // ✅ UPDATED: Debug logging to check data structure
+  // ✅ Debug logging
   console.log('🔍 SummaryCards - Total projects:', filteredProjects.length);
   console.log('🔍 Valid projects:', validProjects.length);
   
-  if (filteredProjects.length > 0) {
-    console.log('🔍 First project sample:', {
-      projectNo: filteredProjects[0]?.projectNo,
-      projectTitle: filteredProjects[0]?.projectTitle,
-      isValid: isValidProject(filteredProjects[0])
-    });
-  }
-  
   /**
-   * ✅ UPDATED: Overview calculations - Use valid projects and proper filtering
+   * ✅ UPDATED: Overview calculations with new logic
    */
   const calculations = {
-    
-    // ✅ FIXED: Total valid projects
+    // Running Projects Quality Plan Overview
     totalProjects: validProjects.length,
     
-    // ✅ FIXED: Audit overview - projects with actual audit data
+    // Audit Overview
     projectsWithAudits: (() => {
       return projectFilters["Audit Overview"](validProjects).length;
     })(),
     
-    // ✅ FIXED: Projects with KPI data
+    // KPI Overview with new logic
     projectsWithKPI: (() => {
-      return projectFilters["KPI Overview"](validProjects).length;
+      const kpiProjects = projectFilters["KPI Overview"](validProjects);
+      const needKPITracking = kpiProjects.filter(p => parsePercent(p.projectCompletionPercent) <= 95).length;
+      const perfectProjects = kpiProjects.filter(p => parsePercent(p.projectCompletionPercent) === 100).length;
+      const belowStandard = kpiProjects.filter(p => {
+        const completion = parsePercent(p.projectCompletionPercent);
+        return completion < 90 && completion > 0;
+      }).length;
+      
+      return {
+        total: kpiProjects.length,
+        needTracking: needKPITracking,
+        perfect: perfectProjects,
+        belowStandard: belowStandard
+      };
     })(),
     
-    // ✅ FIXED: Total issues across valid projects
+    // CARs/Observation Overview
     totalIssues: (() => {
-      return projectFilters["CAR/Observation Overview"](validProjects).reduce((sum, project) => {
+      return projectFilters["CARs/Observation Overview"](validProjects).reduce((sum, project) => {
         const cars = parseNumber(project.carsOpen);
         const obs = parseNumber(project.obsOpen);
         return sum + cars + obs;
       }, 0);
     })(),
     
-    // ✅ FIXED: Projects with billability data
+    // Billability Overview
     projectsWithBillability: (() => {
       return projectFilters["Billability Overview"](validProjects).length;
     })()
   };
 
-  // ✅ FIXED: Handle card clicks with proper filtering and validation
+  // Handle card clicks
   const handleCardClick = (cardTitle) => {
     console.log('🔍 Card clicked:', cardTitle);
     
-    // Apply proper filtering
     const projects = projectFilters[cardTitle] ? projectFilters[cardTitle](validProjects) : validProjects;
     const columns = getModalColumns(cardTitle);
     
     console.log('🔍 Filtered projects for modal:', projects.length);
-    console.log('🔍 Sample projects:', projects.slice(0, 3).map(p => ({
-      projectNo: p.projectNo,
-      projectTitle: p.projectTitle
-    })));
     
     setModalTitle(cardTitle);
     setModalProjects(projects);
@@ -356,41 +413,41 @@ const SummaryCards = ({ filteredProjects = [] }) => {
   };
 
   /**
-   * ✅ UPDATED: Overview cards with new headings and descriptions
+   * ✅ UPDATED: Overview cards with new headings and logic
    */
   const summaryData = [
     {
-      title: "Project Overview",
+      title: "Running Projects Quality Plan Overview",
       value: calculations.totalProjects,
-      description: "Total active projects with details",
+      description: "All active projects with quality plan status",
       priority: "overview",
       color: "blue"
     },
     {
       title: "Audit Overview",
       value: calculations.projectsWithAudits,
-      description: "Projects with audit information",
+      description: "Projects with audit information and delays",
       priority: "overview",
       color: "orange"
     },
     {
       title: "KPI Overview",
-      value: calculations.projectsWithKPI,
-      description: "Projects with KPI tracking",
+      value: calculations.projectsWithKPI.total,
+      description: `${calculations.projectsWithKPI.perfect} perfect, ${calculations.projectsWithKPI.belowStandard} below 90%`,
       priority: "overview",
       color: "green"
     },
     {
-      title: "CAR/Observation Overview",
+      title: "CARs/Observation Overview",
       value: calculations.totalIssues,
-      description: "Total issues across all projects",
+      description: "Total open issues and delayed closures",
       priority: "overview",
       color: "red"
     },
     {
       title: "Billability Overview",
       value: calculations.projectsWithBillability,
-      description: "Projects with billability tracking",
+      description: "Projects with quality billability tracking",
       priority: "overview",
       color: "purple"
     }
@@ -404,7 +461,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
         <div>
           <h3 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-3 flex items-center">
             <Eye className="w-5 h-5 mr-2" />
-            PROJECT OVERVIEWS
+            PROJECT QUALITY OVERVIEWS
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {summaryData.map((item, index) => (
@@ -427,7 +484,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
         </div>
       </div>
 
-      {/* ✅ ENHANCED: Modal with overview-specific content and better empty state handling */}
+      {/* ✅ ENHANCED: Modal with better table styling */}
       <Modal
         open={modalOpen}
         onClose={handleCloseModal}
@@ -436,12 +493,12 @@ const SummaryCards = ({ filteredProjects = [] }) => {
         <Box
           sx={{
             position: 'fixed',
-            top: '5%',
+            top: '3%',
             left: '50%',
             transform: 'translate(-50%, 0)',
             bgcolor: 'transparent',
-            width: { xs: '95vw', md: '90vw', lg: 1000 },
-            maxHeight: '90vh',
+            width: { xs: '98vw', sm: '95vw', md: '90vw', lg: '85vw', xl: '1200px' },
+            maxHeight: '94vh',
             overflowY: 'auto',
             outline: 'none',
           }}
@@ -449,12 +506,12 @@ const SummaryCards = ({ filteredProjects = [] }) => {
           <Paper 
             elevation={6} 
             className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700"
-            sx={{ borderRadius: 3, p: 3, position: 'relative' }}
+            sx={{ borderRadius: 3, p: { xs: 2, sm: 3 }, position: 'relative' }}
           >
             <IconButton
               onClick={handleCloseModal}
               className="!text-gray-500 dark:!text-slate-400 hover:!text-gray-700 dark:hover:!text-slate-200"
-              sx={{ position: 'absolute', right: 12, top: 12 }}
+              sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, top: { xs: 8, sm: 12 } }}
             >
               <CloseIcon />
             </IconButton>
@@ -464,7 +521,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
             </h2>
             
             <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
-              Showing {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''}
+              Showing {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''} with relevant data
             </p>
             
             {modalProjects.length === 0 ? (
@@ -472,30 +529,34 @@ const SummaryCards = ({ filteredProjects = [] }) => {
                 No projects found with relevant data for this overview.
               </p>
             ) : (
-              <div style={{ maxHeight: 500, overflowY: 'auto' }} className="bg-white dark:bg-slate-900">
-                <table className="min-w-full text-sm border border-gray-200 dark:border-slate-700 rounded-lg">
-                  <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900">
-                    <tr>
-                      {modalColumns.map(column => (
-                        <th key={column.key} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-left font-semibold text-gray-900 dark:text-slate-100 whitespace-nowrap">
-                          {column.label}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-slate-900">
-                    {/* ✅ FIXED: No more empty first row - using properly filtered projects */}
-                    {modalProjects.map((project, idx) => (
-                      <tr key={`${project.projectNo || idx}`} className="hover:bg-blue-50 dark:hover:bg-blue-950/30">
+              <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg">
+                <div 
+                  style={{ maxHeight: '70vh', overflowY: 'auto', overflowX: 'auto' }} 
+                  className="bg-white dark:bg-slate-900"
+                >
+                  <table className="min-w-full text-sm">
+                    <thead className="sticky top-0 bg-blue-100 dark:bg-blue-900 z-10">
+                      <tr>
                         {modalColumns.map(column => (
-                          <td key={`${column.key}-${idx}`} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100">
-                            {getCellValue(project, column.key)}
-                          </td>
+                          <th key={column.key} className="border border-gray-300 dark:border-slate-600 px-3 py-3 text-left font-semibold text-gray-900 dark:text-slate-100 whitespace-nowrap">
+                            {column.label}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-900">
+                      {modalProjects.map((project, idx) => (
+                        <tr key={`${project.projectNo || idx}`} className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
+                          {modalColumns.map(column => (
+                            <td key={`${column.key}-${idx}`} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100">
+                              {getCellValue(project, column.key)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </Paper>

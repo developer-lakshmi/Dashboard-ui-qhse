@@ -10,7 +10,6 @@ import { ErrorState } from "../common/ErrorState"
 import { EmptyDataState } from "../common/EmptyDataState"
 
 // Import dashboard-specific components
-import SummaryCard from "./SummaryCard"
 import QHSEOverviewChart from "./OverviewChart"
 import QhseTimeline from "./QhseTimeline"
 import ProjectStatus from "./ProjectStatus"
@@ -22,6 +21,7 @@ import {
 import { generateQHSETimelineData } from "../../utils/chartUtils"
 import { PageLayout } from '../../layouts/PageLayout'
 import { useGoogleSheets } from '../../hooks/useGoogleSheets'
+import DashSummaryCard from './DashSummaryCard'
 
 const DashboardPage = () => {
   // Hooks
@@ -115,7 +115,7 @@ const DashboardContent = ({ projectsData, chartData, loading, onRefresh }) => (
   <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-7 xl:space-y-8">
     {/* Summary Cards Section - Fully responsive */}
     <section className="w-full">
-      <SummaryCard projectsData={projectsData} />
+      <DashSummaryCard projectsData={projectsData} />
     </section>
     
     {/* Charts Section - Responsive grid */}
