@@ -31,10 +31,13 @@ export const generateKPIStatusData = (filteredProjects) => {
 export const generateManhoursData = (filteredProjects) => {
   return filteredProjects.map(project => ({
     code: project.projectNo || 'N/A',
-    name: project.projectTitle,
-    Planned: (Number(project.manhoursUsed) || 0) + (Number(project.manhoursBalance) || 0),
-    Used: Number(project.manhoursUsed) || 0,
-    Balance: Number(project.manhoursBalance) || 0
+    name: project.projectTitleKey || project.projectTitle, // ✅ Use Project Title Key first, fallback to full title
+    originalTitle: project.projectTitle, // Keep full title for tooltips
+    // ✅ Updated field names to match Google Sheets exactly
+    "Manhours for Quality": Number(project.manHourForQuality) || 0,
+    "Manhours Used": Number(project.manhoursUsed) || 0,
+    "Manhours Balance": Number(project.manhoursBalance) || 0,
+    "Quality Billability %": project.qualityBillabilityPercent || "0%"
   }));
 };
 

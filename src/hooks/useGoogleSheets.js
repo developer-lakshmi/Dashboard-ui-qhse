@@ -6,11 +6,12 @@ const SHEET_ID = '1gPwSaDEY84dkfqf78nzhdtxT-j1TaJWsaS_15gpraV4';
 const SHEET_NAME = 'QHSE running projects status';
 const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';
 
-// Updated field mapping to match your ACTUAL Google Sheets headers
+// ✅ UPDATED: Added "Project Title Key" column
 const FIELD_MAPPING = {
   'Sr No': 'srNo',
   'Project No': 'projectNo',
   'Project Title': 'projectTitle',
+  'Project Title Key': 'projectTitleKey', // ✅ NEW: Added Project Title Key field
   'Client': 'client',
   'Project Manager': 'projectManager',
   'Project Starting Date': 'projectStartingDate',
@@ -128,8 +129,8 @@ export function useGoogleSheets(pollInterval = 3600000) {
           // Map header to camelCase field name
           const fieldName = FIELD_MAPPING[header] || toCamelCase(header);
           
-          // 🔍 DEBUG: Log the first 5 basic fields for the first row (only on initial load)
-          if (isInitialLoad && index === 0 && ['Sr No', 'Project No', 'Project Title', 'Client', 'Project Manager'].includes(header)) {
+          // ✅ UPDATED: Added projectTitleKey to debug logging
+          if (isInitialLoad && index === 0 && ['Sr No', 'Project No', 'Project Title', 'Project Title Key', 'Client', 'Project Manager'].includes(header)) {
             console.log(`🔍 Row 0 - Header: "${header}" -> Field: "${fieldName}" -> Value: "${value}"`);
           }
           
@@ -149,17 +150,19 @@ export function useGoogleSheets(pollInterval = 3600000) {
             // Parse European dates to ISO format
             item[fieldName] = parseEuropeanDate(value);
           } else {
+            // ✅ UPDATED: projectTitleKey is treated as a string field (like other titles)
             // Keep as string
             item[fieldName] = value.toString();
           }
         });
         
-        // 🔍 DEBUG: Log the mapped basic fields for first item (only on initial load)
+        // ✅ UPDATED: Added projectTitleKey to debug logging
         if (isInitialLoad && index === 0) {
           console.log('🔍 First item basic fields (after mapping):', {
             srNo: item.srNo,
             projectNo: item.projectNo,
             projectTitle: item.projectTitle,
+            projectTitleKey: item.projectTitleKey, // ✅ NEW: Added to debug output
             client: item.client,
             projectManager: item.projectManager,
             qualityBillabilityPercent: item.qualityBillabilityPercent,
