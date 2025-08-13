@@ -1,40 +1,45 @@
 import {
   BarChart2, ClipboardList, Users, CalendarDays, FileText, Search,
   ShieldCheck, AlertTriangle, Eye, BookOpen, GraduationCap, File, Lightbulb,
-  TrendingUp, UserCheck, UserPlus, Package, PackagePlus, ShoppingBag
+  TrendingUp, UserCheck, UserPlus, Package, PackagePlus, ShoppingBag,
+  PieChart, Activity, Leaf, Zap, DollarSign
 } from "lucide-react";
 
 export const sidebarLinks = [
   {
     title: "Dashboard Overview",
     links: [
-      { label: "Summary View", icon: TrendingUp, path: "/dashboard/summary", iconColor: "text-blue-500" },
+      { label: "Summary View", icon: PieChart, path: "/dashboard/summary", iconColor: "text-blue-500" },
       { label: "Detailed View", icon: ClipboardList, path: "/dashboard/detailed", iconColor: "text-indigo-500" },
       // { label: "Analytics", icon: BarChart2, path: "/dashboard/analytics", iconColor: "text-cyan-500" }
     ]
   },
+  // {
+  //   title: "Audit Management",
+  //   links: [
+  //     { label: "Audit Overview", icon: ClipboardList, path: "/audit/overview", iconColor: "text-orange-500" },
+  //     { label: "Project Audits", icon: Package, path: "/audit/projects", iconColor: "text-yellow-500" },
+  //     { label: "Client Audits", icon: Users, path: "/audit/clients", iconColor: "text-green-500" },
+  //     { label: "Audit Schedule", icon: CalendarDays, path: "/audit/schedule", iconColor: "text-blue-400" },
+  //     { label: "Audit Reports", icon: FileText, path: "/audit/reports", iconColor: "text-purple-500" },
+  //     { label: "Audit Findings", icon: Search, path: "/audit/findings", iconColor: "text-pink-500" }
+  //   ]
+  // },
   {
-    title: "Audit Management",
-    links: [
-      { label: "Audit Overview", icon: ClipboardList, path: "/audit/overview", iconColor: "text-orange-500" },
-      { label: "Project Audits", icon: Package, path: "/audit/projects", iconColor: "text-yellow-500" },
-      { label: "Client Audits", icon: Users, path: "/audit/clients", iconColor: "text-green-500" },
-      { label: "Audit Schedule", icon: CalendarDays, path: "/audit/schedule", iconColor: "text-blue-400" },
-      { label: "Audit Reports", icon: FileText, path: "/audit/reports", iconColor: "text-purple-500" },
-      { label: "Audit Findings", icon: Search, path: "/audit/findings", iconColor: "text-pink-500" }
-    ]
-  },
-  {
-    title: "QHSE Management",
+    title: "IMS Management",
     links: [
       { label: "Quality Management", icon: ShieldCheck, path: "/qhse/quality", iconColor: "text-green-600" },
       { label: "Health & Safety", icon: AlertTriangle, path: "/qhse/health-safety", iconColor: "text-red-500" },
-      { label: "Environmental", icon: BookOpen, path: "/qhse/environmental", iconColor: "text-green-400" },
-      { label: "CARs Management", icon: AlertTriangle, path: "/qhse/cars", iconColor: "text-yellow-600" },
-      { label: "Observations", icon: Eye, path: "/qhse/observations", iconColor: "text-blue-600" },
-      { label: "Compliance", icon: FileText, path: "/qhse/compliance", iconColor: "text-purple-400" }
+      { label: "Environmental", icon: Leaf, path: "/qhse/environmental", iconColor: "text-green-400" },
+      { label: "Energy", icon: Zap, path: "/qhse/energy", iconColor: "text-yellow-600" },
     ]
   },
+  {
+    title: "Additional Information",
+    links: [
+      { label: "Billability Overview", icon: DollarSign, path: "/dashboard/billability", iconColor: "text-blue-500" },
+    ]
+  }
   // {
   //   title: "Project Management",
   //   links: [

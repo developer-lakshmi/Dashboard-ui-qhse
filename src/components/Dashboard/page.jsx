@@ -90,7 +90,7 @@ const DashboardPage = () => {
       {/* Responsive MainHeader */}
       <MainHeader 
         title="QHSE Dashboard"
-        subtitle={`Quality, Health, Safety & Environment monitoring for ${projectsData.length} active projects`}
+        subtitle={`Monitoring for Project QHSE pending Activities `}
         lastUpdated={lastUpdated}
         dataLastChanged={dataLastChanged} // ✅ CHANGED: Pass dataLastChanged
         isRefreshing={isRefreshing}

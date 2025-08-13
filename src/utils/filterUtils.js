@@ -7,7 +7,19 @@ export const getUniqueClients = (projectsData) => {
     .map(p => p.client)
     .filter(client => client && client !== '' && client !== 'N/A');
   
-  return [...new Set(clients)].sort();
+  // Normalize and deduplicate clients by converting to uppercase for comparison
+  const normalizedClients = new Map();
+  
+  clients.forEach(client => {
+    const normalizedKey = client.toUpperCase().trim();
+    // Keep the first occurrence (preserves original casing)
+    if (!normalizedClients.has(normalizedKey)) {
+      normalizedClients.set(normalizedKey, client);
+    }
+  });
+  
+  // Return the original casing values, sorted
+  return Array.from(normalizedClients.values()).sort();
 };
 
 // Calculate basic project metrics
@@ -83,7 +95,8 @@ export const createProjectFilters = (selectedYear, selectedMonth, selectedClient
       const clientName = project.client;
       if (!clientName || clientName === '' || clientName === 'N/A') return false;
       
-      return clientName === selectedClient;
+      // Compare clients case-insensitively
+      return clientName.toUpperCase().trim() === selectedClient.toUpperCase().trim();
     })();
 
     // KPI Status filter

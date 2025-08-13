@@ -68,10 +68,7 @@ const SummaryView = () => {
   if (loading) {
     return (
       <PageLayout>
-        <MainHeader 
-          title="Dashboard Summary"
-          subtitle="Get a quick overview of all QHSE Activities"
-        />
+        <MainHeader/>
         <LoadingState message="Loading Google Sheets data..." />
       </PageLayout>
     )
@@ -94,10 +91,7 @@ const SummaryView = () => {
   if (!projectsData || projectsData.length === 0) {
     return (
       <PageLayout>
-        <MainHeader 
-          title="Dashboard Summary"
-          subtitle="Get a quick overview of your most important QHSE project metrics."
-        />
+        <MainHeader/>
         <EmptyDataState />
       </PageLayout>
     )
@@ -108,7 +102,7 @@ const SummaryView = () => {
     <PageLayout>
       <MainHeader 
         title="Dashboard Summary"
-        subtitle="Get a quick overview of your most important QHSE project metrics."
+        subtitle="Get a quick overview of all QHSE Activities"
         lastUpdated={lastUpdated}
       >
         <div className="text-xs text-green-600 dark:text-green-400">
