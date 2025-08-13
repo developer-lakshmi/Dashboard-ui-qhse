@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useGoogleSheets } from '../../hooks/useGoogleSheets'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, Eye } from 'lucide-react'
 
 // Import reusable components
 import { MainHeader } from "../Common/MainHeader"
@@ -10,6 +10,7 @@ import { EmptyDataState } from "../common/EmptyDataState"
 import { PageLayout } from '../../layouts/PageLayout'
 import { Card, CardContent } from '../ui/Card'
 import { ManhoursChart } from '../charts/ChartComponents/ManhoursChart'
+import BillabilityCard from './BillabilityCard' // ✅ NEW: Import the new component
 // import Filters from '../SummayView/Filters' // ✅ Commented out for future use
 
 import {
@@ -30,14 +31,6 @@ const BillabilityPage = () => {
 
   // ✅ SIMPLIFIED: Use all projects for now (no filtering)
   const filteredProjects = projectsData || [];
-
-  // ✅ FUTURE: Reset filters function (commented for now)
-  // const resetFilters = () => {
-  //   setSelectedYear("all");
-  //   setSelectedMonth("all");
-  //   setSelectedClient("all");
-  //   setSelectedKPIStatus("all");
-  // };
 
   // Generate manhours data using utility function
   const manhoursData = generateManhoursData(filteredProjects);
@@ -114,57 +107,25 @@ const BillabilityContent = ({
 
   return (
     <div className="space-y-6">
+      {/* ✅ UPDATED: Billability Overview Card using new component */}
+      <div>
+        <h3 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-3 flex items-center">
+          <Eye className="w-5 h-5 mr-2" />
+          BILLABILITY OVERVIEW
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <BillabilityCard filteredProjects={filteredProjects} />
+        </div>
+      </div>
+
       {/* ✅ FUTURE: Filters Section (commented for now) */}
-      {/* <FiltersSection 
-        projectsData={projectsData}
-        filteredProjects={filteredProjects}
-        selectedYear={selectedYear}
-        setSelectedYear={setSelectedYear}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        selectedClient={selectedClient}
-        setSelectedClient={setSelectedClient}
-        selectedKPIStatus={selectedKPIStatus}
-        setSelectedKPIStatus={setSelectedKPIStatus}
-        resetFilters={resetFilters}
-      /> */}
+      {/* <FiltersSection ... /> */}
 
       {/* Manhours Chart Section - Main Content */}
       <ManhoursChartSection manhoursData={manhoursData} />
     </div>
   )
 }
-
-// ✅ FUTURE: Filters Section Component (commented for now)
-// const FiltersSection = ({ 
-//   projectsData,
-//   filteredProjects,
-//   selectedYear,
-//   setSelectedYear,
-//   selectedMonth,
-//   setSelectedMonth,
-//   selectedClient,
-//   setSelectedClient,
-//   selectedKPIStatus,
-//   setSelectedKPIStatus,
-//   resetFilters
-// }) => (
-//   <Filters
-//     selectedYear={selectedYear}
-//     setSelectedYear={setSelectedYear}
-//     selectedMonth={selectedMonth}
-//     setSelectedMonth={setSelectedMonth}
-//     selectedClient={selectedClient}
-//     setSelectedClient={setSelectedClient}
-//     selectedKPIStatus={selectedKPIStatus}
-//     setSelectedKPIStatus={setSelectedKPIStatus}
-//     resetFilters={resetFilters}
-//     filteredProjects={filteredProjects}
-//     getUniqueYears={() => getUniqueYears(projectsData)}
-//     getUniqueClients={() => getUniqueClients(projectsData)}
-//     totalProjects={projectsData ? projectsData.length : 0}
-//   />
-// )
 
 const ManhoursChartSection = ({ manhoursData }) => (
   <div>

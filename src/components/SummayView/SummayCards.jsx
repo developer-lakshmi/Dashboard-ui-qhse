@@ -8,7 +8,8 @@ import {
   CheckCircle2,
   Wrench,
   FileText,
-  Eye
+  Eye,
+  XCircle
 } from 'lucide-react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -17,26 +18,28 @@ import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 
 /**
- * ✅ UPDATED: PROJECT OVERVIEW CARDS - Shows comprehensive overviews with exact Google Sheets headers
+ * ✅ UPDATED: PROJECT OVERVIEW CARDS - Removed Billability, Added Rejection and Cost of Poor Quality
  */
 
-// ✅ UPDATED: Icon mapping with new overview icons
+// ✅ UPDATED: Icon mapping with unique colors for each overview
 const iconMap = {
   "Running Projects Quality Plan Overview": <FileText className="w-8 h-8 text-blue-500 dark:text-blue-400" />,
   "Audit Overview": <Clock className="w-8 h-8 text-orange-500 dark:text-orange-400" />,
   "KPI Overview": <BarChart2 className="w-8 h-8 text-green-500 dark:text-green-400" />,
   "CARs/Observation Overview": <Wrench className="w-8 h-8 text-red-500 dark:text-red-400" />,
-  "Billability Overview": <DollarSign className="w-8 h-8 text-purple-500 dark:text-purple-400" />
+  "Rejection Overview": <XCircle className="w-8 h-8 text-pink-500 dark:text-pink-400" />, // ✅ CHANGED: Red to Pink
+  "Cost of Poor Quality Overview": <DollarSign className="w-8 h-8 text-purple-500 dark:text-purple-400" />
 };
 
-// Color mappings (keep existing)
+// ✅ UPDATED: Color mappings - Added pink color
 const getCardClasses = (color) => {
   const colorMap = {
     red: "border-l-4 border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950/20",
     orange: "border-l-4 border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-950/20",
     blue: "border-l-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/20",
     green: "border-l-4 border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-950/20",
-    purple: "border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20"
+    purple: "border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20",
+    pink: "border-l-4 border-pink-500 dark:border-pink-400 bg-pink-50 dark:bg-pink-950/20" // ✅ NEW: Pink color
   };
   return colorMap[color] || colorMap.blue;
 };
@@ -47,7 +50,8 @@ const getTextClasses = (color) => {
     orange: "text-orange-600 dark:text-orange-400",
     blue: "text-blue-600 dark:text-blue-400",
     green: "text-green-600 dark:text-green-400",
-    purple: "text-purple-600 dark:text-purple-400"
+    purple: "text-purple-600 dark:text-purple-400",
+    pink: "text-pink-600 dark:text-pink-400" // ✅ NEW: Pink text color
   };
   return colorMap[color] || colorMap.blue;
 };
@@ -58,7 +62,8 @@ const getValueClasses = (color) => {
     orange: "text-orange-800 dark:text-orange-300",
     blue: "text-blue-800 dark:text-blue-300",
     green: "text-green-800 dark:text-green-300",
-    purple: "text-purple-800 dark:text-purple-300"
+    purple: "text-purple-800 dark:text-purple-300",
+    pink: "text-pink-800 dark:text-pink-300" // ✅ NEW: Pink value color
   };
   return colorMap[color] || colorMap.blue;
 };
@@ -89,7 +94,7 @@ const isValidProject = (project) => {
 };
 
 /**
- * ✅ UPDATED: Project filters with exact Google Sheets field names
+ * ✅ UPDATED: Project filters - Fixed Rejection Overview to only use existing field
  */
 const projectFilters = {
   "Running Projects Quality Plan Overview": (projects) => {
@@ -132,19 +137,27 @@ const projectFilters = {
     );
   },
   
-  "Billability Overview": (projects) => {
+  // ✅ FIXED: Rejection Overview filter - only use rejectionOfDeliverablesPercent
+  "Rejection Overview": (projects) => {
+    return projects.filter(project => 
+      isValidProject(project) && 
+      project.rejectionOfDeliverablesPercent && 
+      parsePercent(project.rejectionOfDeliverablesPercent) > 0
+    );
+  },
+  
+  // ✅ NEW: Cost of Poor Quality Overview filter
+  "Cost of Poor Quality Overview": (projects) => {
     return projects.filter(project => 
       isValidProject(project) && (
-        (project.qualityBillabilityPercent && project.qualityBillabilityPercent !== 'N/A') ||
-        (project.manHourForQuality && parseNumber(project.manHourForQuality) > 0) ||
-        (project.manhoursUsed && parseNumber(project.manhoursUsed) >= 0)
+        project.costOfPoorQualityAED && parseNumber(project.costOfPoorQualityAED) > 0
       )
     );
   }
 };
 
 /**
- * ✅ UPDATED: Modal columns with exact Google Sheets headers
+ * ✅ UPDATED: Modal columns - Removed non-existent field
  */
 const getModalColumns = (cardTitle) => {
   const baseColumns = [
@@ -183,11 +196,13 @@ const getModalColumns = (cardTitle) => {
       { key: 'obsClosed', label: 'Obs Closed' },
       { key: 'obsDelayedClosingNoDays', label: 'Obs delayed closing No. of Days' }
     ],
-    "Billability Overview": [
-      { key: 'manHourForQuality', label: 'Man hour for Quality' },
-      { key: 'manhoursUsed', label: 'Manhours Used' },
-      { key: 'manhoursBalance', label: 'Manhours Balance' },
-      { key: 'qualityBillabilityPercent', label: 'Quality billability %' }
+    // ✅ FIXED: Rejection Overview columns - only the field that exists
+    "Rejection Overview": [
+      { key: 'rejectionOfDeliverablesPercent', label: 'Rejection of Deleverables %' }
+    ],
+    // ✅ NEW: Cost of Poor Quality Overview columns (from DashSummaryCard)
+    "Cost of Poor Quality Overview": [
+      { key: 'costOfPoorQualityAED', label: 'Cost of Poor Quality in AED' }
     ]
   };
 
@@ -195,13 +210,17 @@ const getModalColumns = (cardTitle) => {
 };
 
 /**
- * ✅ UPDATED: Enhanced cell formatting - ONLY KPI Achieved % column gets badges
+ * ✅ UPDATED: Enhanced cell formatting - Removed formatting for non-existent field
  */
 const getCellValue = (project, columnKey) => {
   const value = project[columnKey];
   
   if (!value || value === '' || value === 'N/A') {
-    return <span className="text-gray-400 dark:text-slate-500 italic">Missing</span>;
+    return (
+      <div className="flex justify-center items-center py-1">
+        <span className="text-gray-400 dark:text-slate-500 font-medium text-lg">−</span>
+      </div>
+    );
   }
   
   // ✅ UPDATED: ONLY Project KPI Achieved % gets badges (not Project Compl. %)
@@ -248,13 +267,22 @@ const getCellValue = (project, columnKey) => {
     return <span className={className}>{value}</span>;
   }
   
-  // Billability coloring (no badges)
-  if (columnKey === 'qualityBillabilityPercent') {
+  // ✅ UPDATED: Rejection Rate coloring - kept the same
+  if (columnKey === 'rejectionOfDeliverablesPercent') {
     const numVal = parsePercent(value);
-    const className = numVal >= 85 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
-                     numVal >= 70 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
-                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
+    const className = numVal === 0 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" :
+                     numVal > 10 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" :
+                     numVal > 5 ? "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs" :
+                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
     return <span className={className}>{value}</span>;
+  }
+  
+  // ✅ REMOVED: Number of deliverables rejected formatting (field doesn't exist)
+  
+  // ✅ NEW: Cost of Poor Quality formatting (from DashSummaryCard)
+  if (columnKey === 'costOfPoorQualityAED') {
+    const cost = parseNumber(value);
+    return <span className="text-purple-800 dark:text-purple-300 font-bold font-mono">{cost.toLocaleString()} AED</span>;
   }
   
   // CAR/OBS coloring (no badges)
@@ -346,7 +374,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
   console.log('🔍 Valid projects:', validProjects.length);
   
   /**
-   * ✅ UPDATED: Overview calculations with new logic
+   * ✅ UPDATED: Overview calculations - Fixed Rejection calculation
    */
   const calculations = {
     // Running Projects Quality Plan Overview
@@ -384,9 +412,15 @@ const SummaryCards = ({ filteredProjects = [] }) => {
       }, 0);
     })(),
     
-    // Billability Overview
-    projectsWithBillability: (() => {
-      return projectFilters["Billability Overview"](validProjects).length;
+    // ✅ NEW: Rejection Overview
+    totalRejections: (() => {
+      const projectsWithRejections = projectFilters["Rejection Overview"](validProjects);
+      return projectsWithRejections.length; // Count of projects with rejections
+    })(),
+    
+    // ✅ NEW: Cost of Poor Quality Overview
+    projectsWithCosts: (() => {
+      return projectFilters["Cost of Poor Quality Overview"](validProjects).length;
     })()
   };
 
@@ -413,7 +447,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
   };
 
   /**
-   * ✅ UPDATED: Overview cards with new headings and logic
+   * ✅ UPDATED: Overview cards with unique colors for each card
    */
   const summaryData = [
     {
@@ -421,35 +455,42 @@ const SummaryCards = ({ filteredProjects = [] }) => {
       value: calculations.totalProjects,
       description: "All active projects with quality plan status",
       priority: "overview",
-      color: "blue"
+      color: "blue" // Blue
     },
     {
       title: "Audit Overview",
       value: calculations.projectsWithAudits,
       description: "Projects with audit information and delays",
       priority: "overview",
-      color: "orange"
-    },
-    {
-      title: "KPI Overview",
-      value: calculations.projectsWithKPI.total,
-      description: `${calculations.projectsWithKPI.perfect} perfect, ${calculations.projectsWithKPI.belowStandard} below 90%`,
-      priority: "overview",
-      color: "green"
+      color: "orange" // Orange
     },
     {
       title: "CARs/Observation Overview",
       value: calculations.totalIssues,
       description: "Total open issues and delayed closures",
       priority: "overview",
-      color: "red"
+      color: "red" // Red
     },
     {
-      title: "Billability Overview",
-      value: calculations.projectsWithBillability,
-      description: "Projects with quality billability tracking",
+      title: "KPI Overview",
+      value: calculations.projectsWithKPI.total,
+      description: `${calculations.projectsWithKPI.perfect} perfect, ${calculations.projectsWithKPI.belowStandard} below 90%`,
       priority: "overview",
-      color: "purple"
+      color: "green" // Green
+    },
+    {
+      title: "Rejection Overview",
+      value: calculations.totalRejections,
+      description: "Projects with deliverable rejection rate",
+      priority: "overview",
+      color: "pink" // ✅ CHANGED: Red to Pink
+    },
+    {
+      title: "Cost of Poor Quality Overview",
+      value: calculations.projectsWithCosts,
+      description: "Projects with quality cost impact",
+      priority: "overview",
+      color: "purple" // Purple
     }
   ];
 
@@ -463,7 +504,7 @@ const SummaryCards = ({ filteredProjects = [] }) => {
             <Eye className="w-5 h-5 mr-2" />
             PROJECT QUALITY OVERVIEWS
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {summaryData.map((item, index) => (
               <Card 
                 key={index} 
@@ -555,6 +596,19 @@ const SummaryCards = ({ filteredProjects = [] }) => {
                         </tr>
                       ))}
                     </tbody>
+                    {/* ✅ NEW: Show total sum in table footer for Cost of Poor Quality */}
+                    {modalTitle === "Cost of Poor Quality Overview" && (
+                      <tfoot className="sticky bottom-0 bg-purple-100 dark:bg-purple-900">
+                        <tr>
+                          <td colSpan={modalColumns.length - 1} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-right font-bold text-purple-800 dark:text-purple-200">
+                            Total Cost of Poor Quality:
+                          </td>
+                          <td className="border border-gray-300 dark:border-slate-600 px-3 py-2 font-bold text-purple-800 dark:text-purple-200 font-mono">
+                            {modalProjects.reduce((sum, project) => sum + parseNumber(project.costOfPoorQualityAED), 0).toLocaleString()} AED
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
                   </table>
                 </div>
               </div>

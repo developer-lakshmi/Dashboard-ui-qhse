@@ -36,12 +36,12 @@ const getBadge = (title, value) => {
     if (value > 0) return <span className="ml-1 sm:ml-2 rounded bg-yellow-200 px-1.5 sm:px-2 py-0.5 text-xs text-yellow-800">Attention</span>;
   }
   
-  if (title.includes("Cost of Poor Quality")) {
-    // ✅ CHANGED: More suitable badge for cost-related metric
-    if (value > 10) return <span className="ml-1 sm:ml-2 rounded bg-red-200 px-1.5 sm:px-2 py-0.5 text-xs text-red-800">High Cost</span>;
-    if (value > 5) return <span className="ml-1 sm:ml-2 rounded bg-orange-200 px-1.5 sm:px-2 py-0.5 text-xs text-orange-800">Medium Cost</span>;
-    if (value > 0) return <span className="ml-1 sm:ml-2 rounded bg-purple-200 px-1.5 sm:px-2 py-0.5 text-xs text-purple-800">With Cost</span>;
-  }
+  // if (title.includes("Cost of Poor Quality")) {
+  //   // ✅ CHANGED: More suitable badge for cost-related metric
+  //   if (value > 10) return <span className="ml-1 sm:ml-2 rounded bg-red-200 px-1.5 sm:px-2 py-0.5 text-xs text-red-800">High Cost</span>;
+  //   if (value > 5) return <span className="ml-1 sm:ml-2 rounded bg-orange-200 px-1.5 sm:px-2 py-0.5 text-xs text-orange-800">Medium Cost</span>;
+  //   if (value > 0) return <span className="ml-1 sm:ml-2 rounded bg-purple-200 px-1.5 sm:px-2 py-0.5 text-xs text-purple-800">With Cost</span>;
+  // }
   
   return null;
 };
@@ -91,10 +91,10 @@ const filterProjects = {
     return openObs > 0;
   },
   
-  "Cost of Poor Quality": (p) => {
-    const cost = Number(p.costOfPoorQualityAED || 0);
-    return cost > 0;
-  }
+  // "Cost of Poor Quality": (p) => {
+  //   const cost = Number(p.costOfPoorQualityAED || 0);
+  //   return cost > 0;
+  // }
 };
 
 const DashSummaryCard = ({ projectsData = [] }) => {
@@ -108,8 +108,8 @@ const DashSummaryCard = ({ projectsData = [] }) => {
   const auditsPending = countProjects(projectsData, filterProjects["Projects Audits Pending"]);
   const carOpen = projectsData.reduce((sum, p) => sum + parseNumber(p.carsOpen), 0); // Total count of open CARs
   const obsOpen = projectsData.reduce((sum, p) => sum + parseNumber(p.obsOpen), 0); // Total count of open observations
-  const totalCostOfPoorQuality = projectsData.reduce((sum, p) => sum + parseNumber(p.costOfPoorQualityAED), 0); // Sum of all costs
-  const costProjectsCount = countProjects(projectsData, filterProjects["Cost of Poor Quality"]); // Count of projects with costs
+  // const totalCostOfPoorQuality = projectsData.reduce((sum, p) => sum + parseNumber(p.costOfPoorQualityAED), 0); // Sum of all costs
+  // const costProjectsCount = countProjects(projectsData, filterProjects["Cost of Poor Quality"]); // Count of projects with costs
 
   // ✅ UPDATED: Pending Activities Summary - Show project count for Cost of Poor Quality card
   const pendingActivitiesSummary = [
@@ -141,13 +141,13 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       color: "text-yellow-600 bg-yellow-100/60 dark:bg-yellow-900/30 dark:text-yellow-400",
       description: "Total observations pending closure"
     },
-    {
-      title: "Cost of Poor Quality",
-      value: costProjectsCount, // ✅ CHANGED: Show count of projects, not total cost
-      icon: DollarSign,
-      color: "text-purple-600 bg-purple-100/60 dark:bg-purple-900/30 dark:text-purple-400",
-      description: "Projects with quality cost impact"
-    }
+    // {
+    //   title: "Cost of Poor Quality",
+    //   value: costProjectsCount, // ✅ CHANGED: Show count of projects, not total cost
+    //   icon: DollarSign,
+    //   color: "text-purple-600 bg-purple-100/60 dark:bg-purple-900/30 dark:text-purple-400",
+    //   description: "Projects with quality cost impact"
+    // }
   ];
 
   // Modal handlers
@@ -159,14 +159,14 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       return; // Don't open modal for zero counts on CAR/OBS totals
     }
     
-    if (item.title === "Cost of Poor Quality") {
-      // For cost of poor quality, show projects that have costs
-      const filteredProjects = projectsData.filter(filterProjects["Cost of Poor Quality"]);
-      setModalTitle(item.title);
-      setModalProjects(filteredProjects);
-      setOpen(true);
-      return;
-    }
+    // if (item.title === "Cost of Poor Quality") {
+    //   // For cost of poor quality, show projects that have costs
+    //   const filteredProjects = projectsData.filter(filterProjects["Cost of Poor Quality"]);
+    //   setModalTitle(item.title);
+    //   setModalProjects(filteredProjects);
+    //   setOpen(true);
+    //   return;
+    // }
     
     const filteredProjects = projectsData.filter(filterProjects[item.title]);
     setModalTitle(item.title);
@@ -225,9 +225,9 @@ const DashSummaryCard = ({ projectsData = [] }) => {
         { key: 'obsDelayedClosingNoDays', label: 'Obs delayed closing No. of Days' },
         { key: 'obsClosed', label: 'Obs Closed' }
       ],
-      "Cost of Poor Quality": [
-        { key: 'costOfPoorQualityAED', label: 'Cost of Poor Quality in AED' }
-      ]
+      // "Cost of Poor Quality": [
+      //   { key: 'costOfPoorQualityAED', label: 'Cost of Poor Quality in AED' }
+      // ]
     };
 
     return [...baseColumns, ...(specificColumns[modalTitle] || [])];
@@ -282,12 +282,12 @@ const DashSummaryCard = ({ projectsData = [] }) => {
           severity: openObs > 10 ? "critical" : openObs > 5 ? "warning" : "info"
         };
       
-      case "Cost of Poor Quality":
-        const cost = Number(project.costOfPoorQualityAED || 0);
-        return {
-          value: `${cost.toLocaleString()} AED`,
-          severity: cost > 10000 ? "critical" : cost > 5000 ? "warning" : "info"
-        };
+      // case "Cost of Poor Quality":
+      //   const cost = Number(project.costOfPoorQualityAED || 0);
+      //   return {
+      //     value: `${cost.toLocaleString()} AED`,
+      //     severity: cost > 10000 ? "critical" : cost > 5000 ? "warning" : "info"
+      //   };
       
       default:
         return {
@@ -301,7 +301,11 @@ const DashSummaryCard = ({ projectsData = [] }) => {
     const value = project[columnKey];
     
     if (!value || value === '' || value === 'N/A') {
-      return <span className="text-red-500 dark:text-red-400 font-semibold italic">Missing</span>;
+      return (
+        <div className="flex justify-center items-center py-1">
+          <span className="text-red-500 dark:text-red-400 font-medium text-lg">-</span>
+        </div>
+      );
     }
     
     // Highlight important values
@@ -335,10 +339,10 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       return <span className={className}>{value}</span>;
     }
     
-    if (columnKey === 'costOfPoorQualityAED') {
-      const cost = parseNumber(value);
-      return <span className="text-purple-800 dark:text-purple-300 font-bold font-mono">{cost.toLocaleString()} AED</span>;
-    }
+    // if (columnKey === 'costOfPoorQualityAED') {
+    //   const cost = parseNumber(value);
+    //   return <span className="text-purple-800 dark:text-purple-300 font-bold font-mono">{cost.toLocaleString()} AED</span>;
+    // }
     
     return <span className="text-gray-900 dark:text-gray-100">{value}</span>;
   };
@@ -499,7 +503,7 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                         ))}
                       </tbody>
                       {/* ✅ NEW: Show total sum in table footer for Cost of Poor Quality */}
-                      {modalTitle === "Cost of Poor Quality" && (
+                      {/* {modalTitle === "Cost of Poor Quality" && (
                         <tfoot className="sticky bottom-0 bg-purple-100 dark:bg-purple-900">
                           <tr>
                             <td colSpan={getTableColumns(modalTitle).length - 1} className="border border-gray-300 dark:border-slate-600 px-1.5 sm:px-2 md:px-3 py-2 text-right font-bold text-purple-800 dark:text-purple-200">
@@ -510,7 +514,7 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                             </td>
                           </tr>
                         </tfoot>
-                      )}
+                      )} */}
                     </table>
                   </div>
                 </div>
