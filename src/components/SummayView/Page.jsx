@@ -20,7 +20,7 @@ import {
   createProjectFilters,
   calculateProjectMetrics,
   generateKPIStatusData,
-  generateManhoursData,
+  // generateManhoursData, // ✅ COMMENTED: Moved to BillabilityPage
   generateAuditStatusData,
   generateCarsObsData,
   generateTimelineData,
@@ -53,10 +53,10 @@ const SummaryView = () => {
   // Calculate metrics using utility functions
   const projectMetrics = calculateProjectMetrics(filteredProjects);
 
-  // Generate chart data using utility functions
+  // ✅ UPDATED: Generate chart data without manhours (moved to BillabilityPage)
   const chartData = {
     kpiStatus: generateKPIStatusData(filteredProjects),
-    manhours: generateManhoursData(filteredProjects),
+    // manhours: generateManhoursData(filteredProjects), // ✅ COMMENTED: Now available in BillabilityPage
     auditStatus: generateAuditStatusData(filteredProjects),
     carsObs: generateCarsObsData(filteredProjects),
     timeline: generateTimelineData(filteredProjects),
@@ -203,7 +203,7 @@ const SummaryContent = ({
 
       <ChartsSection chartData={chartData} />
 
-      <CriticalIssues filteredProjects={filteredProjects} />
+      {/* <CriticalIssues filteredProjects={filteredProjects} /> */}
     </>
   )
 }
@@ -237,10 +237,11 @@ const FiltersSection = ({
   />
 )
 
+// ✅ UPDATED: ChartsSection without manhours data
 const ChartsSection = ({ chartData }) => (
   <Charts
     kpiStatusData={chartData.kpiStatus}
-    manhoursData={chartData.manhours}
+    // manhoursData={chartData.manhours} // ✅ COMMENTED: Manhours chart moved to BillabilityPage
     auditStatusData={chartData.auditStatus}
     carsObsData={chartData.carsObs}
     timelineData={chartData.timeline}

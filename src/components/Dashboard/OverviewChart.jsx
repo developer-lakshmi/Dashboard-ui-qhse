@@ -3,11 +3,12 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import { useTheme } from "@/hooks/use-theme";
 import { useState } from "react";
 
+// ✅ UPDATED: Removed billability metric
 const metricOptions = [
   { key: "carsOpen", label: "CARs Open", color: "#ef4444", type: "count" },
   { key: "obsOpen", label: "Observations Open", color: "#f97316", type: "count" },
   { key: "kpiAchieved", label: "KPI Achievement", color: "#22c55e", type: "percentage" },
-  { key: "billability", label: "Billability", color: "#3b82f6", type: "percentage" },
+  // { key: "billability", label: "Billability", color: "#3b82f6", type: "percentage" }, // ✅ REMOVED: Billability now has its own dedicated page
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -56,61 +57,59 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData, className }) => {
 
   return (
     <div className={`card ${className}`}>
-  <div className="card-header space-y-3 flex justify-between ">
-  {/* Heading */}
-  <div >
-    <h3 className="card-title text-lg font-semibold">
-      QHSE Performance Overview
-    </h3>
-  </div>
+      <div className="card-header space-y-3 flex justify-between ">
+        {/* Heading */}
+        <div >
+          <h3 className="card-title text-lg font-semibold">
+            QHSE Performance Overview
+          </h3>
+        </div>
 
-  {/* Filter Dropdown aligned right */}
-  <div className="">
-    <select
-      id="overview-filter"
-      className="border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      value={filter}
-      onChange={e => setFilter(e.target.value)}
-      aria-label="Select time period"
-    >
-      <option value="monthly">Monthly View</option>
-      <option value="yearly">Yearly View</option>
-    </select>
-  </div>
+        {/* Filter Dropdown aligned right */}
+        <div className="">
+          <select
+            id="overview-filter"
+            className="border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            aria-label="Select time period"
+          >
+            <option value="monthly">Monthly View</option>
+            <option value="yearly">Yearly View</option>
+          </select>
+        </div>
+      </div>
 
- 
-</div>
- {/* Metric Toggle Buttons */}
-  <div className="flex flex-wrap gap-2">
-    {metricOptions.map(metric => (
-      <button
-        key={metric.key}
-        onClick={() => toggleMetric(metric.key)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-          selectedMetrics.includes(metric.key)
-            ? 'text-white shadow-md'
-            : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
-        }`}
-        style={{
-          backgroundColor: selectedMetrics.includes(metric.key)
-            ? metric.color
-            : undefined,
-        }}
-        title={`Toggle ${metric.label} visibility`}
-      >
-        <div
-          className="w-2 h-2 rounded-full"
-          style={{
-            backgroundColor: selectedMetrics.includes(metric.key)
-              ? 'white'
-              : metric.color,
-          }}
-        />
-        {metric.label}
-      </button>
-    ))}
-  </div>
-
+      {/* Metric Toggle Buttons */}
+      <div className="flex flex-wrap gap-2">
+        {metricOptions.map(metric => (
+          <button
+            key={metric.key}
+            onClick={() => toggleMetric(metric.key)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              selectedMetrics.includes(metric.key)
+                ? 'text-white shadow-md'
+                : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
+            }`}
+            style={{
+              backgroundColor: selectedMetrics.includes(metric.key)
+                ? metric.color
+                : undefined,
+            }}
+            title={`Toggle ${metric.label} visibility`}
+          >
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{
+                backgroundColor: selectedMetrics.includes(metric.key)
+                  ? 'white'
+                  : metric.color,
+              }}
+            />
+            {metric.label}
+          </button>
+        ))}
+      </div>
 
       <div className="card-body p-0">
         {chartData && chartData.length > 0 ? (

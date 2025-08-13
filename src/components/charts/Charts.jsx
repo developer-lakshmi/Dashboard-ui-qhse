@@ -26,9 +26,14 @@ const Charts = ({
   
   // Chart configuration with individual components
   const chartConfigs = [
+    // {
+    //   id: 'manhours',
+    //   component: <ManhoursChart data={manhoursData} />,
+    //   fullWidth: true
+    // },
     {
-      id: 'manhours',
-      component: <ManhoursChart data={manhoursData} />,
+      id: 'cars-obs',
+      component: <CarsObsChart data={carsObsData} />,
       fullWidth: true
     },
     {
@@ -41,11 +46,7 @@ const Charts = ({
       component: <KPIStatusChart data={kpiStatusData} />,
       fullWidth: false
     },
-    {
-      id: 'cars-obs',
-      component: <CarsObsChart data={carsObsData} />,
-      fullWidth: true
-    },
+    
     {
       id: 'timeline',
       component: <TimelineChart data={timelineData} getKPIBadgeVariant={getKPIBadgeVariant} />,

@@ -37,7 +37,7 @@ export const sidebarLinks = [
   {
     title: "Additional Information",
     links: [
-      { label: "Billability Overview", icon: DollarSign, path: "/dashboard/billability", iconColor: "text-blue-500" },
+      { label: "Billability Overview", icon: DollarSign, path: "/info/billability", iconColor: "text-blue-500" },
     ]
   }
   // {
