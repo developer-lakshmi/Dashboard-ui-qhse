@@ -383,15 +383,26 @@ const getCellValue = (project, columnKey, isFullScreen = false) => {
   
   // ✅ NEW: Audit status coloring
   if (columnKey.includes('Audit') && (columnKey.includes('project') || columnKey.includes('client'))) {
+    // Try to parse as date
+    const parsedDate = formatDate(value);
+    // If value is a valid date (not 'N/A'), show formatted date
+    if (parsedDate !== 'N/A') {
+      return (
+        <span className="text-gray-700 dark:text-gray-300 text-sm">
+          {parsedDate}
+        </span>
+      );
+    }
+    // Otherwise, show status coloring
     const lowerValue = value.toLowerCase();
-    if (lowerValue.includes('pending') || lowerValue.includes('overdue') || lowerValue.includes('delayed')) {
-      return <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold">{value}</span>;
-    }
-    if (lowerValue.includes('completed') || lowerValue.includes('done') || lowerValue.includes('finished')) {
-      return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">{value}</span>;
-    }
-    if (lowerValue.includes('in progress') || lowerValue.includes('ongoing') || lowerValue.includes('started')) {
-      return <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">{value}</span>;
+    if (
+      lowerValue.includes('not applicable') ||
+      lowerValue.includes('n/a') ||
+      lowerValue.includes('not required') ||
+      lowerValue.includes('no audit needed')
+    ) {
+      return<span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200  py-1 rounded text-xs font-bold">{value}</span>;
+
     }
     return <span className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-xs">{value}</span>;
   }
