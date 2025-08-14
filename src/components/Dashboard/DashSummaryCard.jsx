@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
-import { AlertTriangle, FileText, Clock, Wrench, Eye, DollarSign } from "lucide-react";
+import { AlertTriangle, FileText, Clock, Wrench, Eye, Maximize2, Minimize2 } from "lucide-react";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
+import Tooltip from '@mui/material/Tooltip';
 
 // Helper functions (keep existing)
 const parseDate = (dateStr) => {
@@ -26,7 +27,6 @@ const getBadge = (title, value) => {
     if (title.includes("Projects Audits Pending")) return <span className="ml-1 sm:ml-2 rounded bg-green-200 px-1.5 sm:px-2 py-0.5 text-xs text-green-800">On Time</span>;
     if (title.includes("CAR Open")) return <span className="ml-1 sm:ml-2 rounded bg-green-200 px-1.5 sm:px-2 py-0.5 text-xs text-green-800">No Issues</span>;
     if (title.includes("Observation Open")) return <span className="ml-1 sm:ml-2 rounded bg-green-200 px-1.5 sm:px-2 py-0.5 text-xs text-green-800">No Issues</span>;
-    if (title.includes("Cost of Poor Quality")) return <span className="ml-1 sm:ml-2 rounded bg-green-200 px-1.5 sm:px-2 py-0.5 text-xs text-green-800">No Cost</span>;
     return <span className="ml-1 sm:ml-2 rounded bg-green-200 px-1.5 sm:px-2 py-0.5 text-xs text-green-800">OK</span>;
   }
   
@@ -36,17 +36,9 @@ const getBadge = (title, value) => {
     if (value > 0) return <span className="ml-1 sm:ml-2 rounded bg-yellow-200 px-1.5 sm:px-2 py-0.5 text-xs text-yellow-800">Attention</span>;
   }
   
-  // if (title.includes("Cost of Poor Quality")) {
-  //   // ✅ CHANGED: More suitable badge for cost-related metric
-  //   if (value > 10) return <span className="ml-1 sm:ml-2 rounded bg-red-200 px-1.5 sm:px-2 py-0.5 text-xs text-red-800">High Cost</span>;
-  //   if (value > 5) return <span className="ml-1 sm:ml-2 rounded bg-orange-200 px-1.5 sm:px-2 py-0.5 text-xs text-orange-800">Medium Cost</span>;
-  //   if (value > 0) return <span className="ml-1 sm:ml-2 rounded bg-purple-200 px-1.5 sm:px-2 py-0.5 text-xs text-purple-800">With Cost</span>;
-  // }
-  
   return null;
 };
 
-// ✅ SIMPLE FIX: Add valid project helper function
 const isValidProject = (project) => {
   return project && 
          project.projectNo && 
@@ -57,13 +49,10 @@ const isValidProject = (project) => {
          project.projectTitle !== 'N/A';
 };
 
-// ✅ UPDATED: Filter functions - Only fix Quality Plan Pending
 const filterProjects = {
   "Quality Plan Pending": (p) => {
-    // ✅ FIRST CHECK: Only process valid projects (this is the missing piece!)
     if (!isValidProject(p)) return false;
     
-    // ✅ THEN CHECK: Show projects with MISSING quality plan information
     const hasQualityPlanRev = p.projectQualityPlanStatusRev && 
                              p.projectQualityPlanStatusRev !== '' && 
                              p.projectQualityPlanStatusRev !== 'N/A';
@@ -71,11 +60,9 @@ const filterProjects = {
                               p.projectQualityPlanStatusIssueDate !== '' && 
                               p.projectQualityPlanStatusIssueDate !== 'N/A';
     
-    // Return projects that are MISSING either revision or date
     return !hasQualityPlanRev || !hasQualityPlanDate;
   },
   
-  // ✅ KEEP OTHER FILTERS UNCHANGED - they work fine as they are
   "Projects Audits Pending": (p) => {
     const delayDays = Number(p.delayInAuditsNoDays || 0);
     return delayDays > 0;
@@ -89,12 +76,41 @@ const filterProjects = {
   "Observation Open": (p) => {
     const openObs = Number(p.obsOpen || 0);
     return openObs > 0;
-  },
+  }
+};
+
+// ✅ NEW: Helper function to get column information with short and full labels
+const getColumnInfo = (key) => {
+  const columnMap = {
+    // Base columns
+    'projectNo': { short: 'Project No', full: 'Project No' },
+    'projectTitleKey': { short: 'Project Title', full: 'Project Title' },
+    'projectManager': { short: 'Project Manager', full: 'Project Manager' },
+    'client': { short: 'Client', full: 'Client' },
+    
+    // Quality Plan specific
+    'projectQualityPlanStatusRev': { short: 'Quality Plan Rev', full: 'Project Quality Plan Status - Rev' },
+    'projectQualityPlanStatusIssueDate': { short: 'Issue Date', full: 'Project Quality Plan Status - Issue Date' },
+    
+    // Audit specific  
+    'projectAudit1': { short: 'Project Audit-1', full: 'Project Audit-1' },
+    'projectAudit2': { short: 'Project Audit-2', full: 'Project Audit-2' },
+    'projectAudit3': { short: 'Project Audit-3', full: 'Project Audit-3' },
+    'projectAudit4': { short: 'Project Audit-4', full: 'Project Audit-4' },
+    'clientAudit1': { short: 'Client Audit-1', full: 'Client Audit-1' },
+    'clientAudit2': { short: 'Client Audit-2', full: 'Client Audit-2' },
+    'delayInAuditsNoDays': { short: 'Delay Days', full: 'Delay in Audits - No. of Days' },
+    
+    // CAR/Observation specific
+    'carsOpen': { short: 'CARs Open', full: 'CARs Open' },
+    'carsDelayedClosingNoDays': { short: 'CARs Delay Days', full: 'CARs Delayed Closing No. of Days' },
+    'carsClosed': { short: 'CARs Closed', full: 'CARs Closed' },
+    'obsOpen': { short: 'Obs Open', full: 'Observations Open' },
+    'obsDelayedClosingNoDays': { short: 'Obs Delay Days', full: 'Observations Delayed Closing No. of Days' },
+    'obsClosed': { short: 'Obs Closed', full: 'Observations Closed' }
+  };
   
-  // "Cost of Poor Quality": (p) => {
-  //   const cost = Number(p.costOfPoorQualityAED || 0);
-  //   return cost > 0;
-  // }
+  return columnMap[key] || { short: key, full: key };
 };
 
 const DashSummaryCard = ({ projectsData = [] }) => {
@@ -102,16 +118,14 @@ const DashSummaryCard = ({ projectsData = [] }) => {
   const [open, setOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalProjects, setModalProjects] = useState([]);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // ✅ UPDATED: Calculate pending activities counts
+  // Calculate pending activities counts
   const qualityPlanPending = countProjects(projectsData, filterProjects["Quality Plan Pending"]);
   const auditsPending = countProjects(projectsData, filterProjects["Projects Audits Pending"]);
-  const carOpen = projectsData.reduce((sum, p) => sum + parseNumber(p.carsOpen), 0); // Total count of open CARs
-  const obsOpen = projectsData.reduce((sum, p) => sum + parseNumber(p.obsOpen), 0); // Total count of open observations
-  // const totalCostOfPoorQuality = projectsData.reduce((sum, p) => sum + parseNumber(p.costOfPoorQualityAED), 0); // Sum of all costs
-  // const costProjectsCount = countProjects(projectsData, filterProjects["Cost of Poor Quality"]); // Count of projects with costs
+  const carOpen = projectsData.reduce((sum, p) => sum + parseNumber(p.carsOpen), 0);
+  const obsOpen = projectsData.reduce((sum, p) => sum + parseNumber(p.obsOpen), 0);
 
-  // ✅ UPDATED: Pending Activities Summary - Show project count for Cost of Poor Quality card
   const pendingActivitiesSummary = [
     {
       title: "Quality Plan Pending",
@@ -140,33 +154,17 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       icon: Eye,
       color: "text-yellow-600 bg-yellow-100/60 dark:bg-yellow-900/30 dark:text-yellow-400",
       description: "Total observations pending closure"
-    },
-    // {
-    //   title: "Cost of Poor Quality",
-    //   value: costProjectsCount, // ✅ CHANGED: Show count of projects, not total cost
-    //   icon: DollarSign,
-    //   color: "text-purple-600 bg-purple-100/60 dark:bg-purple-900/30 dark:text-purple-400",
-    //   description: "Projects with quality cost impact"
-    // }
+    }
   ];
 
-  // Modal handlers
+  // Enhanced modal handlers
   const handleOpen = (item) => {
     console.log('🔍 Opening modal for:', item.title);
     
     if ((item.title.includes("CAR Open") || item.title.includes("Observation Open")) && 
         (typeof item.value === 'number' && item.value === 0)) {
-      return; // Don't open modal for zero counts on CAR/OBS totals
+      return;
     }
-    
-    // if (item.title === "Cost of Poor Quality") {
-    //   // For cost of poor quality, show projects that have costs
-    //   const filteredProjects = projectsData.filter(filterProjects["Cost of Poor Quality"]);
-    //   setModalTitle(item.title);
-    //   setModalProjects(filteredProjects);
-    //   setOpen(true);
-    //   return;
-    // }
     
     const filteredProjects = projectsData.filter(filterProjects[item.title]);
     setModalTitle(item.title);
@@ -178,133 +176,195 @@ const DashSummaryCard = ({ projectsData = [] }) => {
     setOpen(false);
     setModalTitle('');
     setModalProjects([]);
+    setIsFullScreen(false);
   };
 
-  // ✅ UPDATED: Column headers using exact Google Sheets headers
-  const getColumnHeader = (modalTitle) => {
-    const headers = {
-      "Quality Plan Pending": "Quality Plan Status",
-      "Projects Audits Pending": "Delay in Audits - No. of Days",
-      "CAR Open": "CARs Open",
-      "Observation Open": "No. of Obs Open",
-      "Cost of Poor Quality": "Cost of Poor Quality in AED"
-    };
-    return headers[modalTitle] || "Status";
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
   };
 
-  // ✅ UPDATED: Table columns - Enhanced Projects Audits Pending columns
+  // ✅ ENHANCED: Optimized table columns with proper widths and column info
   const getTableColumns = (modalTitle) => {
     const baseColumns = [
-      { key: 'projectNo', label: 'Project No' },
-      { key: 'projectTitle', label: 'Project Title' },
-      { key: 'projectManager', label: 'Project Manager' },
-      { key: 'client', label: 'Client' }
+      { 
+        key: 'projectNo', 
+        label: getColumnInfo('projectNo').short,
+        fullLabel: getColumnInfo('projectNo').full,
+        width: '100px', 
+        minWidth: '100px' 
+      },
+      { 
+        key: 'projectTitleKey', 
+        label: getColumnInfo('projectTitleKey').short,
+        fullLabel: getColumnInfo('projectTitleKey').full,
+        width: '100px', 
+        minWidth: '200px', 
+        truncate: true 
+      },
+      { 
+        key: 'projectManager', 
+        label: getColumnInfo('projectManager').short,
+        fullLabel: getColumnInfo('projectManager').full,
+        width: '180px', 
+        minWidth: '150px' 
+      },
+      { 
+        key: 'client', 
+        label: getColumnInfo('client').short,
+        fullLabel: getColumnInfo('client').full,
+        width: '160px', 
+        minWidth: '140px' 
+      }
     ];
 
     const specificColumns = {
       "Quality Plan Pending": [
-        { key: 'projectQualityPlanStatusRev', label: 'Project Quality Plan status - Rev' },
-        { key: 'projectQualityPlanStatusIssueDate', label: 'Project Quality Plan status - Issued Date' }
+        { 
+          key: 'projectQualityPlanStatusRev', 
+          label: getColumnInfo('projectQualityPlanStatusRev').short,
+          fullLabel: getColumnInfo('projectQualityPlanStatusRev').full,
+          width: '140px', 
+          minWidth: '120px' 
+        },
+        { 
+          key: 'projectQualityPlanStatusIssueDate', 
+          label: getColumnInfo('projectQualityPlanStatusIssueDate').short,
+          fullLabel: getColumnInfo('projectQualityPlanStatusIssueDate').full,
+          width: '130px', 
+          minWidth: '110px' 
+        }
       ],
       "Projects Audits Pending": [
-        { key: 'projectAudit1', label: 'Project Audit -1' },
-        { key: 'projectAudit2', label: 'Project Audit -2' },
-        { key: 'projectAudit3', label: 'Project Audit -3' },
-        { key: 'projectAudit4', label: 'Project Audit -4' },
-        { key: 'clientAudit1', label: 'Client Audit -1' },
-        { key: 'clientAudit2', label: 'Client Audit -2' },
-        { key: 'delayInAuditsNoDays', label: 'Delay in Audits - No. of Days' }
+        { 
+          key: 'projectAudit1', 
+          label: getColumnInfo('projectAudit1').short,
+          fullLabel: getColumnInfo('projectAudit1').full,
+          width: '140px', 
+          minWidth: '120px' 
+        },
+        { 
+          key: 'projectAudit2', 
+          label: getColumnInfo('projectAudit2').short,
+          fullLabel: getColumnInfo('projectAudit2').full,
+          width: '140px', 
+          minWidth: '120px' 
+        },
+        { 
+          key: 'projectAudit3', 
+          label: getColumnInfo('projectAudit3').short,
+          fullLabel: getColumnInfo('projectAudit3').full,
+          width: '140px', 
+          minWidth: '120px' 
+        },
+        { 
+          key: 'projectAudit4', 
+          label: getColumnInfo('projectAudit4').short,
+          fullLabel: getColumnInfo('projectAudit4').full,
+          width: '140px', 
+          minWidth: '120px' 
+        },
+        { 
+          key: 'clientAudit1', 
+          label: getColumnInfo('clientAudit1').short,
+          fullLabel: getColumnInfo('clientAudit1').full,
+          width: '130px', 
+          minWidth: '110px' 
+        },
+        { 
+          key: 'clientAudit2', 
+          label: getColumnInfo('clientAudit2').short,
+          fullLabel: getColumnInfo('clientAudit2').full,
+          width: '130px', 
+          minWidth: '110px' 
+        },
+        { 
+          key: 'delayInAuditsNoDays', 
+          label: getColumnInfo('delayInAuditsNoDays').short,
+          fullLabel: getColumnInfo('delayInAuditsNoDays').full,
+          width: '110px', 
+          minWidth: '90px' 
+        }
       ],
       "CAR Open": [
-        { key: 'carsOpen', label: 'CARs Open' },
-        { key: 'carsDelayedClosingNoDays', label: 'CARs Delayed closing No. days' },
-        { key: 'carsClosed', label: 'CARs Closed' }
+        { 
+          key: 'carsOpen', 
+          label: getColumnInfo('carsOpen').short,
+          fullLabel: getColumnInfo('carsOpen').full,
+          width: '100px', 
+          minWidth: '80px' 
+        },
+        { 
+          key: 'carsDelayedClosingNoDays', 
+          label: getColumnInfo('carsDelayedClosingNoDays').short,
+          fullLabel: getColumnInfo('carsDelayedClosingNoDays').full,
+          width: '120px', 
+          minWidth: '100px' 
+        },
+        { 
+          key: 'carsClosed', 
+          label: getColumnInfo('carsClosed').short,
+          fullLabel: getColumnInfo('carsClosed').full,
+          width: '110px', 
+          minWidth: '90px' 
+        }
       ],
       "Observation Open": [
-        { key: 'obsOpen', label: 'No. of Obs Open' },
-        { key: 'obsDelayedClosingNoDays', label: 'Obs delayed closing No. of Days' },
-        { key: 'obsClosed', label: 'Obs Closed' }
-      ],
-      // "Cost of Poor Quality": [
-      //   { key: 'costOfPoorQualityAED', label: 'Cost of Poor Quality in AED' }
-      // ]
+        { 
+          key: 'obsOpen', 
+          label: getColumnInfo('obsOpen').short,
+          fullLabel: getColumnInfo('obsOpen').full,
+          width: '100px', 
+          minWidth: '80px' 
+        },
+        { 
+          key: 'obsDelayedClosingNoDays', 
+          label: getColumnInfo('obsDelayedClosingNoDays').short,
+          fullLabel: getColumnInfo('obsDelayedClosingNoDays').full,
+          width: '120px', 
+          minWidth: '100px' 
+        },
+        { 
+          key: 'obsClosed', 
+          label: getColumnInfo('obsClosed').short,
+          fullLabel: getColumnInfo('obsClosed').full,
+          width: '110px', 
+          minWidth: '90px' 
+        }
+      ]
     };
 
     return [...baseColumns, ...(specificColumns[modalTitle] || [])];
   };
 
-  const getDetailedStatus = (project, modalTitle) => {
-    switch (modalTitle) {
-      case "Quality Plan Pending":
-        const qualityPlanRev = project.projectQualityPlanStatusRev || "";
-        const qualityPlanIssueDate = project.projectQualityPlanStatusIssueDate || "";
-        
-        if (!qualityPlanRev && !qualityPlanIssueDate) {
-          return {
-            value: "Rev: Missing | Date: Missing",
-            severity: "critical"
-          };
-        } else if (!qualityPlanRev) {
-          return {
-            value: `Rev: Missing | Date: ${qualityPlanIssueDate}`,
-            severity: "warning"
-          };
-        } else if (!qualityPlanIssueDate) {
-          return {
-            value: `Rev: ${qualityPlanRev} | Date: Missing`,
-            severity: "warning"
-          };
-        } else {
-          return {
-            value: `Rev: ${qualityPlanRev} | Date: ${qualityPlanIssueDate}`,
-            severity: "info"
-          };
-        }
-
-      case "Projects Audits Pending":
-        const delayDays = Number(project.delayInAuditsNoDays || 0);
-        return {
-          value: `${delayDays} days overdue`,
-          severity: delayDays > 30 ? "critical" : delayDays > 15 ? "warning" : "info"
-        };
-      
-      case "CAR Open":
-        const openCars = Number(project.carsOpen || 0);
-        return {
-          value: `${openCars} open`,
-          severity: openCars > 5 ? "critical" : openCars > 2 ? "warning" : "info"
-        };
-      
-      case "Observation Open":
-        const openObs = Number(project.obsOpen || 0);
-        return {
-          value: `${openObs} open`,
-          severity: openObs > 10 ? "critical" : openObs > 5 ? "warning" : "info"
-        };
-      
-      // case "Cost of Poor Quality":
-      //   const cost = Number(project.costOfPoorQualityAED || 0);
-      //   return {
-      //     value: `${cost.toLocaleString()} AED`,
-      //     severity: cost > 10000 ? "critical" : cost > 5000 ? "warning" : "info"
-      //   };
-      
-      default:
-        return {
-          value: "Unknown",
-          severity: "info"
-        };
+  // ✅ ENHANCED: Cell value with projectTitleKey support and tooltip
+  const getCellValue = (project, columnKey, isFullScreen = false) => {
+    let value = project[columnKey];
+    
+    // ✅ NEW: Use projectTitleKey if available, fallback to projectTitle
+    if (columnKey === 'projectTitleKey') {
+      value = project.projectTitleKey || project.projectTitle || '';
     }
-  };
-
-  const getCellValue = (project, columnKey) => {
-    const value = project[columnKey];
     
     if (!value || value === '' || value === 'N/A') {
       return (
         <div className="flex justify-center items-center py-1">
-          <span className="text-red-500 dark:text-red-400 font-medium text-lg">-</span>
+          <span className="text-red-500 dark:text-red-400 font-medium text-lg">−</span>
         </div>
+      );
+    }
+    
+    // ✅ ENHANCED: Project title with tooltip showing full title
+    if (columnKey === 'projectTitleKey') {
+      const fullTitle = project.projectTitle || value;
+      const maxLength = isFullScreen ? 60 : 30;
+      const truncatedValue = value.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
+      
+      return (
+        <Tooltip title={fullTitle} arrow placement="top">
+          <span className="text-gray-900 dark:text-gray-100 cursor-help">
+            {truncatedValue}
+          </span>
+        </Tooltip>
       );
     }
     
@@ -317,7 +377,6 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       return <span className={className}>{value} days</span>;
     }
     
-    // ✅ NEW: Highlight audit status columns
     if (columnKey.includes('Audit') && (columnKey.includes('projectAudit') || columnKey.includes('clientAudit'))) {
       if (value.toLowerCase().includes('pending') || value.toLowerCase().includes('overdue') || value.toLowerCase().includes('delayed')) {
         return <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold">{value}</span>;
@@ -339,12 +398,55 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       return <span className={className}>{value}</span>;
     }
     
-    // if (columnKey === 'costOfPoorQualityAED') {
-    //   const cost = parseNumber(value);
-    //   return <span className="text-purple-800 dark:text-purple-300 font-bold font-mono">{cost.toLocaleString()} AED</span>;
-    // }
-    
     return <span className="text-gray-900 dark:text-gray-100">{value}</span>;
+  };
+
+  // ✅ ENHANCED: Dynamic modal styles
+  const getModalStyles = () => {
+    if (isFullScreen) {
+      return {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        bgcolor: 'transparent',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden'
+      };
+    }
+    
+    return {
+      position: 'fixed',
+      top: '3%',
+      left: '50%',
+      transform: 'translate(-50%, 0)',
+      bgcolor: 'transparent',
+      width: { xs: '98vw', sm: '95vw', md: '90vw', lg: '85vw', xl: '1200px' },
+      maxHeight: '94vh',
+      overflowY: 'auto',
+      outline: 'none',
+    };
+  };
+
+  const getPaperStyles = () => {
+    if (isFullScreen) {
+      return {
+        borderRadius: 0,
+        width: '100%',
+        height: '100%',
+        maxHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column'
+      };
+    }
+    
+    return {
+      borderRadius: 3,
+      p: { xs: 2, sm: 3 },
+      position: 'relative'
+    };
   };
 
   if (!projectsData || projectsData.length === 0) {
@@ -400,7 +502,7 @@ const DashSummaryCard = ({ projectsData = [] }) => {
         ))}
       </div>
 
-      {/* ✅ ENHANCED: Modal with Cost of Poor Quality total shown in table footer */}
+      {/* ✅ ENHANCED: Full-screen modal with tooltips on column headers */}
       {open && (
         <Modal
           open={open}
@@ -408,117 +510,113 @@ const DashSummaryCard = ({ projectsData = [] }) => {
           aria-labelledby="pending-activities-modal"
           sx={{ zIndex: 1300 }}
         >
-          <Box
-            sx={{
-              position: 'fixed',
-              top: { xs: '20px', sm: '40px', md: '60px', lg: '80px' },
-              left: '50%',
-              transform: 'translate(-50%, 0)',
-              bgcolor: 'transparent',
-              width: { 
-                xs: '95vw', 
-                sm: '90vw', 
-                md: '85vw', 
-                lg: '800px',
-                xl: '900px',
-                '2xl': '1000px'
-              },
-              maxHeight: { 
-                xs: 'calc(100vh - 40px)', 
-                sm: 'calc(100vh - 80px)', 
-                md: 'calc(100vh - 120px)',
-                lg: 'calc(100vh - 160px)'
-              },
-              overflowY: 'auto',
-              outline: 'none',
-            }}
-          >
-            <Paper elevation={6} sx={{ 
-              borderRadius: { xs: 2, sm: 3, md: 4 }, 
-              p: { xs: 2, sm: 3, md: 3 }, 
-              position: 'relative',
-              bgcolor: 'background.paper'
-            }}>
-              <IconButton
-                aria-label="close"
-                onClick={handleClose}
-                sx={{ 
-                  position: 'absolute', 
-                  right: { xs: 8, sm: 12 }, 
-                  top: { xs: 8, sm: 12 }, 
-                  color: 'grey.600',
-                  p: { xs: 1, sm: 1.5 }
-                }}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
+          <Box sx={getModalStyles()}>
+            <Paper 
+              elevation={6} 
+              className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700"
+              sx={getPaperStyles()}
+            >
+              {/* Enhanced Header with Full-screen Toggle */}
+              <div className={`flex items-center justify-between ${isFullScreen ? 'p-4' : 'pb-0'}`}>
+                <div className="flex-1">
+                  <h2 className="font-bold text-xl text-orange-700 dark:text-orange-400">
+                    {modalTitle}
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">
+                    Found {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''} requiring attention
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Tooltip title={isFullScreen ? "Exit Full Screen" : "Full Screen"} arrow>
+                    <IconButton
+                      onClick={toggleFullScreen}
+                      className="!text-orange-600 dark:!text-orange-400 hover:!text-orange-800 dark:hover:!text-orange-200"
+                    >
+                      {isFullScreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                    </IconButton>
+                  </Tooltip>
+                  
+                  <Tooltip title="Close" arrow>
+                    <IconButton
+                      onClick={handleClose}
+                      className="!text-gray-500 dark:!text-slate-400 hover:!text-gray-700 dark:hover:!text-slate-200"
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              </div>
               
-              <h2 id="pending-activities-modal" className="font-bold text-lg sm:text-xl md:text-xl mb-3 sm:mb-4 text-orange-700 dark:text-orange-400 pr-8 sm:pr-12">
-                {modalTitle}
-              </h2>
-              
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
-                {modalTitle === "Cost of Poor Quality" 
-                  ? `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} with quality costs`
-                  : `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} requiring attention`
-                }
-              </p>
-              
-              {modalProjects.length === 0 ? (
-                <p className="text-center text-green-600 dark:text-green-400 py-6 sm:py-8 text-sm sm:text-base font-semibold">
-                  ✅ No pending activities found - All projects are on track!
-                </p>
-              ) : (
-                <div className="overflow-hidden">
-                  <div 
-                    style={{ 
-                      maxHeight: '60vh', 
-                      overflowY: 'auto',
-                      overflowX: 'auto'
-                    }}
-                    className="border rounded-lg shadow-sm"
-                  >
-                    <table className="min-w-full text-xs sm:text-sm">
-                      <thead className="sticky top-0 bg-orange-100 dark:bg-orange-900 z-10">
-                        <tr>
-                          {getTableColumns(modalTitle).map(column => (
-                            <th key={column.key} className="border border-gray-300 dark:border-slate-600 px-1.5 sm:px-2 md:px-3 py-2 text-left font-semibold text-gray-900 dark:text-slate-100 whitespace-nowrap">
-                              {column.label}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-slate-900">
-                        {modalProjects.map((project, idx) => (
-                          <tr 
-                            key={`${project.projectNo || idx}`} 
-                            className="hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors"
-                          >
+              {/* Enhanced Table Container */}
+              <div className={`${isFullScreen ? 'flex-1 overflow-hidden p-4 pt-0' : ''}`}>
+                {modalProjects.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-center text-green-600 dark:text-green-400 text-lg font-semibold">
+                      ✅ No pending activities found - All projects are on track!
+                    </p>
+                  </div>
+                ) : (
+                  <div className={`overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg ${isFullScreen ? 'h-full' : ''}`}>
+                    <div 
+                      style={{ 
+                        maxHeight: isFullScreen ? '100%' : '70vh', 
+                        overflowY: 'auto', 
+                        overflowX: 'auto' 
+                      }} 
+                      className="bg-white dark:bg-slate-900"
+                    >
+                      <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                        <thead className="sticky top-0 bg-orange-100 dark:bg-orange-900 z-10">
+                          <tr>
                             {getTableColumns(modalTitle).map(column => (
-                              <td key={`${column.key}-${idx}`} className="border border-gray-300 dark:border-slate-600 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 text-gray-900 dark:text-slate-100">
-                                {getCellValue(project, column.key)}
-                              </td>
+                              <th 
+                                key={column.key} 
+                                className="border border-gray-300 dark:border-slate-600 px-3 py-3 text-left font-semibold text-gray-900 dark:text-slate-100"
+                                style={{ 
+                                  width: column.width,
+                                  minWidth: column.minWidth,
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {/* ✅ NEW: Column headers with tooltips showing full labels */}
+                                <Tooltip title={column.fullLabel} arrow placement="top">
+                                  <span className="cursor-help">
+                                    {column.label}
+                                  </span>
+                                </Tooltip>
+                              </th>
                             ))}
                           </tr>
-                        ))}
-                      </tbody>
-                      {/* ✅ NEW: Show total sum in table footer for Cost of Poor Quality */}
-                      {/* {modalTitle === "Cost of Poor Quality" && (
-                        <tfoot className="sticky bottom-0 bg-purple-100 dark:bg-purple-900">
-                          <tr>
-                            <td colSpan={getTableColumns(modalTitle).length - 1} className="border border-gray-300 dark:border-slate-600 px-1.5 sm:px-2 md:px-3 py-2 text-right font-bold text-purple-800 dark:text-purple-200">
-                              Total Cost of Poor Quality:
-                            </td>
-                            <td className="border border-gray-300 dark:border-slate-600 px-1.5 sm:px-2 md:px-3 py-2 font-bold text-purple-800 dark:text-purple-200 font-mono">
-                              {totalCostOfPoorQuality.toLocaleString()} AED
-                            </td>
-                          </tr>
-                        </tfoot>
-                      )} */}
-                    </table>
+                        </thead>
+                        <tbody className="bg-white dark:bg-slate-900">
+                          {modalProjects.map((project, idx) => (
+                            <tr 
+                              key={`${project.projectNo || idx}`} 
+                              className="hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors"
+                            >
+                              {getTableColumns(modalTitle).map(column => (
+                                <td 
+                                  key={`${column.key}-${idx}`} 
+                                  className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100"
+                                  style={{ 
+                                    width: column.width,
+                                    minWidth: column.minWidth,
+                                    overflow: column.truncate ? 'hidden' : 'visible',
+                                    textOverflow: column.truncate ? 'ellipsis' : 'clip'
+                                  }}
+                                >
+                                  {getCellValue(project, column.key, isFullScreen)}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </Paper>
           </Box>
         </Modal>

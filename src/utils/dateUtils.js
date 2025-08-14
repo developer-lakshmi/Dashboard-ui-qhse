@@ -24,17 +24,14 @@ export const parseDate = (dateString) => {
 };
 
 // Format date to readable string
-export const formatDate = (date, locale = 'en-US') => {
+export const formatDate = (date) => {
   if (!date) return 'N/A';
-  
   const parsedDate = date instanceof Date ? date : parseDate(date);
   if (!parsedDate) return 'N/A';
-  
-  return parsedDate.toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+  const day = parsedDate.getDate().toString().padStart(2, '0');
+  const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
+  const year = parsedDate.getFullYear();
+  return `${day}/${month}/${year}`;
 };
 
 // Calculate days between two dates
