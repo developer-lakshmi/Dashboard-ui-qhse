@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
+import { getDetailedBadge } from '../../utils/BadgeUtils'; // Add this import
 
 /**
  * BILLABILITY CARD COMPONENT - Enhanced with full-screen modal
@@ -119,21 +120,8 @@ const getModalColumns = () => {
 // ✅ ENHANCED: Cell formatting with projectTitleKey support
 const getCellValue = (project, columnKey, isFullScreen = false) => {
   let value = project[columnKey];
-  
-  // ✅ NEW: Use projectTitleKey if available, fallback to projectTitle
-  if (columnKey === 'projectTitleKey') {
-    value = project.projectTitleKey || project.projectTitle || '';
-    
-    // ✅ DEBUG: Log to see what values we're getting
-    console.log('🔍 BillabilityCard ProjectTitleKey Debug:', {
-      projectNo: project.projectNo,
-      hasProjectTitleKey: !!project.projectTitleKey,
-      projectTitleKey: project.projectTitleKey,
-      projectTitle: project.projectTitle,
-      finalValue: value
-    });
-  }
-  
+
+  // Empty or N/A
   if (!value || value === '' || value === 'N/A') {
     return (
       <div className="flex justify-center items-center py-1">
@@ -142,37 +130,16 @@ const getCellValue = (project, columnKey, isFullScreen = false) => {
     );
   }
 
-  // Billability percentage coloring
-  if (columnKey === 'qualityBillabilityPercent') {
-    const numVal = parsePercent(value);
-    const className = numVal >= 85 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-semibold" : 
-                     numVal >= 70 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs font-semibold" : 
-                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-semibold";
-    return <span className={className}>{value}</span>;
-  }
+  // Use centralized badge logic for all columns
+  const detailedBadge = getDetailedBadge(project, columnKey, isFullScreen);
+  if (detailedBadge) return detailedBadge;
 
-  // Hours (numerical values)
-  if (['manHourForQuality', 'manhoursUsed', 'manhoursBalance'].includes(columnKey)) {
-    const numVal = parseNumber(value);
-    return <span className="text-gray-900 dark:text-gray-100 font-mono text-sm">{numVal.toLocaleString()}</span>;
-  }
-
-  // ✅ ENHANCED: Project title with tooltip showing full title
-  if (columnKey === 'projectTitleKey') {
-    const fullTitle = project.projectTitle || value;
-    const maxLength = isFullScreen ? 60 : 30;
-    const truncatedValue = value.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
-    
-    return (
-      <Tooltip title={fullTitle} arrow placement="top">
-        <span className="text-gray-900 dark:text-gray-100 cursor-help">
-          {truncatedValue}
-        </span>
-      </Tooltip>
-    );
-  }
-
-  return <span className="text-gray-900 dark:text-gray-100">{value}</span>;
+  // Common badge style for all other columns
+  return (
+    <span className="text-gray-900 dark:text-gray-100">
+      {value}
+    </span>
+  );
 };
 
 const BillabilityCard = ({ filteredProjects = [] }) => {

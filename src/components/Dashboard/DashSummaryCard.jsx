@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
+import { getDetailedBadge } from '../../utils/BadgeUtils';
 
 // Helper functions (keep existing)
 const parseDate = (dateStr) => {
@@ -112,6 +113,34 @@ const getColumnInfo = (key) => {
   
   return columnMap[key] || { short: key, full: key };
 };
+
+const statusBadgeColumns = [
+  'projectCompletionPercent',
+  'rejectionOfDeliverablesPercent',
+  'costOfPoorQualityAED',
+  'carsOpen',
+  'obsOpen',
+  'carsDelayedClosingNoDays',
+  'obsDelayedClosingNoDays',
+  'carsClosed',
+  'obsClosed',
+  'delayInAuditsNoDays',
+  'projectQualityPlanStatusRev',
+  'projectTitleKey',
+  'projectStartingDate',
+  'projectClosingDate',
+  'projectExtension',
+  'projectQualityPlanStatusIssueDate',
+  'projectAudit1',
+  'projectAudit2',
+  'projectAudit3',
+  'projectAudit4',
+  'clientAudit1',
+  'clientAudit2',
+  'manHourForQuality',
+  'manhoursUsed',
+  'manhoursBalance'
+];
 
 const DashSummaryCard = ({ projectsData = [] }) => {
   // State management
@@ -339,12 +368,8 @@ const DashSummaryCard = ({ projectsData = [] }) => {
   // ✅ ENHANCED: Cell value with projectTitleKey support and tooltip
   const getCellValue = (project, columnKey, isFullScreen = false) => {
     let value = project[columnKey];
-    
-    // ✅ NEW: Use projectTitleKey if available, fallback to projectTitle
-    if (columnKey === 'projectTitleKey') {
-      value = project.projectTitleKey || project.projectTitle || '';
-    }
-    
+
+    // Empty or N/A
     if (!value || value === '' || value === 'N/A') {
       return (
         <div className="flex justify-center items-center py-1">
@@ -352,53 +377,17 @@ const DashSummaryCard = ({ projectsData = [] }) => {
         </div>
       );
     }
-    
-    // ✅ ENHANCED: Project title with tooltip showing full title
-    if (columnKey === 'projectTitleKey') {
-      const fullTitle = project.projectTitle || value;
-      const maxLength = isFullScreen ? 60 : 30;
-      const truncatedValue = value.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
-      
-      return (
-        <Tooltip title={fullTitle} arrow placement="top">
-          <span className="text-gray-900 dark:text-gray-100 cursor-help">
-            {truncatedValue}
-          </span>
-        </Tooltip>
-      );
-    }
-    
-    // Highlight important values
-    if (columnKey === 'delayInAuditsNoDays') {
-      const days = parseNumber(value);
-      const className = days > 30 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" :
-                       days > 15 ? "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs font-bold" :
-                       "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
-      return <span className={className}>{value} days</span>;
-    }
-    
-    if (columnKey.includes('Audit') && (columnKey.includes('projectAudit') || columnKey.includes('clientAudit'))) {
-      if (value.toLowerCase().includes('pending') || value.toLowerCase().includes('overdue') || value.toLowerCase().includes('delayed')) {
-        return <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold">{value}</span>;
-      }
-      if (value.toLowerCase().includes('completed') || value.toLowerCase().includes('done') || value.toLowerCase().includes('finished')) {
-        return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">{value}</span>;
-      }
-      if (value.toLowerCase().includes('in progress') || value.toLowerCase().includes('ongoing') || value.toLowerCase().includes('started')) {
-        return <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">{value}</span>;
-      }
-      return <span className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-xs">{value}</span>;
-    }
-    
-    if (columnKey === 'carsOpen' || columnKey === 'obsOpen') {
-      const count = parseNumber(value);
-      if (count === 0) return <span className="text-green-600 dark:text-green-400">0</span>;
-      const className = count > 5 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" :
-                       "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs font-bold";
-      return <span className={className}>{value}</span>;
-    }
-    
-    return <span className="text-gray-900 dark:text-gray-100">{value}</span>;
+
+    // Use centralized badge logic for all columns
+    const detailedBadge = getDetailedBadge(project, columnKey, isFullScreen);
+    if (detailedBadge) return detailedBadge;
+
+    // Common badge style for all other columns
+    return (
+      <span className="text-gray-900 dark:text-gray-100">
+        {value}
+      </span>
+    );
   };
 
   // ✅ ENHANCED: Dynamic modal styles

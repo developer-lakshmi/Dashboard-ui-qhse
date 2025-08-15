@@ -19,7 +19,9 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
-import { formatDate } from '../../utils/dateUtils'; // Add this import
+import { getDetailedBadge } from '../../utils/BadgeUtils';
+
+// import { getDetailedBadge } from '../../utils/BadgeUtils'; // Import centralized badge logic
 
 /**
  * ✅ UPDATED: PROJECT OVERVIEW CARDS - Enhanced with full-screen modals and projectTitleKey support
@@ -259,23 +261,38 @@ const getModalColumns = (cardTitle) => {
 /**
  * ✅ ENHANCED: Cell formatting with projectTitleKey support and tooltip
  */
+const statusBadgeColumns = [
+  'projectCompletionPercent',
+  'rejectionOfDeliverablesPercent',
+  'costOfPoorQualityAED',
+  'carsOpen',
+  'obsOpen',
+  'carsDelayedClosingNoDays',
+  'obsDelayedClosingNoDays',
+  'carsClosed',
+  'obsClosed',
+  'delayInAuditsNoDays',
+  'projectQualityPlanStatusRev',
+  'projectTitleKey',
+  'projectStartingDate',
+  'projectClosingDate',
+  'projectExtension',
+  'projectQualityPlanStatusIssueDate',
+  'projectAudit1',
+  'projectAudit2',
+  'projectAudit3',
+  'projectAudit4',
+  'clientAudit1',
+  'clientAudit2',
+  'manHourForQuality',
+  'manhoursUsed',
+  'manhoursBalance'
+];
+
 const getCellValue = (project, columnKey, isFullScreen = false) => {
   let value = project[columnKey];
-  
-  // ✅ FIXED: Use projectTitleKey if available, fallback to projectTitle
-  if (columnKey === 'projectTitleKey') {
-    value = project.projectTitleKey || project.projectTitle || '';
-    
-    // ✅ DEBUG: Log to see what values we're getting
-    console.log('🔍 ProjectTitleKey Debug:', {
-      projectNo: project.projectNo,
-      hasProjectTitleKey: !!project.projectTitleKey,
-      projectTitleKey: project.projectTitleKey,
-      projectTitle: project.projectTitle,
-      finalValue: value
-    });
-  }
-  
+
+  // Empty or N/A
   if (!value || value === '' || value === 'N/A') {
     return (
       <div className="flex justify-center items-center py-1">
@@ -284,149 +301,18 @@ const getCellValue = (project, columnKey, isFullScreen = false) => {
     );
   }
 
-  // ✅ ENHANCED: Project title with tooltip showing full title
-  if (columnKey === 'projectTitleKey') {
-    const fullTitle = project.projectTitle || value;
-    const maxLength = isFullScreen ? 60 : 25;
-    const truncatedValue = value.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
-    
-    return (
-      <Tooltip title={fullTitle} arrow placement="top">
-        <span className="text-gray-900 dark:text-gray-100 cursor-help">
-          {truncatedValue}
-        </span>
-      </Tooltip>
-    );
+  // Use detailed badge for all status columns
+  if (statusBadgeColumns.includes(columnKey)) {
+    const detailedBadge = getDetailedBadge(project, columnKey, isFullScreen);
+    if (detailedBadge) return detailedBadge;
   }
-  
-  // ✅ REMOVED: Project KPI Achieved % badges - now just simple color coding
-  if (columnKey === 'projectKPIsAchievedPercent') {
-    const numVal = parsePercent(value);
-    const className = numVal >= 90 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
-                     numVal >= 75 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
-                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
-    
-    return <span className={className}>{value}</span>;
-  }
-  
-  // ✅ UPDATED: Project Completion % - NO BADGES, just normal coloring
-  if (columnKey === 'projectCompletionPercent') {
-    const numVal = parsePercent(value);
-    const className = numVal === 100 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-bold" :
-                     numVal > 95 ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-bold" :
-                     numVal >= 90 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" : 
-                     numVal >= 75 ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs" : 
-                     "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs";
-    
-    return <span className={className}>{value}</span>;
-  }
-  
-  // ✅ UPDATED: Rejection Rate coloring - kept the same
-  if (columnKey === 'rejectionOfDeliverablesPercent') {
-    const numVal = parsePercent(value);
-    const className = numVal === 0 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs" :
-                     numVal > 10 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" :
-                     numVal > 5 ? "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs" :
-                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
-    return <span className={className}>{value}</span>;
-  }
-  
-  // ✅ NEW: Cost of Poor Quality formatting
-  if (columnKey === 'costOfPoorQualityAED') {
-    const cost = parseNumber(value);
-    return <span className="text-purple-800 dark:text-purple-300 font-bold font-mono">{cost.toLocaleString()} AED</span>;
-  }
-  
-  // CAR/OBS coloring
-  if (columnKey === 'carsOpen' || columnKey === 'obsOpen') {
-    const numVal = parseNumber(value);
-    if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">0</span>;
-    const className = numVal > 3 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" : 
-                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
-    return <span className={className}>{value}</span>;
-  }
-  
-  // ✅ NEW: Delayed closing days coloring
-  if (columnKey === 'carsDelayedClosingNoDays' || columnKey === 'obsDelayedClosingNoDays') {
-    const numVal = parseNumber(value);
-    if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">On Time</span>;
-    const className = numVal > 30 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" : 
-                     numVal > 15 ? "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs" : 
-                     "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs";
-    return <span className={className}>{value} days</span>;
-  }
-  
-  // Closed CARs/OBS (positive indicator)
-  if (columnKey === 'carsClosed' || columnKey === 'obsClosed') {
-    const numVal = parseNumber(value);
-    const className = numVal > 0 ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs" : 
-                     "text-gray-400 dark:text-slate-500";
-    return <span className={className}>{value}</span>;
-  }
-  
-  // Audit delays
-  if (columnKey === 'delayInAuditsNoDays') {
-    const numVal = parseNumber(value);
-    if (numVal === 0) return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">On Time</span>;
-    const className = numVal > 15 ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold" : 
-                     "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs";
-    return <span className={className}>{value} days</span>;
-  }
-  
-  // ✅ UPDATED: Quality Plan status
-  if (columnKey === 'projectQualityPlanStatusRev') {
-    if (!value || value === '' || value === 'N/A') {
-      return <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold">Pending</span>;
-    }
-    return <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">{value}</span>;
-  }
-  
-  // ✅ NEW: Audit status coloring
-  if (columnKey.includes('Audit') && (columnKey.includes('project') || columnKey.includes('client'))) {
-    // Try to parse as date
-    const parsedDate = formatDate(value);
-    // If value is a valid date (not 'N/A'), show formatted date
-    if (parsedDate !== 'N/A') {
-      return (
-        <span className="text-gray-700 dark:text-gray-300 text-sm">
-          {parsedDate}
-        </span>
-      );
-    }
-    // Otherwise, show status coloring
-    const lowerValue = value.toLowerCase();
-    if (
-      lowerValue.includes('not applicable') ||
-      lowerValue.includes('n/a') ||
-      lowerValue.includes('not required') ||
-      lowerValue.includes('no audit needed')
-    ) {
-      return<span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200  py-1 rounded text-xs font-bold">{value}</span>;
 
-    }
-    return <span className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-xs">{value}</span>;
-  }
-  
-  // Hours (numerical values)
-  if (['manHourForQuality', 'manhoursUsed', 'manhoursBalance'].includes(columnKey)) {
-    const numVal = parseNumber(value);
-    return <span className="text-gray-900 dark:text-gray-100 font-mono">{numVal.toLocaleString()}</span>;
-  }
-  
-  // Dates
-  if (
-    columnKey.includes('Date') ||
-    columnKey.includes('Extension') ||
-    columnKey.includes('Audit') // This covers Project Audit -1, -2, etc.
-  ) {
-    return (
-      <span className="text-gray-700 dark:text-gray-300 text-sm">
-        {formatDate(value)}
-      </span>
-    );
-  }
-  
-  return <span className="text-gray-900 dark:text-gray-100">{value}</span>;
+  // Common badge style for all other columns
+  return (
+    <span className="text-gray-900 dark:text-gray-100">
+      {value}
+    </span>
+  );
 };
 
 const SummaryCards = ({ filteredProjects = [] }) => {
