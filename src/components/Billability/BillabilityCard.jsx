@@ -224,7 +224,7 @@ const BillabilityCard = ({ filteredProjects = [] }) => {
   return (
     <>
       <Card 
-        className="border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border border-gray-200 dark:border-slate-700"
+        className="border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border "
         onClick={handleCardClick}
       >
         <CardContent className="p-4 bg-white dark:bg-slate-800">

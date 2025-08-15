@@ -40,12 +40,12 @@ const iconMap = {
 // ✅ UPDATED: Color mappings - Enhanced with themes
 const getCardClasses = (color) => {
   const colorMap = {
-    blue: "border-l-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/20",
-    orange: "border-l-4 border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-950/20",
-    green: "border-l-4 border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-950/20",
-    red: "border-l-4 border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950/20",
-    pink: "border-l-4 border-pink-500 dark:border-pink-400 bg-pink-50 dark:bg-pink-950/20",
-    purple: "border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20"
+    blue: "border-l-4 border-blue-800 dark:border-blue-300 bg-blue-50 dark:bg-blue-950/20",
+    orange: "border-l-4 border-orange-500 dark:border-orange-300 bg-orange-50 dark:bg-orange-950/20",
+    green: "border-l-4 border-green-500 dark:border-green-300 bg-green-50 dark:bg-green-950/20",
+    red: "border-l-4 border-red-500 dark:border-red-300 bg-red-50 dark:bg-red-950/20",
+    pink: "border-l-4 border-pink-500 dark:border-pink-300 bg-pink-50 dark:bg-pink-950/20",
+    purple: "border-l-4 border-purple-500 dark:border-purple-300 bg-purple-50 dark:bg-purple-950/20"
   };
   return colorMap[color] || colorMap.blue;
 };
