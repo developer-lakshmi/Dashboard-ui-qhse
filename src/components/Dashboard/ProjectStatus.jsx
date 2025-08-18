@@ -361,7 +361,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
           fontWeight={600}
           className="!text-gray-900 dark:!text-slate-100"
         >
-          Project Status Overview
+          Project Critical Status
         </Typography>
         <Typography 
           variant="body2" 

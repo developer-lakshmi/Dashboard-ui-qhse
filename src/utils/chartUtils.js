@@ -80,6 +80,7 @@ export const generateAuditStatusData = (filteredProjects) => {
 export const generateCarsObsData = (filteredProjects) => {
   return filteredProjects.map(project => ({
     name: project.projectTitle,
+    projectNo: project.projectNo || '', // <-- Add projectNo for axis
     CARsOpen: Number(project.carsOpen) || 0,
     CARsClosed: Number(project.carsClosed) || 0,
     ObsOpen: Number(project.obsOpen) || 0,

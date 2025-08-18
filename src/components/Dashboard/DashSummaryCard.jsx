@@ -328,14 +328,8 @@ const DashSummaryCard = ({ projectsData = [] }) => {
           fullLabel: getColumnInfo('carsDelayedClosingNoDays').full,
           width: '120px', 
           minWidth: '100px' 
-        },
-        { 
-          key: 'carsClosed', 
-          label: getColumnInfo('carsClosed').short,
-          fullLabel: getColumnInfo('carsClosed').full,
-          width: '110px', 
-          minWidth: '90px' 
         }
+        // Removed CARs Closed column
       ],
       "Observation Open": [
         { 

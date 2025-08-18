@@ -48,6 +48,11 @@ export const MainHeader = ({
     <header className="mb-8">
       <div className="flex items-center gap-4">
         <img
+          src={Assets.qhse_rejler_logo}
+          alt="QHSE Logo"
+          className=" drop-shadow-md w-24 max-w-full h-auto rounded-full"
+        />
+        {/* <img
           src={Assets.qhseLogo}
           alt="QHSE Logo"
           className="dark:hidden drop-shadow-md w-24 max-w-full h-auto rounded-full"
@@ -56,7 +61,7 @@ export const MainHeader = ({
           src={Assets.qhse_dark}
           alt="QHSE Logo"
           className="hidden dark:block drop-shadow-md w-24 max-w-full h-auto rounded-full"
-        />
+        /> */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
             {title}

@@ -99,7 +99,8 @@ export const CarsObsChart = ({ data = [] }) => {
         return hasValidProjectNo;
       })
       .map(item => ({
-        name: item.name, // <-- This is now projectNo from generateCarsObsData
+        name: item.name, // projectTitle
+        projectNo: item.projectNo || '', // <-- Add projectNo for axis
         CARsOpen: Number(item.CARsOpen) || 0,
         CARsClosed: Number(item.CARsClosed) || 0,
         ObsOpen: Number(item.ObsOpen) || 0,
@@ -220,46 +221,28 @@ export const CarsObsChart = ({ data = [] }) => {
                     vertical={true}
                   />
                   <XAxis
-                    dataKey="name"
+                    dataKey="projectNo" // <-- Use projectNo for X axis
                     type="category"
-                    tick={({ x, y, payload }) => {
-                      const [line1, line2] = splitTextIntoLines(payload.value, 35);
-                      return (
-                        <g transform={`translate(${x},${y})`}>
-                          <text
-                            y={line2 ? 0 : 10}
-                            dy={16}
-                            x={0}
-                            textAnchor="middle"
-                            fill="#374151"
-                            fontSize={12}
-                            fontWeight={500}
-                            className="fill-gray-700 dark:fill-gray-300"
-                          >
-                            {line1}
-                          </text>
-                          {line2 && (
-                            <text
-                              y={18}
-                              dy={16}
-                              x={0}
-                              textAnchor="middle"
-                              fill="#374151"
-                              fontSize={12}
-                              fontWeight={500}
-                              className="fill-gray-700 dark:fill-gray-300"
-                            >
-                              {line2}
-                            </text>
-                          )}
-                        </g>
-                      );
-                    }}
+                    tick={({ x, y, payload }) => (
+                      <g transform={`translate(${x},${y})`}>
+                        <text
+                           dy={16}
+                          x={0}
+                          textAnchor="middle"
+                          fill="#374151"
+                          fontSize={12}
+                          fontWeight={500}
+                          className="fill-gray-700 dark:fill-gray-300"
+                        >
+                          {payload.value}
+                        </text>
+                      </g>
+                    )}
                     tickLine={false}
                     axisLine={false}
                     interval={0}
                     label={{
-                      value: "Projects",
+                      value: "Project No",
                       position: "insideBottom",
                       offset: -5,
                       style: {
