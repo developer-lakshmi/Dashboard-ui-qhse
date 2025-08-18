@@ -131,7 +131,7 @@ const EnhancedTableHead = ({ order, orderBy, onRequestSort }) => {
       id: 'projectTitle', 
       label: 'Project Title', 
       sortable: true, 
-      width: 'auto', // Let this column expand
+      width: '170px', // Let this column expand
       minWidth: '180px'
     },
     { 
@@ -353,24 +353,38 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      {/* Filter Buttons */}
-      <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        <ButtonGroup 
-          variant="outlined" 
-          size="small"
-          className="bg-white dark:bg-slate-800"
-          sx={{
-            '& .MuiButton-root': {
-              borderRadius: 1,
-              px: 2
-            }
-          }}
+      {/* Heading FIRST */}
+      {/* <div className="p-6 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 rounded-t-xl"> */}
+        <Typography 
+          variant="h6" 
+          component="div" 
+          fontWeight={600}
+          className="!text-gray-900 dark:!text-slate-100"
         >
+          Project Status Overview
+        </Typography>
+        <Typography 
+          variant="body2" 
+          className="!text-gray-600 dark:!text-slate-400"
+        >
+          {filteredProjects.length} projects
+          {activeFilter !== 'ALL' && (
+            <span> • Filtered by: {activeFilter.replace('_', ' ')}</span>
+          )}
+        </Typography>
+        {/* Info about filter logic */}
+        <Typography variant="caption" className="!text-gray-500 dark:!text-slate-400">
+          <strong>Critical:</strong> Severe issues. <strong>High Risk:</strong> Notable issues. <strong>On Track:</strong> No major issues.
+        </Typography>
+      {/* </div> */}
+
+      {/* Filter Buttons SECOND */}
+      <Box sx={{ mb: 2, mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <ButtonGroup variant="outlined" size="small" className="bg-white dark:bg-slate-800">
           <Button 
             variant={activeFilter === 'ALL' ? 'contained' : 'outlined'}
             onClick={() => handleFilterChange('ALL')}
             startIcon={<FilterIcon />}
-            className="!text-gray-900 dark:!text-slate-100 !border-gray-300 dark:!border-slate-600"
           >
             All ({stats.total})
           </Button>
@@ -379,7 +393,6 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             color="error"
             onClick={() => handleFilterChange('CRITICAL')}
             startIcon={<CriticalIcon />}
-            className="!border-gray-300 dark:!border-slate-600"
           >
             Critical ({stats.critical})
           </Button>
@@ -388,25 +401,16 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             color="warning"
             onClick={() => handleFilterChange('HIGH_RISK')}
             startIcon={<WarningIcon />}
-            className="!border-gray-300 dark:!border-slate-600"
           >
             High Risk ({stats.highRisk})
           </Button>
-          <Button 
-            variant={activeFilter === 'MEDIUM_RISK' ? 'contained' : 'outlined'}
-            color="info"
-            onClick={() => handleFilterChange('MEDIUM_RISK')}
-            startIcon={<DelayIcon />}
-            className="!border-gray-300 dark:!border-slate-600"
-          >
-            Medium ({stats.mediumRisk})
-          </Button>
+          {/* Remove Medium if not needed */}
+          {/* <Button ...>Medium ({stats.mediumRisk})</Button> */}
           <Button 
             variant={activeFilter === 'ON_TRACK' ? 'contained' : 'outlined'}
             color="success"
             onClick={() => handleFilterChange('ON_TRACK')}
             startIcon={<CheckCircleIcon />}
-            className="!border-gray-300 dark:!border-slate-600"
           >
             On Track ({stats.onTrack})
           </Button>
@@ -424,7 +428,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
             flexWrap="wrap" 
             gap={2}
           >
-            <Box>
+            {/* <Box>
               <Typography 
                 variant="h6" 
                 component="div" 
@@ -442,7 +446,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                   <span> • Filtered by: {activeFilter.replace('_', ' ')}</span>
                 )}
               </Typography>
-            </Box>
+            </Box> */}
             
             <Box display="flex" gap={2} alignItems="center">
               <TextField
@@ -584,9 +588,9 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden'
                         }}
-                        title={project.projectTitle}
+                        title={project.projectTitle} // Show full title on hover
                       >
-                        {project.projectTitle || 'Untitled Project'}
+                        {project.projectTitleKey || 'Untitled Project'}
                       </Typography>
                     </TableCell>
                     

@@ -6,7 +6,9 @@ import { KPIStatusChart } from './ChartComponents/KPIStatusChart';
 import { CarsObsChart } from './ChartComponents/CarsObsChart';
 import { TimelineChart } from './ChartComponents/TimelineChart';
 import { QualityPlanChart } from './ChartComponents/QualityPlanChart';
-import { BarChart3 } from 'lucide-react'; // ✅ Simple icon import
+import { BarChart3 } from 'lucide-react';
+import GrowthChart from './ChartComponents/GrowthChart';
+import { generateGrowthChartData } from '../../utils/chartUtils';
 
 /**
  * MAIN CHARTS COMPONENT - PARENT ORCHESTRATOR
@@ -21,16 +23,18 @@ const Charts = ({
   carsObsData,
   timelineData,
   qualityPlanStatusData,
-  getKPIBadgeVariant
+  getKPIBadgeVariant,
+  filteredProjects // <-- Add this prop if needed
 }) => {
   
   // Chart configuration with individual components
   const chartConfigs = [
-    // {
-    //   id: 'manhours',
-    //   component: <ManhoursChart data={manhoursData} />,
-    //   fullWidth: true
-    // },
+    {
+      id: 'growth',
+      component:
+          <GrowthChart data={generateGrowthChartData(filteredProjects)} />,
+      fullWidth: true
+    },
     {
       id: 'cars-obs',
       component: <CarsObsChart data={carsObsData} />,

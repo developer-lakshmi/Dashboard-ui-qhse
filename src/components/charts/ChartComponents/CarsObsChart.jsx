@@ -88,20 +88,18 @@ export const CarsObsChart = ({ data = [] }) => {
   // Data processing
   const processedData = React.useMemo(() => {
     if (!Array.isArray(data)) return [];
-    
     return data
       .filter(item => {
-        const hasValidName = item?.name && 
-                            typeof item.name === 'string' && 
-                            item.name.trim() !== '' && 
-                            item.name !== 'N/A' &&
-                            item.name !== 'Unknown Project' &&
-                            item.name.toLowerCase() !== 'untitled project';
-        return hasValidName;
+        const hasValidProjectNo = item?.name &&
+          typeof item.name === 'string' &&
+          item.name.trim() !== '' &&
+          item.name !== 'N/A' &&
+          item.name !== 'Unknown Project' &&
+          item.name.toLowerCase() !== 'untitled project';
+        return hasValidProjectNo;
       })
       .map(item => ({
-        name: normalizeProjectName(item.name),
-        originalName: item.name,
+        name: item.name, // <-- This is now projectNo from generateCarsObsData
         CARsOpen: Number(item.CARsOpen) || 0,
         CARsClosed: Number(item.CARsClosed) || 0,
         ObsOpen: Number(item.ObsOpen) || 0,
@@ -198,138 +196,131 @@ export const CarsObsChart = ({ data = [] }) => {
       </div>
 
       {/* Chart Container with Horizontal Scroll */}
-      <div className="flex-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-        <div className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-red-200 dark:scrollbar-thumb-red-900 scrollbar-track-transparent">
-          <div className="min-w-[900px] w-full">
-            <ResponsiveContainer 
-              width="100%" 
-              minWidth={900}
-              height={Math.max(400, processedData.length * 50)}
-            >
-              <BarChart
-                layout="vertical"
-                data={processedData}
-                margin={{ top: 20, right: 80, left: 320, bottom: 40 }}
-                barCategoryGap="10%"
-                barGap={2}
+      <div className="flex-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 sm:p-6 flex flex-col justify-center items-center">
+        <div className="w-full h-full flex justify-center items-center">
+          <div className="w-full max-w-full overflow-x-auto scrollbar-thin scrollbar-thumb-red-200 dark:scrollbar-thumb-red-900 scrollbar-track-transparent">
+            <div className="min-w-[600px] sm:min-w-[700px] md:min-w-[900px] lg:min-w-[1500px] xl:min-w-[1300px] 2xl:min-w-[1600px] mx-auto">
+              <ResponsiveContainer
+                width="100%"
+                minWidth={600}
+                height={Math.max(400, processedData.length * 0.8 + 120)}
               >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="#e5e7eb" 
-                  strokeOpacity={0.7}
-                  horizontal={true}
-                  vertical={true}
-                />
-                
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={320}
-                  tick={({ x, y, payload }) => {
-                    const [line1, line2] = splitTextIntoLines(payload.value, 35);
-                    
-                    return (
-                      <g transform={`translate(${x},${y})`}>
-                        <text
-                          x={-15}
-                          y={line2 ? -6 : 0}
-                          dy={4}
-                          textAnchor="end"
-                          fill="#374151"
-                          fontSize={12}
-                          fontWeight={500}
-                          className="fill-gray-700 dark:fill-gray-300"
-                        >
-                          {line1}
-                        </text>
-                        {line2 && (
+                <BarChart
+                  layout="horizontal"
+                  data={processedData}
+                  margin={{ top: 20, right: 40, left: 40, bottom: 80 }}
+                  barCategoryGap={120}
+                  barGap={24}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#e5e7eb"
+                    strokeOpacity={0.7}
+                    horizontal={true}
+                    vertical={true}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    type="category"
+                    tick={({ x, y, payload }) => {
+                      const [line1, line2] = splitTextIntoLines(payload.value, 35);
+                      return (
+                        <g transform={`translate(${x},${y})`}>
                           <text
-                            x={-15}
-                            y={6}
-                            dy={4}
-                            textAnchor="end"
+                            y={line2 ? 0 : 10}
+                            dy={16}
+                            x={0}
+                            textAnchor="middle"
                             fill="#374151"
                             fontSize={12}
                             fontWeight={500}
                             className="fill-gray-700 dark:fill-gray-300"
                           >
-                            {line2}
+                            {line1}
                           </text>
-                        )}
-                      </g>
-                    );
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                  interval={0}
-                  label={{
-                    value: "Projects",
-                    angle: -90,
-                    position: "insideLeft",
-                    offset: -25,
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: "#6b7280",
-                      fontSize: "13px",
-                      fontWeight: "600"
-                    }
-                  }}
-                />
-                
-                <XAxis
-                  type="number"
-                  tick={{ fill: "#6b7280", fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={{ stroke: "#d1d5db", strokeWidth: 1 }}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  label={{
-                    value: "Count",
-                    position: "insideBottom",
-                    offset: -5,
-                    style: { 
-                      textAnchor: 'middle',
-                      fill: "#6b7280",
-                      fontSize: "13px",
-                      fontWeight: "600"
-                    }
-                  }}
-                />
-                
-                <Tooltip content={<CarsObsTooltip />} cursor={{ fill: 'rgba(239, 68, 68, 0.05)' }} />
-                
-                <Bar 
-                  dataKey="CARsOpen" 
-                  fill="#dc2626" 
-                  name="CARs Open"
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={25}
-                />
-                
-                <Bar 
-                  dataKey="CARsClosed" 
-                  fill="#15803d" 
-                  name="CARs Closed"
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={25}
-                />
-                
-                <Bar 
-                  dataKey="ObsOpen" 
-                  fill="#f97316" 
-                  name="Obs Open"
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={25}
-                />
-                
-                <Bar 
-                  dataKey="ObsClosed" 
-                  fill="#4ade80" 
-                  name="Obs Closed"
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={25}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                          {line2 && (
+                            <text
+                              y={18}
+                              dy={16}
+                              x={0}
+                              textAnchor="middle"
+                              fill="#374151"
+                              fontSize={12}
+                              fontWeight={500}
+                              className="fill-gray-700 dark:fill-gray-300"
+                            >
+                              {line2}
+                            </text>
+                          )}
+                        </g>
+                      );
+                    }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval={0}
+                    label={{
+                      value: "Projects",
+                      position: "insideBottom",
+                      offset: -5,
+                      style: {
+                        textAnchor: 'middle',
+                        fill: "#6b7280",
+                        fontSize: "13px",
+                        fontWeight: "600"
+                      }
+                    }}
+                  />
+                  <YAxis
+                    type="number"
+                    tick={{ fill: "#6b7280", fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#d1d5db", strokeWidth: 1 }}
+                    tickFormatter={(value) => value.toLocaleString()}
+                    label={{
+                      value: "Count",
+                      angle: -90,
+                      position: "insideLeft",
+                      offset: 0,
+                      style: {
+                        textAnchor: 'middle',
+                        fill: "#6b7280",
+                        fontSize: "13px",
+                        fontWeight: "600"
+                      }
+                    }}
+                  />
+                  <Tooltip content={<CarsObsTooltip />} cursor={{ fill: 'rgba(239, 68, 68, 0.05)' }} />
+                  <Bar
+                    dataKey="CARsOpen"
+                    fill="#dc2626"
+                    name="CARs Open"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={25}
+                  />
+                  <Bar
+                    dataKey="CARsClosed"
+                    fill="#15803d"
+                    name="CARs Closed"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={25}
+                  />
+                  <Bar
+                    dataKey="ObsOpen"
+                    fill="#f97316"
+                    name="Obs Open"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={25}
+                  />
+                  <Bar
+                    dataKey="ObsClosed"
+                    fill="#4ade80"
+                    name="Obs Closed"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={25}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </div>

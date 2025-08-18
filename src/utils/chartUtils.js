@@ -558,6 +558,21 @@ export const generateQHSETimelineData = (filteredProjects) => {
   return result;
 };
 
+// Generate Growth Chart Data
+export function generateGrowthChartData(projects) {
+  return projects.map(project => ({
+    name: project.projectNo, // X axis value
+    projectTitleKey: project.projectTitleKey, // For X axis hover
+    projectTitle: project.projectTitle, // For chart tooltip
+    rejectionPercent: Number(
+      typeof project.rejectionOfDeliverablesPercent === 'string'
+        ? project.rejectionOfDeliverablesPercent.replace('%', '')
+        : project.rejectionOfDeliverablesPercent
+    ),
+    costPoorQuality: Number(project.costOfPoorQualityAED || 0)
+  }));
+}
+
 // ✅ REMOVE THE DEMO DATA FUNCTION - We're using real data now
 // Keep the demo function for reference only
 export const generateDemoQHSETimelineData = () => {

@@ -143,9 +143,9 @@ const DashboardContent = ({ projectsData, chartData, loading, onRefresh }) => (
 const ChartsGrid = ({ monthlyData, yearlyData, timelineData }) => (
   <div className="w-full">
     {/* Responsive container with proper spacing and 2-row layout for lg screens */}
-    <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-1 lg:grid-rows-2 lg:gap-4 xl:grid-cols-7 xl:grid-rows-1 xl:gap-6 2xl:gap-8">
+    <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-1 lg:grid-rows-1 lg:gap-4 xl:grid-cols-7 xl:grid-rows-1 xl:gap-6 2xl:gap-8">
       {/* Overview Chart - Responsive column spans with better height control */}
-      <div className="col-span-1 lg:col-span-1 lg:row-span-1 xl:col-span-4 xl:row-span-1 w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px]">
+      <div className="col-span-1 lg:col-span-1 lg:row-span-1 xl:col-span-7 xl:row-span-1 w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px]">
         <QHSEOverviewChart 
           monthlyData={monthlyData} 
           yearlyData={yearlyData} 
@@ -154,12 +154,14 @@ const ChartsGrid = ({ monthlyData, yearlyData, timelineData }) => (
       </div>
       
       {/* Timeline Chart - Responsive column spans with better height control */}
+      {/*
       <div className="col-span-1 lg:col-span-1 lg:row-span-1 xl:col-span-3 xl:row-span-1 w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px]">
         <QhseTimeline 
           timelineData={timelineData} 
           className="w-full h-full"
         />
       </div>
+      */}
     </div>
   </div>
 )

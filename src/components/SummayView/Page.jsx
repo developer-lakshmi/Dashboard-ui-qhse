@@ -201,7 +201,7 @@ const SummaryContent = ({
         filteredProjects={filteredProjects}
       />
 
-      <ChartsSection chartData={chartData} />
+      <ChartsSection chartData={chartData} filteredProjects={filteredProjects} />
 
       {/* <CriticalIssues filteredProjects={filteredProjects} /> */}
     </>
@@ -237,16 +237,16 @@ const FiltersSection = ({
   />
 )
 
-// ✅ UPDATED: ChartsSection without manhours data
-const ChartsSection = ({ chartData }) => (
+// ✅ UPDATED: ChartsSection now receives filteredProjects
+const ChartsSection = ({ chartData, filteredProjects }) => (
   <Charts
     kpiStatusData={chartData.kpiStatus}
-    // manhoursData={chartData.manhours} // ✅ COMMENTED: Manhours chart moved to BillabilityPage
     auditStatusData={chartData.auditStatus}
     carsObsData={chartData.carsObs}
     timelineData={chartData.timeline}
     qualityPlanStatusData={chartData.qualityPlanStatus}
     getKPIBadgeVariant={getKPIBadgeVariant}
+    filteredProjects={filteredProjects} // <-- Pass filteredProjects here
   />
 )
 

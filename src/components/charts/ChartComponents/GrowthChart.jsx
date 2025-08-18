@@ -1,23 +1,26 @@
-import React from "react";
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
-import { useTheme } from "@/hooks/use-theme";
-import { useState } from "react";
+import React, { useState } from 'react';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
-// ✅ UPDATED: Removed billability metric
+// Define metrics for the chart
 const metricOptions = [
-  { key: "carsOpen", label: "CARs Overview", color: "#ef4444", type: "count" },
-  { key: "obsOpen", label: "Observation Overview", color: "#f97316", type: "count" },
-  { key: "kpiAchieved", label: "KPI Achievement Overview", color: "#22c55e", type: "percentage" },
+  { key: "rejectionPercent", label: "Rejection of Deliverables (%)", color: "#2563eb", type: "percentage", yAxisId: "left" },
+  { key: "costPoorQuality", label: "Cost of Poor Quality (AED)", color: "#ef4444", type: "currency", yAxisId: "right" }
 ];
 
+// Custom tooltip similar to OverviewChart
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
+    const fullTitle = payload[0]?.payload?.projectTitle || label;
     return (
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-3 text-sm border border-slate-200 dark:border-slate-700">
-        <p className="font-semibold mb-2 text-slate-700 dark:text-slate-300">{label}</p>
+        <p className="font-semibold mb-2 text-slate-700 dark:text-slate-300" title={fullTitle}>
+          {fullTitle}
+        </p>
         {payload.map((entry, idx) => {
           const metric = metricOptions.find(m => m.key === entry.dataKey);
-          const suffix = metric?.type === "percentage" ? "%" : "";
+          let suffix = "";
+          if (metric?.type === "percentage") suffix = "%";
+          if (metric?.type === "currency") suffix = " AED";
           return (
             <div key={idx} className="flex items-center justify-between gap-3 mb-1">
               <div className="flex items-center gap-2">
@@ -39,12 +42,8 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const QHSEOverviewChart = ({ monthlyData, yearlyData, className }) => {
-  const { theme } = useTheme();
-  const [filter, setFilter] = useState("monthly");
+const GrowthChart = ({ data }) => {
   const [selectedMetrics, setSelectedMetrics] = useState(metricOptions.map(m => m.key));
-
-  const chartData = filter === "monthly" ? monthlyData : yearlyData;
 
   const toggleMetric = (metricKey) => {
     setSelectedMetrics(prev => 
@@ -55,27 +54,11 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData, className }) => {
   };
 
   return (
-    <div className={`card w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px] p-4 sm:p-6 md:p-8 ${className}`}>
+    <div className="card w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px] p-4 sm:p-6 md:p-8">
       <div className="card-header space-y-3 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-        {/* Heading */}
-        <div>
-          <h3 className="card-title text-lg font-semibold">
-            QHSE Performance Overview
-          </h3>
-        </div>
-        {/* Filter Dropdown aligned right */}
-        <div>
-          <select
-            id="overview-filter"
-            className="border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={filter}
-            onChange={e => setFilter(e.target.value)}
-            aria-label="Select time period"
-          >
-            <option value="monthly">Monthly View</option>
-            <option value="yearly">Yearly View</option>
-          </select>
-        </div>
+        <h3 className="card-title text-lg font-semibold">
+          Growth Graph: Rejection of Deliverables & Cost of Poor Quality
+        </h3>
       </div>
       {/* Metric Toggle Buttons */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -108,71 +91,104 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData, className }) => {
         ))}
       </div>
       <div className="card-body p-0">
-        {chartData && chartData.length > 0 ? (
+        {data && data.length > 0 ? (
           <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={chartData}
+            <LineChart
+              data={data}
               margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
             >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={theme === "light" ? "#e2e8f0" : "#374151"} 
-                opacity={0.4}
-                horizontal={true}
-                vertical={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" opacity={0.4} />
               <XAxis
                 dataKey="name"
-                stroke={theme === "light" ? "#64748b" : "#9ca3af"}
-                fontSize={12}
+                fontSize={13}
                 tickMargin={10}
                 axisLine={false}
                 tickLine={false}
-                label={{ 
-                  value: 'Time Period', 
-                  position: 'insideBottom', 
-                  offset: -16,
-                  style: { 
+                tick={<CustomXAxisTick />}
+                label={{
+                  value: 'Project',
+                  position: 'insideBottom',
+                  offset: -36,
+                  style: {
                     textAnchor: 'middle',
-                    fill: theme === "light" ? "#64748b" : "#9ca3af",
-                    fontSize: '12px',
-                    fontWeight: 500
+                    fill: "#334155",
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    letterSpacing: 0.2
                   }
                 }}
               />
+              {/* Left Y Axis for Rejection % */}
               <YAxis
-                stroke={theme === "light" ? "#64748b" : "#9ca3af"}
-                fontSize={12}
+                yAxisId="left"
+                fontSize={13}
                 tickMargin={10}
                 axisLine={false}
                 tickLine={false}
                 width={55}
+                tick={{
+                  fill: "#2563eb", // blue for rejection
+                  fontWeight: 500,
+                  fontSize: 13,
+                  letterSpacing: 0.2
+                }}
                 label={{ 
-                  value: 'Values', 
+                  value: 'Rejection %', 
                   angle: -90, 
                   position: 'insideLeft',
                   style: { 
                     textAnchor: 'middle',
-                    fill: theme === "light" ? "#64748b" : "#9ca3af",
-                    fontSize: '12px',
-                    fontWeight: 500
+                    fill: "#2563eb",
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    letterSpacing: 0.2
+                  }
+                }}
+              />
+              {/* Right Y Axis for Cost of Poor Quality */}
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                fontSize={13}
+                tickMargin={10}
+                axisLine={false}
+                tickLine={false}
+                width={70}
+                tick={{
+                  fill: "#ef4444", // red for cost
+                  fontWeight: 500,
+                  fontSize: 13,
+                  letterSpacing: 0.2
+                }}
+                label={{ 
+                  value: 'Cost of Poor Quality (AED)', 
+                  angle: 90, 
+                  position: 'insideRight',
+                  style: { 
+                    textAnchor: 'middle',
+                    fill: "#ef4444",
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    letterSpacing: 0.2
                   }
                 }}
               />
               <Tooltip content={<CustomTooltip />} />
+              <Legend />
               {metricOptions.map(metric => 
                 selectedMetrics.includes(metric.key) && (
-                  <Bar
+                  <Line
                     key={metric.key}
+                    type="monotone"
                     dataKey={metric.key}
-                    fill={metric.color}
-                    radius={[4, 4, 0, 0]}
-                    barSize={30}
-                    isAnimationActive={true}
+                    stroke={metric.color}
+                    strokeWidth={3}
+                    dot={true}
+                    yAxisId={metric.yAxisId}
                   />
                 )
               )}
-            </BarChart>
+            </LineChart>
           </ResponsiveContainer>
         ) : (
           <div className="flex flex-col items-center justify-center h-80 text-slate-500 dark:text-slate-400">
@@ -188,4 +204,26 @@ const QHSEOverviewChart = ({ monthlyData, yearlyData, className }) => {
   );
 };
 
-export default QHSEOverviewChart;
+// Add this inside GrowthChart.jsx
+const CustomXAxisTick = ({ x, y, payload }) => {
+  // payload.value is Project No, payload.payload.projectTitleKey is the key
+  const titleKey = payload?.payload?.projectTitleKey || '';
+  return (
+    <g>
+      <text
+        x={x}
+        y={y + 10}
+        textAnchor="middle"
+        fill="#334155"
+        fontWeight={500}
+        fontSize={13}
+        style={{ cursor: 'pointer' }}
+      >
+        {payload.value}
+        {titleKey && <title>{titleKey}</title>}
+      </text>
+    </g>
+  );
+};
+
+export default GrowthChart;
