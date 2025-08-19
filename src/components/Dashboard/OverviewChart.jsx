@@ -16,6 +16,13 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-3 text-sm border border-slate-200 dark:border-slate-700">
         <p className="font-semibold mb-2 text-slate-700 dark:text-slate-300">{label}</p>
         {payload.map((entry, idx) => {
+          // Show only CARs, Observation, KPI Achievement in tooltip
+          let displayLabel = "";
+          if (entry.dataKey === "carsOpen") displayLabel = "CARs";
+          else if (entry.dataKey === "obsOpen") displayLabel = "Observation";
+          else if (entry.dataKey === "kpiAchieved") displayLabel = "KPI Achievement";
+          else return null; // Skip other metrics
+
           const metric = metricOptions.find(m => m.key === entry.dataKey);
           const suffix = metric?.type === "percentage" ? "%" : "";
           return (
@@ -25,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }) => {
                   className="w-3 h-3 rounded-full" 
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-slate-600 dark:text-slate-400">{metric?.label || entry.name}:</span>
+                <span className="text-slate-600 dark:text-slate-400">{displayLabel}:</span>
               </div>
               <span className="font-bold" style={{ color: entry.color }}>
                 {typeof entry.value === "number" ? entry.value.toLocaleString(undefined, { maximumFractionDigits: 1 }) : entry.value}{suffix}

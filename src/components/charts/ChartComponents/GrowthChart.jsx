@@ -57,7 +57,7 @@ const GrowthChart = ({ data }) => {
     <div className="card w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] lg:min-h-[280px] xl:min-h-[450px] p-4 sm:p-6 md:p-8">
       <div className="card-header space-y-3 flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <h3 className="card-title text-lg font-semibold">
-          Growth Graph: Rejection of Deliverables & Cost of Poor Quality
+       Overview for Rejection and Cost of Poor Quality
         </h3>
       </div>
       {/* Metric Toggle Buttons */}

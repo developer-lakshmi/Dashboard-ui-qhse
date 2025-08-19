@@ -9,22 +9,48 @@ const parsePercentage = (value) => {
   return Number(value) || 0;
 };
 
-// Generate KPI status data for charts
+// Helper to categorize KPI percent
+const categorizeKPI = (percent) => {
+  if (percent === 100) return "green";
+  if (percent >= 90) return "lightGreen";
+  if (percent >= 80) return "yellow";
+  if (percent >= 60) return "orange";
+  return "red";
+};
+
+// Generate KPI status data for charts (with 5 categories)
 export const generateKPIStatusData = (filteredProjects) => {
+  const categories = {
+    green: 0,
+    lightGreen: 0,
+    yellow: 0,
+    orange: 0,
+    red: 0,
+  };
+  filteredProjects.forEach(p => {
+    // Only include if KPI percent is not empty, not null, not undefined, not "N/A"
+    const raw = p.projectKPIsAchievedPercent;
+    if (
+      raw === undefined ||
+      raw === null ||
+      raw === "" ||
+      raw === "N/A"
+    ) {
+      return; // Skip empty KPI fields
+    }
+    const percent = typeof raw === "string"
+      ? Number(raw.replace('%', ''))
+      : Number(raw);
+    const cat = categorizeKPI(percent);
+    categories[cat]++;
+  });
   return [
-    { 
-      name: "Green", 
-      value: filteredProjects.filter(p => getKPIStatus(p.projectKPIsAchievedPercent) === "Green").length 
-    },
-    { 
-      name: "Yellow", 
-      value: filteredProjects.filter(p => getKPIStatus(p.projectKPIsAchievedPercent) === "Yellow").length 
-    },
-    { 
-      name: "Red", 
-      value: filteredProjects.filter(p => getKPIStatus(p.projectKPIsAchievedPercent) === "Red").length 
-    },
-  ];
+    { name: "Green", value: categories.green },
+    { name: "Light Green", value: categories.lightGreen },
+    { name: "Yellow", value: categories.yellow },
+    { name: "Orange", value: categories.orange },
+    { name: "Red", value: categories.red },
+  ].filter(item => item.value > 0);
 };
 
 // Generate manhours data for charts

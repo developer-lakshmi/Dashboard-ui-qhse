@@ -479,7 +479,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                 }}
               />
               
-              <Tooltip title="Refresh Data">
+              {/* <Tooltip title="Refresh Data">
                 <IconButton 
                   onClick={onRefresh} 
                   disabled={loading}
@@ -487,7 +487,7 @@ const ProjectStatus = ({ projectsData = [], loading = false, onRefresh }) => {
                 >
                   <RefreshIcon />
                 </IconButton>
-              </Tooltip>
+              </Tooltip> */}
             </Box>
           </Box>
         </div>

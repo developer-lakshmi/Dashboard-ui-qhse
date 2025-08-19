@@ -9,6 +9,13 @@ import { pieColors } from '../../../data/index';
 const KPIStatusTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const entry = payload[0];
+    let status = "";
+    if (entry?.name === "Green") status = "On Track";
+    else if (entry?.name === "Light Green") status = "Very Good";
+    else if (entry?.name === "Yellow") status = "Attention Needed";
+    else if (entry?.name === "Orange") status = "Risk";
+    else if (entry?.name === "Red") status = "Critical";
+
     return (
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 px-4 py-3 min-w-[180px]">
         <div className="font-semibold mb-2 text-blue-700 dark:text-blue-300 text-base">
@@ -27,9 +34,7 @@ const KPIStatusTooltip = ({ active, payload }) => {
           </span>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {entry?.name === "Green" && "On Track"}
-          {entry?.name === "Yellow" && "Attention Needed"}
-          {entry?.name === "Red" && "Critical"}
+          {status}
         </div>
       </div>
     );
@@ -38,6 +43,15 @@ const KPIStatusTooltip = ({ active, payload }) => {
 };
 
 export const KPIStatusChart = ({ data }) => {
+  // Color mapping for 5 categories
+  const colorMap = {
+    "Green": "#16a34a",
+    "Light Green": "#4ade80",
+    "Yellow": "#facc15",
+    "Orange": "#f97316",
+    "Red": "#ef4444"
+  };
+
   return (
     <>
       <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
@@ -67,15 +81,7 @@ export const KPIStatusChart = ({ data }) => {
                     {data.map((entry, index) => (
                       <Cell
                         key={index}
-                        fill={
-                          entry.name === "Green"
-                            ? "#16a34a"
-                            : entry.name === "Yellow"
-                            ? "#facc15"
-                            : entry.name === "Red"
-                            ? "#ef4444"
-                            : pieColors[index % pieColors.length]
-                        }
+                        fill={colorMap[entry.name] || "#a3a3a3"}
                       />
                     ))}
                   </Pie>
@@ -84,37 +90,34 @@ export const KPIStatusChart = ({ data }) => {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="flex justify-center gap-6 mt-4 flex-wrap">
-            {data.map((entry, index) => (
-              <div key={entry.name} className="flex items-center gap-2 mb-2">
-                <span
-                  className="inline-block w-4 h-4 rounded-full border border-gray-300 dark:border-gray-700"
-                  style={{
-                    background:
-                      entry.name === "Green"
-                        ? "#16a34a"
-                        : entry.name === "Yellow"
-                        ? "#facc15"
-                        : entry.name === "Red"
-                        ? "#ef4444"
-                        : pieColors[index % pieColors.length]
-                  }}
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">
-                  {entry.name}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  ({entry.value})
-                </span>
+          <div className="mt-6 w-full max-w-2xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-green-600" />
+                <span className="font-medium text-green-700 dark:text-green-400"></span>
+                <span className="text-xs text-gray-500 ml-1">100% (On Track)</span>
               </div>
-            ))}
-          </div>
-          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-            <span>
-              <strong>Green</strong>: On Track &nbsp;|&nbsp;
-              <strong>Yellow</strong>: Attention Needed &nbsp;|&nbsp;
-              <strong>Red</strong>: Critical
-            </span>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-green-400" />
+                <span className="font-medium text-green-500 dark:text-green-300"></span>
+                <span className="text-xs text-gray-500 ml-1">90-99% (Very Good)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-yellow-400" />
+                <span className="font-medium text-yellow-600 dark:text-yellow-400"></span>
+                <span className="text-xs text-gray-500 ml-1">80-89% (Attention Needed)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-orange-400" />
+                <span className="font-medium text-orange-600 dark:text-orange-400"></span>
+                <span className="text-xs text-gray-500 ml-1">60-79% (Risk)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-red-500" />
+                <span className="font-medium text-red-600 dark:text-red-400"></span>
+                <span className="text-xs text-gray-500 ml-1">Below 60% (Critical)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
