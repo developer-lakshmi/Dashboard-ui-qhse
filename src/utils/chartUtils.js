@@ -30,10 +30,9 @@ export const generateKPIStatusData = (filteredProjects) => {
 // Generate manhours data for charts
 export const generateManhoursData = (filteredProjects) => {
   return filteredProjects.map(project => ({
-    code: project.projectNo || 'N/A',
-    name: project.projectTitleKey || project.projectTitle, // ✅ Use Project Title Key first, fallback to full title
+    projectNo: project.projectNo || 'N/A', // <-- Use projectNo for axis
+    name: project.projectTitleKey || project.projectTitle, // Project Title Key or fallback to full title
     originalTitle: project.projectTitle, // Keep full title for tooltips
-    // ✅ Updated field names to match Google Sheets exactly
     "Manhours for Quality": Number(project.manHourForQuality) || 0,
     "Manhours Used": Number(project.manhoursUsed) || 0,
     "Manhours Balance": Number(project.manhoursBalance) || 0,
