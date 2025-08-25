@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
-import { AlertTriangle, FileText, Clock, Wrench, Eye, Maximize2, Minimize2 } from "lucide-react";
+import { AlertTriangle, FileText, Clock, Wrench, Eye, Maximize2, Minimize2, MessageCircle } from "lucide-react";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -183,18 +183,34 @@ const DashSummaryCard = ({ projectsData = [] }) => {
       icon: Eye,
       color: "text-yellow-600 bg-yellow-100/60 dark:bg-yellow-900/30 dark:text-yellow-400",
       description: "Total observations pending closure"
+    },
+    // ✅ NEW CARD: Client Feedback & Expectation
+    {
+      title: "Client Feedback & Expectation",
+      value: "-",
+      icon: MessageCircle,
+      color: "text-blue-600 bg-blue-100/60 dark:bg-blue-900/30 dark:text-blue-400",
+      description: "View client feedback and expectations (future integration)"
     }
   ];
 
   // Enhanced modal handlers
   const handleOpen = (item) => {
     console.log('🔍 Opening modal for:', item.title);
-    
-    if ((item.title.includes("CAR Open") || item.title.includes("Observation Open")) && 
+
+    // For Client Feedback & Expectation, show placeholder modal
+    if (item.title === "Client Feedback & Expectation") {
+      setModalTitle(item.title);
+      setModalProjects([]); // No data yet
+      setOpen(true);
+      return;
+    }
+
+    if ((item.title.includes("CAR Open") || item.title.includes("Observation Open")) &&
         (typeof item.value === 'number' && item.value === 0)) {
       return;
     }
-    
+
     const filteredProjects = projectsData.filter(filterProjects[item.title]);
     setModalTitle(item.title);
     setModalProjects(filteredProjects);
@@ -494,32 +510,31 @@ const DashSummaryCard = ({ projectsData = [] }) => {
           sx={{ zIndex: 1300 }}
         >
           <Box sx={getModalStyles()}>
-            <Paper 
-              elevation={6} 
+            <Paper
+              elevation={6}
               className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700"
               sx={getPaperStyles()}
             >
-              {/* Enhanced Header with Full-screen Toggle */}
               <div className={`flex items-center justify-between ${isFullScreen ? 'p-4' : 'pb-0'}`}>
                 <div className="flex-1">
-                  <h2 className="font-bold text-xl text-orange-700 dark:text-orange-400">
+                  <h2 className={`font-bold text-xl ${modalTitle === "Client Feedback & Expectation" ? "text-blue-700 dark:text-blue-400" : "text-orange-700 dark:text-orange-400"}`}>
                     {modalTitle}
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">
-                    Found {modalProjects.length} project{modalProjects.length !== 1 ? 's' : ''} requiring attention
+                    {modalTitle === "Client Feedback & Expectation"
+                      ? "This section will show client feedback and expectations. Integration with Google Sheets coming soon."
+                      : `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} requiring attention`}
                   </p>
                 </div>
-                
                 <div className="flex items-center gap-2">
                   <Tooltip title={isFullScreen ? "Exit Full Screen" : "Full Screen"} arrow>
                     <IconButton
                       onClick={toggleFullScreen}
-                      className="!text-orange-600 dark:!text-orange-400 hover:!text-orange-800 dark:hover:!text-orange-200"
+                      className={`!${modalTitle === "Client Feedback & Expectation" ? "text-blue-600 dark:!text-blue-400 hover:!text-blue-800 dark:hover:!text-blue-200" : "text-orange-600 dark:!text-orange-400 hover:!text-orange-800 dark:hover:!text-orange-200"}`}
                     >
                       {isFullScreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
                     </IconButton>
                   </Tooltip>
-                  
                   <Tooltip title="Close" arrow>
                     <IconButton
                       onClick={handleClose}
@@ -530,13 +545,12 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                   </Tooltip>
                 </div>
               </div>
-              
-              {/* Enhanced Table Container */}
               <div className={`${isFullScreen ? 'flex-1 overflow-hidden p-4 pt-0' : ''}`}>
-                {modalProjects.length === 0 ? (
+                {modalTitle === "Client Feedback & Expectation" ? (
                   <div className="text-center py-12">
-                    <p className="text-center text-green-600 dark:text-green-400 text-lg font-semibold">
-                      ✅ No pending activities found - All projects are on track!
+                    <p className="text-blue-600 dark:text-blue-400 text-lg font-semibold">
+                      🚧 Client Feedback & Expectation integration coming soon.<br />
+                      This will be linked to a separate Google Sheet.
                     </p>
                   </div>
                 ) : (
