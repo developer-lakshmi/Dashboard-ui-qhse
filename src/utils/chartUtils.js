@@ -416,7 +416,7 @@ export const generateQHSETimelineData = (filteredProjects) => {
     .map(project => {
       console.log(`🔍 Processing project: ${project.projectTitle}`);
       
-      // ✅ Using EXACT field names from your useGoogleSheets.js mapping
+      // ✅ Using EXACT field names from your useQHSERunningProjects.js mapping
       const completion = parsePercent(project.projectCompletionPercent);
       const kpiStatus = parsePercentage(project.projectKPIsAchievedPercent);
       const billability = parsePercentage(project.qualityBillabilityPercent);

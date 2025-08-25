@@ -1,6 +1,6 @@
 import React from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme } from "@/hooks/theme/use-theme";
 import { useState } from "react";
 
 // ✅ UPDATED: Removed billability metric

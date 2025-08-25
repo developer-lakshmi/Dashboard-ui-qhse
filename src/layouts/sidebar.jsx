@@ -1,11 +1,7 @@
 import { forwardRef } from "react";
 import { NavLink } from "react-router-dom";
-
 import { navbarLinks } from "@/constants";
 import { sidebarLinks } from "@/constants/sidebarLinks";
-
-
-
 import PropTypes from "prop-types";
 import Assets from "../assets/Assets";
 import { cn } from "../utils";

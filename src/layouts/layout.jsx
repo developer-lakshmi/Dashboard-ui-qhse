@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { useClickOutside } from "@/hooks/use-click-outside";
+import { useClickOutside } from "@/hooks/sidebar/use-click-outside";
 
 import { Sidebar } from "@/layouts/sidebar";
 import { Header } from "@/layouts/header";

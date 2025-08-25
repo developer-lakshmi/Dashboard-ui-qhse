@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useGoogleSheets } from '../../hooks/useGoogleSheets'; // Add this import
+import { useQHSERunningProjects } from '../../hooks/excel-data/use-qhse-running-projects'; // Add this import
 import {
   Paper, Typography, Box, Chip, Button, Stack, TextField, InputAdornment
 } from "@mui/material";
@@ -55,7 +55,7 @@ const allHeaders = Object.keys(fieldLabels).map((key) => ({
 }));
 
 const DetailedView = () => {
-  const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets();
+  const { data: projectsData, loading, error, lastUpdated, refetch } = useQHSERunningProjects();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Debug: Log first project to verify field structure (only when data exists)

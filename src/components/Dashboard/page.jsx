@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box } from "@mui/material"
-import { useTheme } from "@/hooks/use-theme"
+import { useTheme } from "@/hooks/theme/use-theme"
 import { Footer } from "@/layouts/footer"
 
 // Import reusable components
@@ -20,7 +20,7 @@ import {
 } from "../../utils"
 import { generateQHSETimelineData } from "../../utils/chartUtils"
 import { PageLayout } from '../../layouts/PageLayout'
-import { useGoogleSheets } from '../../hooks/useGoogleSheets'
+import { useQHSERunningProjects } from '../../hooks/excel-data/use-qhse-running-projects'
 import DashSummaryCard from './DashSummaryCard'
 
 const DashboardPage = () => {
@@ -34,7 +34,7 @@ const DashboardPage = () => {
     refetch, 
     lastUpdated,
     dataLastChanged // ✅ CHANGED: Use dataLastChanged instead of sheetLastModified
-  } = useGoogleSheets();
+  } = useQHSERunningProjects();
 
   const chartData = React.useMemo(() => {
     if (!projectsData || projectsData.length === 0) {

@@ -1,10 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import { fetchGoogleSheet } from '../../api/Api';
+import { DATA_CONFIG } from '../../api/dataConfig';
+
+const { sheetId, sheetName } = DATA_CONFIG.runningProjects;
+const { apiKey } = DATA_CONFIG;
 
 // Your Google Sheets configuration
-const SHEET_ID = '1gPwSaDEY84dkfqf78nzhdtxT-j1TaJWsaS_15gpraV4';
-const SHEET_NAME = 'QHSE running projects status';
-const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';
+// const SHEET_ID = '1gPwSaDEY84dkfqf78nzhdtxT-j1TaJWsaS_15gpraV4';
+// const SHEET_NAME = 'QHSE running projects status';
+// const API_KEY = 'AIzaSyAMPpWHmtO3asVWSppJS_iWiWQS6cft2oo';
 
 // ✅ UPDATED: Added "Project Title Key" column
 const FIELD_MAPPING = {
@@ -83,14 +87,14 @@ const createDataHash = (data) => {
 };
 
 // ✅ UPDATED: Changed default polling interval from 60 seconds to 1 hour
-export function useGoogleSheets(pollInterval = 3600000) {
+export function useQHSERunningProjects(pollInterval = 3600000) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [dataLastChanged, setDataLastChanged] = useState(null); // ✅ NEW: Track when data actually changed
-  const [previousDataHash, setPreviousDataHash] = useState(null); // ✅ NEW: Track data changes
+  const [dataLastChanged, setDataLastChanged] = useState(null);
+  const [previousDataHash, setPreviousDataHash] = useState(null);
 
   const fetchSheetData = useCallback(async (isInitialLoad = false) => {
     try {
@@ -100,11 +104,9 @@ export function useGoogleSheets(pollInterval = 3600000) {
         setIsRefreshing(true);
       }
 
-      const dataRes = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
-      );
+      // ✅ Use shared fetchGoogleSheet function
+      const rows = await fetchGoogleSheet({ sheetId, sheetName, apiKey });
 
-      const rows = dataRes.data.values;
       if (!rows || rows.length === 0) {
         setData([]);
         return;

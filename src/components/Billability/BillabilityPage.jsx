@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useGoogleSheets } from '../../hooks/useGoogleSheets'
+import { useQHSERunningProjects } from '../../hooks/excel-data/use-qhse-running-projects'
 import { BarChart3, Eye } from 'lucide-react'
 
 // Import reusable components
@@ -21,7 +21,7 @@ import {
 } from '../../utils'
 
 const BillabilityPage = () => {
-  const { data: projectsData, loading, error, lastUpdated, refetch, isRefreshing, dataLastChanged } = useGoogleSheets();
+  const { data: projectsData, loading, error, lastUpdated, refetch, isRefreshing, dataLastChanged } = useQHSERunningProjects();
 
   // ✅ FUTURE: Filter states (commented for now)
   // const [selectedYear, setSelectedYear] = useState("all")

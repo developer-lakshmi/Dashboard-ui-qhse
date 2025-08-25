@@ -4,7 +4,7 @@ import Charts from '../charts/Charts'
 import CriticalIssues from './CriticalIssues'
 import Filters from './Filters'
 import { Card, CardContent } from '../ui/Card'
-import { useGoogleSheets } from '../../hooks/useGoogleSheets'
+import { useQHSERunningProjects } from '../../hooks/excel-data/use-qhse-running-projects'
 import { SearchX, BarChart2 } from 'lucide-react'
 
 // Import reusable components (same as DashboardPage)
@@ -29,7 +29,7 @@ import {
 } from '../../utils'
 
 const SummaryView = () => {
-  const { data: projectsData, loading, error, lastUpdated, refetch } = useGoogleSheets();
+  const { data: projectsData, loading, error, lastUpdated, refetch } = useQHSERunningProjects();
 
   const [selectedYear, setSelectedYear] = useState("all")
   const [selectedMonth, setSelectedMonth] = useState("all")

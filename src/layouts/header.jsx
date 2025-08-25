@@ -1,4 +1,4 @@
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme } from "@/hooks/theme/use-theme";
 
 import { Bell, ChevronsLeft, Moon, Search, Sun } from "lucide-react";
 
