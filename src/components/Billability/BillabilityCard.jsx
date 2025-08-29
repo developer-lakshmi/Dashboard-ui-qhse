@@ -8,6 +8,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import { getDetailedBadge } from '../../utils/BadgeUtils'; // Add this import
+import OverviewCard from '../ui/OverviewCard';
+import OverviewTable from '../ui/OverviewTable';
 
 /**
  * BILLABILITY CARD COMPONENT - Enhanced with full-screen modal
@@ -223,25 +225,15 @@ const BillabilityCard = ({ filteredProjects = [] }) => {
 
   return (
     <>
-      <Card 
-        className="border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border "
+      <OverviewCard
+        title="Billability Overview"
+        value={projectsWithBillability.length}
+        valueColor="text-purple-800 dark:text-purple-400" // <-- Add this line
+        description="Projects with quality billability tracking"
+        icon={<DollarSign className="w-8 h-8 text-purple-500 dark:text-purple-400" />}
+        color="border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20"
         onClick={handleCardClick}
-      >
-        <CardContent className="p-4 bg-white dark:bg-slate-800">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Billability Overview
-            </p>
-            <DollarSign className="w-8 h-8 text-purple-500 dark:text-purple-400" />
-          </div>
-          <p className="text-3xl font-bold text-purple-800 dark:text-purple-300 mb-1">
-            {projectsWithBillability.length}
-          </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            Projects with quality billability tracking
-          </p>
-        </CardContent>
-      </Card>
+      />
 
       {/* ✅ ENHANCED: Modal with tooltips on column headers */}
       <Modal
@@ -306,53 +298,11 @@ const BillabilityCard = ({ filteredProjects = [] }) => {
                     }} 
                     className="bg-white dark:bg-slate-900"
                   >
-                    <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-                      <thead className="sticky top-0 bg-purple-100 dark:bg-purple-900 z-10">
-                        <tr>
-                          {modalColumns.map(column => (
-                            <th 
-                              key={column.key} 
-                              className="border border-gray-300 dark:border-slate-600 px-3 py-3 text-left font-semibold text-gray-900 dark:text-slate-100"
-                              style={{ 
-                                width: column.width,
-                                minWidth: column.minWidth,
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {/* ✅ NEW: Column headers with tooltips showing full labels */}
-                              <Tooltip title={column.fullLabel} arrow placement="top">
-                                <span className="cursor-help">
-                                  {column.label}
-                                </span>
-                              </Tooltip>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-slate-900">
-                        {projectsWithBillability.map((project, idx) => (
-                          <tr 
-                            key={`${project.projectNo || idx}`} 
-                            className="hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors"
-                          >
-                            {modalColumns.map(column => (
-                              <td 
-                                key={`${column.key}-${idx}`} 
-                                className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100"
-                                style={{ 
-                                  width: column.width,
-                                  minWidth: column.minWidth,
-                                  overflow: column.truncate ? 'hidden' : 'visible',
-                                  textOverflow: column.truncate ? 'ellipsis' : 'clip'
-                                }}
-                              >
-                                {getCellValue(project, column.key, isFullScreen)}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <OverviewTable
+                      columns={modalColumns}
+                      data={projectsWithBillability}
+                      headerClass="bg-purple-100 dark:bg-purple-900"
+                    />
                   </div>
                 </div>
               )}

@@ -20,6 +20,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import { getDetailedBadge } from '../../utils/BadgeUtils';
+import OverviewCard from '../ui/OverviewCard';
+import OverviewTable from '../ui/OverviewTable'; // Import the new OverviewTable component
 
 // import { getDetailedBadge } from '../../utils/BadgeUtils'; // Import centralized badge logic
 
@@ -526,23 +528,16 @@ const SummaryCards = ({ filteredProjects = [] }) => {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {summaryData.map((item, index) => (
-              <Card 
-                key={index} 
-                className={`${getCardClasses(item.color)} cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border border-gray-200 dark:border-slate-700`}
+              <OverviewCard
+                key={index}
+                title={item.title}
+                value={item.value}
+                valueColor={getValueClasses(item.color)} 
+                description={item.description}
+                icon={iconMap[item.title]}
+                color={getCardClasses(item.color)}
                 onClick={() => handleCardClick(item.title)}
-              >
-                <CardContent className="p-4 bg-white dark:bg-slate-800">
-                  <div className="flex items-center justify-between mb-2">
-                    {/* ✅ CARDS SHOW FULL NAMES - NO CHANGES */}
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {item.title}
-                    </p>
-                    <div>{iconMap[item.title]}</div>
-                  </div>
-                  <p className={`text-3xl font-bold ${getValueClasses(item.color)} mb-1`}>{item.value}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">{item.description}</p>
-                </CardContent>
-              </Card>
+              />
             ))}
           </div>
         </div>
@@ -610,66 +605,11 @@ const SummaryCards = ({ filteredProjects = [] }) => {
                     }} 
                     className="bg-white dark:bg-slate-900"
                   >
-                    <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-                      <thead className={`sticky top-0 ${themeColors.header} z-10`}>
-                        <tr>
-                          {modalColumns.map(column => (
-                            <th 
-                              key={column.key} 
-                              className="border border-gray-300 dark:border-slate-600 px-3 py-3 text-left font-semibold text-gray-900 dark:text-slate-100"
-                              style={{ 
-                                width: column.width,
-                                minWidth: column.minWidth,
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {/* ✅ ONLY TABLE HEADERS ARE SHORTENED WITH TOOLTIPS */}
-                              <Tooltip title={column.fullLabel} arrow placement="top">
-                                <span className="cursor-help">
-                                  {column.label}
-                                </span>
-                              </Tooltip>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-slate-900">
-                        {modalProjects.map((project, idx) => (
-                          <tr 
-                            key={`${project.projectNo || idx}`} 
-                            className={`${themeColors.hover} transition-colors`}
-                          >
-                            {modalColumns.map(column => (
-                              <td 
-                                key={`${column.key}-${idx}`} 
-                                className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100"
-                                style={{ 
-                                  width: column.width,
-                                  minWidth: column.minWidth,
-                                  overflow: column.truncate ? 'hidden' : 'visible',
-                                  textOverflow: column.truncate ? 'ellipsis' : 'clip'
-                                }}
-                              >
-                                {getCellValue(project, column.key, isFullScreen)}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                      {/* ✅ NEW: Show total sum in table footer for Cost of Poor Quality */}
-                      {modalTitle === "Cost of Poor Quality Overview" && (
-                        <tfoot className="sticky bottom-0 bg-purple-100 dark:bg-purple-900">
-                          <tr>
-                            <td colSpan={modalColumns.length - 1} className="border border-gray-300 dark:border-slate-600 px-3 py-2 text-right font-bold text-purple-800 dark:text-purple-200">
-                              Total Cost of Poor Quality:
-                            </td>
-                            <td className="border border-gray-300 dark:border-slate-600 px-3 py-2 font-bold text-purple-800 dark:text-purple-200 font-mono">
-                              {modalProjects.reduce((sum, project) => sum + parseNumber(project.costOfPoorQualityAED), 0).toLocaleString()} AED
-                            </td>
-                          </tr>
-                        </tfoot>
-                      )}
-                    </table>
+                    <OverviewTable
+                      columns={modalColumns}
+                      data={modalProjects}
+                      headerClass={themeColors.header}
+                    />
                   </div>
                 </div>
               )}
