@@ -196,18 +196,19 @@ const DashSummaryCard = ({ projectsData = [] }) => {
 
   // Enhanced modal handlers
   const handleOpen = (item) => {
-    console.log('🔍 Opening modal for:', item.title);
-
     // For Client Feedback & Expectation, show placeholder modal
     if (item.title === "Client Feedback & Expectation") {
       setModalTitle(item.title);
-      setModalProjects([]); // No data yet
+      setModalProjects([]);
       setOpen(true);
       return;
     }
 
-    if ((item.title.includes("CAR Open") || item.title.includes("Observation Open")) &&
-        (typeof item.value === 'number' && item.value === 0)) {
+    // If value is 0, show modal only if you want to display a positive message
+    if (typeof item.value === 'number' && item.value === 0) {
+      setModalTitle(item.title);
+      setModalProjects([]); // No projects to show
+      setOpen(true);
       return;
     }
 
@@ -494,7 +495,9 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                 {item.value}
               </p>
               <span className="text-xs sm:text-xs text-slate-500 dark:text-slate-400 leading-relaxed block">
-                {item.description}
+                {(typeof item.value === 'number' && item.value === 0)
+                  ? getZeroDescription(item.title)
+                  : item.description}
               </span>
             </CardBody>
           </Card>
@@ -523,7 +526,9 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                   <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">
                     {modalTitle === "Client Feedback & Expectation"
                       ? "This section will show client feedback and expectations. Integration with Google Sheets coming soon."
-                      : `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} requiring attention`}
+                      : modalProjects.length === 0
+                        ? getZeroDescription(modalTitle)
+                        : `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} requiring attention`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -551,6 +556,16 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                     <p className="text-blue-600 dark:text-blue-400 text-lg font-semibold">
                       🚧 Client Feedback & Expectation integration coming soon.<br />
                       This will be linked to a separate Google Sheet.
+                    </p>
+                  </div>
+                ) : modalProjects.length === 0 ? (
+                  <div className="text-center py-12">
+                    <h4 className="font-medium mb-1 text-green-600 dark:text-green-400">
+                      {/* Add emoji or extra text for modal */}
+                      🎉 {getZeroDescription(modalTitle)}
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                      No pending items for this category. Keep up the great work!
                     </p>
                   </div>
                 ) : (
@@ -627,18 +642,16 @@ export default DashSummaryCard;
 // ✅ NEW: Helper function for zero count descriptions
 const getZeroDescription = (title) => {
   switch (title) {
-    case "Project Quality Plan Status":
-      return "All projects have quality plan status documented";
-    case "Projects with Overdue Audits":
-      return "All project audits are on schedule";
-    case "CAR Status":
-      return "No open CARs or delayed closures";
-    case "Observation Status":
-      return "No open observations or delayed closures";
-    case "Rejection Rate":
-      return "No deliverable rejections reported";
-    case "Cost of poor Quality":
-      return "No poor quality costs incurred";
+    case "Quality Plan Pending":
+      return "All projects have quality plan documentation.";
+    case "Projects Audits Pending":
+      return "All audits are up to date.";
+    case "CAR Open":
+      return "No open corrective actions.";
+    case "Observation Open":
+      return "No open observations.";
+    case "Client Feedback & Expectation":
+      return "No feedback or expectations pending.";
     default:
       return "No issues found - everything looks good!";
   }
