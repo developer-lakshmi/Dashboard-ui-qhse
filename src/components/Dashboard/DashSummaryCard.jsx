@@ -419,9 +419,9 @@ const DashSummaryCard = ({ projectsData = [] }) => {
     
     return {
       position: 'fixed',
-      top: '3%',
-      left: '50%',
-      transform: 'translate(-50%, 0)',
+      top: '5%',
+        left: '50%',
+        transform: 'translate(-50%, 0)',
       bgcolor: 'transparent',
       width: { xs: '98vw', sm: '95vw', md: '90vw', lg: '85vw', xl: '1200px' },
       maxHeight: '94vh',
@@ -519,23 +519,23 @@ const DashSummaryCard = ({ projectsData = [] }) => {
               sx={getPaperStyles()}
             >
               <div className={`flex items-center justify-between ${isFullScreen ? 'p-4' : 'pb-0'}`}>
-                <div className="flex-1">
-                  <h2 className={`font-bold text-xl ${modalTitle === "Client Feedback & Expectation" ? "text-blue-700 dark:text-blue-400" : "text-orange-700 dark:text-orange-400"}`}>
+                <div className={`flex-1 ${modalProjects.length ==0 ?'text-center':''}`}>
+                  <h2 className={`font-bold text-xl text-orange-700 dark:text-orange-400"}`}>
                     {modalTitle}
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">
                     {modalTitle === "Client Feedback & Expectation"
-                      ? "This section will show client feedback and expectations. Integration with Google Sheets coming soon."
-                      : modalProjects.length === 0
-                        ? getZeroDescription(modalTitle)
-                        : `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} requiring attention`}
+                      ? ""
+                      : modalProjects.length !== 0
+                       
+                       ? `Found ${modalProjects.length} project${modalProjects.length !== 1 ? 's' : ''} requiring attention`:''}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Tooltip title={isFullScreen ? "Exit Full Screen" : "Full Screen"} arrow>
                     <IconButton
                       onClick={toggleFullScreen}
-                      className={`!${modalTitle === "Client Feedback & Expectation" ? "text-blue-600 dark:!text-blue-400 hover:!text-blue-800 dark:hover:!text-blue-200" : "text-orange-600 dark:!text-orange-400 hover:!text-orange-800 dark:hover:!text-orange-200"}`}
+                      className={`text-orange-600 dark:!text-orange-400 hover:!text-orange-800 dark:hover:!text-orange-200"}`}
                     >
                       {isFullScreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
                     </IconButton>
@@ -553,7 +553,7 @@ const DashSummaryCard = ({ projectsData = [] }) => {
               <div className={`${isFullScreen ? 'flex-1 overflow-hidden p-4 pt-0' : ''}`}>
                 {modalTitle === "Client Feedback & Expectation" ? (
                   <div className="text-center py-12">
-                    <p className="text-blue-600 dark:text-blue-400 text-lg font-semibold">
+                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                       🚧 Client Feedback & Expectation integration coming soon.<br />
                       This will be linked to a separate Google Sheet.
                     </p>
@@ -562,7 +562,7 @@ const DashSummaryCard = ({ projectsData = [] }) => {
                   <div className="text-center py-12">
                     <h4 className="font-medium mb-1 text-green-600 dark:text-green-400">
                       {/* Add emoji or extra text for modal */}
-                      🎉 {getZeroDescription(modalTitle)}
+                     {getZeroDescription(modalTitle)}  🎉
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                       No pending items for this category. Keep up the great work!
