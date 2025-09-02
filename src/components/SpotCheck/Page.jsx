@@ -41,7 +41,6 @@ const SpotCheckPage = () => {
     );
   }
 
-  // Main Spot Check Overview (without table)
   return (
     <PageLayout>
       <MainHeader
@@ -55,7 +54,6 @@ const SpotCheckPage = () => {
         <section className="w-full">
           <SpotCheckSummaryCards spotCheckData={spotCheckData} />
         </section>
-        {/* Table removed */}
       </div>
    <Footer className="mt-6 sm:mt-8 md:mt-10 lg:mt-12" />
        </PageLayout>

@@ -10,7 +10,7 @@ import { EmptyDataState } from "../common/EmptyDataState"
 import { PageLayout } from '../../layouts/PageLayout'
 import { Card, CardContent } from '../ui/Card'
 import { ManhoursChart } from '../charts/ChartComponents/ManhoursChart'
-import BillabilityCard from './BillabilityCard' // ✅ NEW: Import the new component
+import BillabilityCard from './BillabilityCard'
 // import Filters from '../SummayView/Filters' // ✅ Commented out for future use
 
 import {
@@ -107,7 +107,6 @@ const BillabilityContent = ({
 
   return (
     <div className="space-y-6">
-      {/* ✅ UPDATED: Billability Overview Card using new component */}
       <div>
         <h3 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-3 flex items-center">
           <Eye className="w-5 h-5 mr-2" />

@@ -53,7 +53,6 @@ const SummaryView = () => {
   // Calculate metrics using utility functions
   const projectMetrics = calculateProjectMetrics(filteredProjects);
 
-  // ✅ UPDATED: Generate chart data without manhours (moved to BillabilityPage)
   const chartData = {
     kpiStatus: generateKPIStatusData(filteredProjects),
     // manhours: generateManhoursData(filteredProjects), // ✅ COMMENTED: Now available in BillabilityPage
