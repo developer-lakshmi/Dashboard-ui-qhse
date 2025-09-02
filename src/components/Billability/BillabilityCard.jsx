@@ -228,10 +228,10 @@ const BillabilityCard = ({ filteredProjects = [] }) => {
       <OverviewCard
         title="Billability Overview"
         value={projectsWithBillability.length}
-        valueColor="text-purple-800 dark:text-purple-400" // <-- Add this line
+        valueColor="text-purple-800 dark:text-purple-300" // <-- Add this line
         description="Projects with quality billability tracking"
         icon={<DollarSign className="w-8 h-8 text-purple-500 dark:text-purple-400" />}
-        color="border-l-4 border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/20"
+        color="border-l-4 border-purple-500 dark:border-purple-500 bg-purple-50 dark:bg-purple-950/30"
         onClick={handleCardClick}
       />
 

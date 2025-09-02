@@ -28,11 +28,11 @@ const iconMap = {
 
 const getCardClasses = (color) => {
   const colorMap = {
-    blue: "border-l-4 border-blue-800 dark:border-blue-300 bg-blue-50 dark:bg-blue-950/20",
-    orange: "border-l-4 border-orange-500 dark:border-orange-300 bg-orange-50 dark:bg-orange-950/20",
-    green: "border-l-4 border-green-500 dark:border-green-300 bg-green-50 dark:bg-green-950/20",
-    purple: "border-l-4 border-purple-500 dark:border-purple-300 bg-purple-50 dark:bg-purple-950/20",
-    gray: "border-l-4 border-gray-500 dark:border-gray-300 bg-gray-50 dark:bg-gray-950/20"
+    blue: "border-l-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/30",
+    orange: "border-l-4 border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-950/30",
+    green: "border-l-4 border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-950/30",
+    purple: "border-l-4 border-purple-500 dark:border-purple-500 bg-purple-50 dark:bg-purple-950/30",
+    gray: "border-l-4 border-gray-500 dark:border-gray-400 bg-gray-50 dark:bg-gray-950/30"
   };
   return colorMap[color] || colorMap.blue;
 };
