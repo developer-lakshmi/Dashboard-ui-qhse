@@ -367,6 +367,7 @@ const DetailedViewContent = ({
                       fontSize: '0.8rem',
                       height: '32px',
                       border: '1px solid #d1d5db',
+                      color: '#374151',
                       '&:hover': {
                         borderColor: '#9ca3af',
                       },
@@ -382,8 +383,35 @@ const DetailedViewContent = ({
                       },
                       '& input': {
                         padding: '6px 10px',
+                        color: '#374151',
                         '&::placeholder': {
                           color: '#9ca3af',
+                          opacity: 1
+                        }
+                      }
+                    },
+                    // Dark mode overrides
+                    '.dark & .MuiOutlinedInput-root': {
+                      backgroundColor: '#334155', // Tailwind slate-700
+                      border: '1px solid #475569', // Tailwind slate-600
+                      color: '#f1f5f9',
+                      '&:hover': {
+                        borderColor: '#64748b', // Tailwind slate-500
+                      },
+                      '&.Mui-focused': {
+                        borderColor: '#3b82f6',
+                        boxShadow: '0 0 0 1px rgba(59, 130, 246, 0.2)',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#3b82f6',
+                        }
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'transparent'
+                      },
+                      '& input': {
+                        color: '#f1f5f9',
+                        '&::placeholder': {
+                          color: '#94a3b8', // Tailwind slate-400
                           opacity: 1
                         }
                       }
@@ -419,7 +447,7 @@ const DetailedViewContent = ({
               )}
             </div>
           </div>
-          <Typography className="!text-gray-500 dark:!text-slate-500 mt-1"
+          <Typography className="!text-gray-500 dark:!text-slate-400 mt-1"
             variant="caption" sx={{ fontSize: '0.7rem', display: 'block' }}>
             {rows.length} projects • {filteredHeaders.length} columns
           </Typography>
@@ -446,9 +474,16 @@ const DetailedViewContent = ({
               '& .MuiDataGrid-main': {
                 overflow: 'hidden'
               },
-              '& .MuiDataGrid-columnHeaders': { 
+              // Table header styles for dark mode only
+              '& .MuiDataGrid-columnHeader': { 
                 backgroundColor: "#fff !important",
                 borderBottom: "2px solid #e2e8f0",
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: "rgb(30 41 59) !important",
+                  borderBottom: "2px solid #334155",
+                   borderTop: "1px solid #334155",
+                }
               },
               '& .MuiDataGrid-cell': { 
                 padding: '2px 4px',
@@ -458,6 +493,12 @@ const DetailedViewContent = ({
                 borderBottom: '1px solid #f1f5f9',
                 color: '#374151',
                 fontSize: '0.75rem',
+                // Dark mode override
+                '.dark &': {
+                  color: 'rgb(241 245 249)',
+                  borderBottom: '1px solid #334155',
+                  backgroundColor: 'rgb(15 23 42)',
+                }
               },
               '& .MuiDataGrid-row': {
                 backgroundColor: 'white',
@@ -466,11 +507,25 @@ const DetailedViewContent = ({
                 },
                 '&:nth-of-type(even)': {
                   backgroundColor: '#fafbfb',
+                },
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: 'rgb(15 23 42)',
+                  '&:hover': {
+                    backgroundColor: "rgb(30 41 59)",
+                  },
+                  '&:nth-of-type(even)': {
+                    backgroundColor: 'rgb(30 41 59)',
+                  }
                 }
               },
               '& .MuiDataGrid-columnSeparator': {
                 visibility: 'visible',
                 color: '#e2e8f0',
+                // Dark mode override
+                '.dark &': {
+                  color: '#334155',
+                }
               },
               '& .MuiDataGrid-footerContainer': {
                 borderTop: '2px solid #e2e8f0',
@@ -483,29 +538,68 @@ const DetailedViewContent = ({
                 '& .MuiIconButton-root': {
                   color: '#6b7280',
                   padding: '4px',
+                },
+                // Dark mode override
+                '.dark &': {
+                  borderTop: '2px solid #334155',
+                  backgroundColor: 'rgb(30 41 59)',
+                  '& .MuiTablePagination-root': {
+                    color: 'rgb(241 245 249)',
+                  },
+                  '& .MuiIconButton-root': {
+                    color: 'rgb(148 163 184)',
+                  }
                 }
               },
               '& .MuiDataGrid-sortIcon': {
                 color: '#6b7280',
+                // Dark mode override
+                '.dark &': {
+                  color: 'rgb(148 163 184)',
+                }
               },
               '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
                 color: '#374151',
                 fontSize: '0.75rem',
+                // Dark mode override
+                '.dark &': {
+                  color: 'rgb(241 245 249)',
+                }
               },
               '& .MuiDataGrid-filler': {
                 backgroundColor: "#fff !important",
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: "rgb(15 23 42) !important",
+                }
               },
               '& .MuiDataGrid-scrollbarFiller': {
                 backgroundColor: "#fff !important",
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: "rgb(15 23 42) !important",
+                }
               },
               '& .MuiDataGrid-scrollbarFiller--header': {
                 backgroundColor: "#fff !important",
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: "rgb(30 41 59) !important",
+                }
               },
               '& .MuiDataGrid-virtualScroller': {
                 backgroundColor: 'white',
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: 'rgb(15 23 42)',
+                }
               },
               '& .MuiDataGrid-overlayWrapper': {
                 backgroundColor: 'white',
+                // Dark mode override
+                '.dark &': {
+                  backgroundColor: 'rgb(15 23 42)',
+                }
               },
             }}
           />
